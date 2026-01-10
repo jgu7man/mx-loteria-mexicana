@@ -1,0 +1,152 @@
+<div class="manager-container min-h-screen bg-gradient-to-br from-indigo-600 to-purple-700 p-8">
+  <!-- Header -->
+  <header class="flex justify-between items-center mb-8">
+    <h1 class="text-4xl font-bold text-white">👨‍💼 Manager Dashboard</h1>
+    <button 
+      (click)="goHome()"
+      class="bg-white text-purple-600 px-6 py-2 rounded-lg font-semibold hover:bg-gray-100 transition">
+      ← Volver
+    </button>
+  </header>
+
+  <!-- Not authenticated -->
+  <div *ngIf="!isAuthenticated()" class="text-center">
+    <div class="bg-white rounded-2xl shadow-2xl p-12 max-w-md mx-auto">
+      <h2 class="text-2xl font-bold text-gray-800 mb-6">Inicia sesión para crear salas</h2>
+      <button 
+        (click)="signInWithGoogle()"
+        class="bg-blue-500 text-white px-8 py-3 rounded-lg font-semibold hover:bg-blue-600 transition">
+        🔐 Iniciar sesión con Google
+      </button>
+    </div>
+  </div>
+
+  <!-- Authenticated - No room -->
+  <div *ngIf="isAuthenticated() && !room()" class="text-center">
+    <div class="bg-white rounded-2xl shadow-2xl p-12 max-w-2xl mx-auto">
+      <h2 class="text-2xl font-bold text-gray-800 mb-6">Bienvenido, {{ currentUser()?.displayName }}!</h2>
+      
+      <button 
+        *ngIf="!showCreateForm()"
+        (click)="toggleCreateForm()"
+        class="bg-green-500 text-white px-8 py-4 rounded-lg font-semibold hover:bg-green-600 transition text-xl">
+        ➕ Crear Nueva Sala
+      </button>
+
+      <!-- Create room form -->
+      <div *ngIf="showCreateForm()" class="mt-8">
+        <form (ngSubmit)="createRoom()" class="space-y-6">
+          <div>
+            <label class="block text-left text-gray-700 font-semibold mb-2">Nombre de la Sala</label>
+            <input 
+              type="text"
+              [(ngModel)]="roomName"
+              name="roomName"
+              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+              placeholder="Ej: Lotería del Viernes">
+          </div>
+
+          <div>
+            <label class="block text-left text-gray-700 font-semibold mb-2">Número de Rondas</label>
+            <input 
+              type="number"
+              [(ngModel)]="maxRounds"
+              name="maxRounds"
+              min="1"
+              max="20"
+              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
+          </div>
+
+          <div>
+            <label class="block text-left text-gray-700 font-semibold mb-2">Dificultad para Espectadores</label>
+            <select 
+              [(ngModel)]="difficulty"
+              name="difficulty"
+              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
+              <option value="easy">Fácil (últimas 5 cartas)</option>
+              <option value="medium">Medio (últimas 2 cartas)</option>
+              <option value="hard">Difícil (solo carta actual)</option>
+            </select>
+          </div>
+
+          <div class="flex gap-4">
+            <button 
+              type="submit"
+              class="flex-1 bg-purple-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-purple-700 transition">
+              Crear Sala
+            </button>
+            <button 
+              type="button"
+              (click)="toggleCreateForm()"
+              class="flex-1 bg-gray-300 text-gray-700 px-6 py-3 rounded-lg font-semibold hover:bg-gray-400 transition">
+              Cancelar
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Room active -->
+  <div *ngIf="room()" class="space-y-8">
+    <!-- Room info -->
+    <div class="bg-white rounded-2xl shadow-2xl p-8">
+      <h2 class="text-3xl font-bold text-gray-800 mb-4">{{ room()!.name }}</h2>
+      <div class="grid grid-cols-3 gap-4 text-center">
+        <div class="bg-purple-100 p-4 rounded-lg">
+          <div class="text-2xl font-bold text-purple-600">{{ room()!.currentRound }}</div>
+          <div class="text-sm text-gray-600">Ronda Actual</div>
+        </div>
+        <div class="bg-blue-100 p-4 rounded-lg">
+          <div class="text-2xl font-bold text-blue-600">{{ room()!.currentIndex + 1 }}/54</div>
+          <div class="text-sm text-gray-600">Cartas Cantadas</div>
+        </div>
+        <div class="bg-green-100 p-4 rounded-lg">
+          <div class="text-2xl font-bold text-green-600">{{ room()!.state }}</div>
+          <div class="text-sm text-gray-600">Estado</div>
+        </div>
+      </div>
+      
+      <!-- Room link -->
+      <div class="mt-6 p-4 bg-gray-100 rounded-lg">
+        <p class="text-sm text-gray-600 mb-2">Link de invitación:</p>
+        <code class="text-purple-600 font-mono">{{ room()!.inviteLink }}</code>
+      </div>
+    </div>
+
+    <!-- Current card -->
+    <div *ngIf="currentCard()" class="bg-white rounded-2xl shadow-2xl p-8 text-center">
+      <h3 class="text-2xl font-bold text-gray-800 mb-6">Carta Actual</h3>
+      <div class="flex justify-center">
+        <app-card [card]="currentCard()!" [size]="'large'" [showVerso]="true"></app-card>
+      </div>
+    </div>
+
+    <!-- Controls -->
+    <div class="bg-white rounded-2xl shadow-2xl p-8">
+      <h3 class="text-2xl font-bold text-gray-800 mb-6">Controles</h3>
+      <div class="flex gap-4 justify-center">
+        <button 
+          *ngIf="room()!.state === 'waiting'"
+          (click)="startRound()"
+          class="bg-green-500 text-white px-8 py-4 rounded-lg font-semibold hover:bg-green-600 transition text-xl">
+          ▶️ Iniciar Ronda
+        </button>
+        
+        <button 
+          *ngIf="room()!.state === 'playing'"
+          (click)="nextCard()"
+          class="bg-blue-500 text-white px-8 py-4 rounded-lg font-semibold hover:bg-blue-600 transition text-xl">
+          ➡️ Siguiente Carta
+        </button>
+        
+        <button 
+          *ngIf="room()!.state === 'playing'"
+          (click)="finishRound()"
+          class="bg-red-500 text-white px-8 py-4 rounded-lg font-semibold hover:bg-red-600 transition text-xl">
+          ⏹️ Finalizar Ronda
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

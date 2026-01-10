@@ -1,0 +1,31 @@
+<div 
+  class="card-container relative rounded-lg shadow-lg overflow-hidden transition-all duration-300 hover:shadow-xl cursor-pointer"
+  [class.card-small]="size === 'small'"
+  [class.card-medium]="size === 'medium'"
+  [class.card-large]="size === 'large'"
+  [style.background-color]="backgroundColor">
+  
+  <!-- Card content -->
+  <div class="card-content flex flex-col items-center justify-center h-full p-4 relative">
+    <!-- Emoji -->
+    <div class="card-emoji text-center">
+      {{ card.emoji }}
+    </div>
+    
+    <!-- Name -->
+    <div class="card-name text-white font-bold text-center mt-2 drop-shadow-lg">
+      {{ card.name }}
+    </div>
+    
+    <!-- Verso (optional) -->
+    <div *ngIf="showVerso" class="card-verso text-white text-xs text-center mt-2 italic opacity-90">
+      "{{ card.verso }}"
+    </div>
+    
+    <!-- Marker overlay (when marked) -->
+    <div *ngIf="isMarked && markerEmoji" 
+         class="marker-overlay absolute inset-0 flex items-center justify-center bg-black bg-opacity-30">
+      <span class="marker-emoji">{{ markerEmoji }}</span>
+    </div>
+  </div>
+</div>
