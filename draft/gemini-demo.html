@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lotería Mexicana - Demo Prototipo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap');
+        body { font-family: 'Outfit', sans-serif; }
+        .card-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+        .slot { aspect-ratio: 2/3; position: relative; cursor: pointer; transition: transform 0.1s; }
+        .slot:hover { transform: scale(1.02); }
+        .marker { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 10; width: 60%; pointer-events: none; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-900 min-h-screen">
+
+    <!-- Contenedor de la Aplicación -->
+    <div id="app" class="max-w-4xl mx-auto p-4 md:p-8">
+        
+        <!-- PANTALLA INICIAL: SELECCIÓN DE ROL -->
+        <section id="view-home" class="flex flex-col items-center justify-center space-y-8 mt-12">
+            <div class="text-center space-y-4">
+                <h1 class="text-5xl font-bold text-indigo-600">Lotería Mexicana</h1>
+                <p class="text-slate-500 text-lg">Plataforma de juego en streaming</p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 w-full">
+                <button onclick="switchView('manager')" class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 hover:border-indigo-400 hover:shadow-md transition-all text-left group">
+                    <div class="bg-indigo-100 p-3 rounded-lg w-fit mb-4 group-hover:bg-indigo-600 group-hover:text-white transition-colors">
+                        <i data-lucide="mic"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold">Manager</h3>
+                    <p class="text-slate-500 text-sm mt-2">Crea salas, canta cartas y verifica ganadores.</p>
+                </button>
+
+                <button onclick="switchView('player-setup')" class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 hover:border-emerald-400 hover:shadow-md transition-all text-left group">
+                    <div class="bg-emerald-100 p-3 rounded-lg w-fit mb-4 group-hover:bg-emerald-600 group-hover:text-white transition-colors">
+                        <i data-lucide="user"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold">Jugador</h3>
+                    <p class="text-slate-500 text-sm mt-2">Elige tu tabla y marca tus cartas para ganar.</p>
+                </button>
+
+                <button onclick="switchView('viewer')" class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 hover:border-amber-400 hover:shadow-md transition-all text-left group">
+                    <div class="bg-amber-100 p-3 rounded-lg w-fit mb-4 group-hover:bg-amber-600 group-hover:text-white transition-colors">
+                        <i data-lucide="eye"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold">Espectador</h3>
+                    <p class="text-slate-500 text-sm mt-2">Observa la partida y el podium en tiempo real.</p>
+                </button>
+            </div>
+        </section>
+
+        <!-- PANTALLA MANAGER -->
+        <section id="view-manager" class="hidden space-y-6">
+            <header class="flex justify-between items-center">
+                <h2 class="text-2xl font-bold flex items-center gap-2"><i data-lucide="mic-2"></i> Panel del Gritón</h2>
+                <button onclick="switchView('home')" class="text-slate-400 hover:text-red-500"><i data-lucide="x"></i></button>
+            </header>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Carta Actual -->
+                <div class="md:col-span-2 bg-white p-8 rounded-3xl shadow-sm border border-slate-100 flex flex-col items-center justify-center space-y-6">
+                    <div id="m-current-card" class="w-64 aspect-[2/3] bg-slate-100 rounded-2xl border-4 border-slate-200 flex flex-col items-center justify-center shadow-inner">
+                        <span class="text-8xl mb-4">?</span>
+                        <p class="text-xl font-bold text-slate-400 uppercase tracking-widest">Esperando...</p>
+                    </div>
+                    <div class="text-center bg-indigo-50 p-4 rounded-2xl border border-indigo-100 w-full">
+                        <p class="text-[10px] uppercase font-bold text-indigo-400 mb-1 tracking-widest">Sugerencia para la próxima</p>
+                        <p id="m-verso" class="text-indigo-700 italic font-semibold text-lg min-h-[3rem]">"Presiona Iniciar para barajar"</p>
+                    </div>
+                    <div class="flex gap-4 w-full">
+                        <button id="btn-start" onclick="startRonda()" class="flex-1 bg-indigo-600 text-white py-4 rounded-xl font-bold hover:bg-indigo-700 transition-colors shadow-lg">Iniciar Ronda</button>
+                        <button id="btn-next" onclick="nextCard()" class="hidden flex-1 bg-indigo-600 text-white py-4 rounded-xl font-bold hover:bg-indigo-700 transition-colors shadow-lg">Siguiente Carta</button>
+                    </div>
+                </div>
+
+                <!-- Info y Siguiente -->
+                <div class="space-y-6">
+                    <div class="bg-slate-800 text-white p-6 rounded-3xl shadow-lg">
+                        <p class="text-slate-400 text-xs uppercase font-bold mb-4">Próxima carta (Solo tú ves)</p>
+                        <div id="m-next-card" class="flex items-center gap-4 opacity-100">
+                            <div class="w-16 h-24 bg-slate-700 rounded-lg flex items-center justify-center text-3xl border border-slate-600" id="m-next-preview-slot">?</div>
+                            <div>
+                                <p class="font-bold text-slate-200" id="m-next-name">???</p>
+                                <p class="text-[10px] text-slate-500">LISTA PARA CANTAR</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white p-6 rounded-3xl border border-slate-200">
+                        <h4 class="font-bold mb-4 flex items-center gap-2 text-slate-700"><i data-lucide="check-circle" class="w-4"></i> Verificación</h4>
+                        <div class="space-y-3" id="verification-list">
+                            <div class="flex items-center justify-between p-3 bg-slate-50 rounded-xl">
+                                <div>
+                                    <p class="font-bold text-sm">Pepe_El_Toro</p>
+                                    <p class="text-xs text-slate-500">Gritó ¡Lotería!</p>
+                                </div>
+                                <button onclick="showVerifyModal()" class="bg-indigo-100 text-indigo-600 px-3 py-1 rounded-lg text-xs font-bold hover:bg-indigo-200">Revisar</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button onclick="confirmFinalize()" class="w-full border-2 border-red-100 text-red-500 py-3 rounded-xl font-bold hover:bg-red-50 hover:border-red-200 transition-colors flex items-center justify-center gap-2">
+                        <i data-lucide="log-out" class="w-4"></i> Finalizar Ronda
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- PANTALLA JUGADOR SETUP -->
+        <section id="view-player-setup" class="hidden space-y-8 max-w-lg mx-auto">
+            <h2 class="text-3xl font-bold text-center">Configura tu juego</h2>
+            
+            <div class="space-y-4">
+                <label class="block font-semibold">Tu Seudónimo</label>
+                <input type="text" id="p-name" placeholder="Ej. ElValiente99" class="w-full p-4 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-400 outline-none">
+            </div>
+
+            <div class="space-y-4">
+                <label class="block font-semibold">Elige tu marcador</label>
+                <div class="grid grid-cols-3 gap-4">
+                    <button onclick="setMarker('bean')" class="marker-opt border-2 border-slate-200 p-4 rounded-xl flex flex-col items-center gap-2 hover:border-emerald-400" id="opt-bean">
+                        <span class="text-3xl">🫘</span>
+                        <span class="text-xs font-bold">Frijol</span>
+                    </button>
+                    <button onclick="setMarker('corn')" class="marker-opt border-2 border-slate-200 p-4 rounded-xl flex flex-col items-center gap-2 hover:border-emerald-400" id="opt-corn">
+                        <span class="text-3xl">🌽</span>
+                        <span class="text-xs font-bold">Maíz</span>
+                    </button>
+                    <button onclick="setMarker('coin')" class="marker-opt border-2 border-slate-200 p-4 rounded-xl flex flex-col items-center gap-2 hover:border-emerald-400" id="opt-coin">
+                        <span class="text-3xl">🪙</span>
+                        <span class="text-xs font-bold">Moneda</span>
+                    </button>
+                </div>
+            </div>
+
+            <button onclick="switchView('player-table-select')" class="w-full bg-emerald-600 text-white py-4 rounded-xl font-bold shadow-lg hover:bg-emerald-700">Siguiente: Elegir Tabla</button>
+        </section>
+
+        <!-- SELECCIÓN DE TABLA -->
+        <section id="view-player-table-select" class="hidden space-y-8">
+            <header class="text-center">
+                <h2 class="text-3xl font-bold">Elige tu Tabla</h2>
+                <p class="text-slate-500">Selecciona una de las 4 opciones aleatorias del catálogo</p>
+            </header>
+
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4" id="table-options">
+                <!-- Se genera vía JS -->
+            </div>
+
+            <div class="flex justify-center gap-4">
+                <button onclick="renderTableOptions()" class="text-emerald-600 font-bold border-b-2 border-emerald-600 hover:text-emerald-700">Ver otras 4 opciones</button>
+            </div>
+        </section>
+
+        <!-- GAMEPLAY JUGADOR -->
+        <section id="view-player-game" class="hidden space-y-6">
+            <header class="flex justify-between items-center bg-white p-4 rounded-2xl shadow-sm border border-slate-100">
+                <div class="flex items-center gap-3">
+                    <div id="p-active-marker" class="text-2xl">🫘</div>
+                    <div>
+                        <p id="p-display-name" class="font-bold leading-none">Cargando...</p>
+                        <p class="text-xs text-slate-500">En partida</p>
+                    </div>
+                </div>
+                <div class="bg-indigo-50 text-indigo-600 px-4 py-2 rounded-xl font-bold text-sm" id="game-current-card-notif">
+                    Esperando carta...
+                </div>
+            </header>
+
+            <div class="max-w-md mx-auto">
+                <div id="active-table" class="card-grid bg-white p-3 rounded-xl shadow-xl border-4 border-white">
+                    <!-- Tabla generada -->
+                </div>
+            </div>
+
+            <div class="flex gap-4">
+                <button onclick="confirmChangeTable()" class="flex-1 bg-slate-200 text-slate-700 py-4 rounded-xl font-bold hover:bg-slate-300">Cambiar Tabla</button>
+                <button onclick="shoutLoteria()" class="flex-1 bg-emerald-600 text-white py-4 rounded-xl font-bold shadow-lg animate-pulse hover:bg-emerald-700">¡LOTERÍA!</button>
+            </div>
+        </section>
+
+        <!-- VIEW ESPECTADOR -->
+        <section id="view-viewer" class="hidden space-y-8">
+            <div class="text-center">
+                <h2 class="text-3xl font-bold">Modo Espectador</h2>
+                <p id="v-difficulty" class="text-indigo-600 font-bold">Nivel: FÁCIL</p>
+            </div>
+
+            <div class="bg-white p-8 rounded-3xl shadow-sm text-center space-y-6 border border-slate-100">
+                <div id="v-current-card" class="w-48 h-72 bg-slate-100 mx-auto rounded-2xl flex flex-col items-center justify-center border-4 border-indigo-200 shadow-inner">
+                    <span class="text-6xl text-slate-300">?</span>
+                </div>
+                <h3 class="text-2xl font-bold text-slate-400 uppercase tracking-tighter" id="v-card-name">Esperando inicio...</h3>
+            </div>
+
+            <div class="space-y-4">
+                <h4 class="font-bold text-slate-500 uppercase text-xs tracking-widest flex items-center gap-2">
+                    <i data-lucide="history" class="w-3"></i> Historial (Últimas 5)
+                </h4>
+                <div id="v-history" class="flex gap-3 overflow-x-auto pb-4">
+                    <!-- Cartas previas -->
+                </div>
+            </div>
+        </section>
+
+    </div>
+
+    <!-- Modal de Verificación (Simulado) -->
+    <div id="modal-verify" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-md rounded-3xl p-6 space-y-6 shadow-2xl">
+            <div class="flex justify-between items-start">
+                <div>
+                    <h3 class="text-xl font-bold">Verificando a Pepe_El_Toro</h3>
+                    <p class="text-slate-500 text-sm">Validando marcas del jugador</p>
+                </div>
+                <div class="bg-amber-100 text-amber-700 px-2 py-1 rounded-md text-[10px] font-bold uppercase">Manual</div>
+            </div>
+            
+            <div id="verify-table-view" class="card-grid p-2 bg-slate-100 rounded-xl border border-slate-200">
+                <!-- Simulación de la tabla del jugador -->
+            </div>
+
+            <div class="bg-emerald-50 p-4 rounded-xl border border-emerald-200 flex items-center gap-3">
+                <i data-lucide="sparkles" class="text-emerald-600"></i>
+                <p class="text-sm text-emerald-800">El software sugiere que <strong>es válido</strong>. Patrón detectado: Línea Horizontal.</p>
+            </div>
+
+            <div class="flex gap-3">
+                <button onclick="closeVerifyModal(true)" class="flex-1 bg-emerald-600 text-white py-3 rounded-xl font-bold hover:bg-emerald-700 shadow-lg shadow-emerald-200">Dar el Gane</button>
+                <button onclick="closeVerifyModal(false)" class="flex-1 bg-slate-200 text-slate-700 py-3 rounded-xl font-bold hover:bg-slate-300">Rechazar</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // DATOS DE CARTAS (Muestra para la demo)
+        const CARDS = [
+            { id: 1, name: "El Gallo", emoji: "🐓", verso: "El que le cantó a San Pedro no le volverá a cantar." },
+            { id: 2, name: "El Diablito", emoji: "😈", verso: "Pórtate bien cuatito, si no te lleva el coloradito." },
+            { id: 3, name: "La Dama", emoji: "💃", verso: "Puliendo el paso, por toda la calle real." },
+            { id: 4, name: "El Catrín", emoji: "🎩", verso: "Don Ferruco en la Alameda, su bastón quería tirar." },
+            { id: 5, name: "El Paraguas", emoji: "☂️", verso: "Para el sol y para el agua." },
+            { id: 6, name: "La Sirena", emoji: "🧜‍♀️", verso: "Con los cantos de sirena, no te vayas a marear." },
+            { id: 7, name: "La Escalera", emoji: "🪜", verso: "Súbeme paso a pasito, no quieras de un brinco llegar." },
+            { id: 8, name: "La Botella", emoji: "🍾", verso: "La botella del jerez, no te la bebas de una vez." },
+            { id: 9, name: "El Barril", emoji: "🛢️", verso: "Tanto bebió el albañil, que se quedó en el barril." },
+            { id: 10, name: "El Árbol", emoji: "🌳", verso: "El que a buen árbol se arrima, buena sombra le cobija." },
+            { id: 14, name: "La Muerte", emoji: "💀", verso: "La muerte tilica y flaca." },
+            { id: 15, name: "La Pera", emoji: "🍐", verso: "El que espera, desespera." },
+            { id: 25, name: "El Borracho", emoji: "🥴", verso: "¡Ah! qué borracho tan necio, ya no lo puedo aguantar." },
+            { id: 27, name: "El Corazón", emoji: "❤️", verso: "No me extrañes, corazón, que regreso en el camión." },
+            { id: 28, name: "La Sandía", emoji: "🍉", verso: "La barriga que Juan tenía era empacho de sandía." },
+            { id: 30, name: "El Camarón", emoji: "🦐", verso: "Camarón que se duerme, se lo lleva la corriente." },
+            { id: 37, name: "El Mundo", emoji: "🌍", verso: "Este mundo es una bola y nosotros el bolillo." },
+            { id: 42, name: "La Calavera", emoji: "💀", verso: "Al pasar por el panteón, me encontré una calavera." },
+            { id: 46, name: "El Sol", emoji: "☀️", verso: "La cobija de los pobres." },
+            { id: 54, name: "La Rana", emoji: "🐸", verso: "Al ver a la verde rana, qué brinco pegó tu hermana." }
+        ];
+
+        let state = {
+            view: 'home',
+            manager: { deck: [], currentIndex: -1, history: [] },
+            player: { name: '', marker: 'bean', table: null, marks: [] },
+            viewer: { history: [], difficulty: 'facil' }
+        };
+
+        // NAVEGACIÓN
+        function switchView(viewId) {
+            document.querySelectorAll('section').forEach(s => s.classList.add('hidden'));
+            document.getElementById('view-' + viewId).classList.remove('hidden');
+            state.view = viewId;
+            if(viewId === 'player-table-select') renderTableOptions();
+            if(viewId === 'player-game') setupGame();
+            lucide.createIcons();
+            window.scrollTo(0, 0);
+        }
+
+        // LÓGICA DEL MANAGER (EL GRITÓN)
+        function startRonda() {
+            // Algoritmo Fisher-Yates para randomizar el mazo en cada ronda
+            state.manager.deck = [...CARDS];
+            for (let i = state.manager.deck.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [state.manager.deck[i], state.manager.deck[j]] = [state.manager.deck[j], state.manager.deck[i]];
+            }
+            
+            state.manager.currentIndex = -1;
+            state.manager.history = [];
+            document.getElementById('btn-start').classList.add('hidden');
+            document.getElementById('btn-next').classList.remove('hidden');
+            nextCard();
+        }
+
+        function nextCard() {
+            if (state.manager.currentIndex < state.manager.deck.length - 1) {
+                state.manager.currentIndex++;
+                const current = state.manager.deck[state.manager.currentIndex];
+                const next = state.manager.deck[state.manager.currentIndex + 1];
+                
+                // Actualizar UI del Manager: Carta Actual
+                document.getElementById('m-current-card').innerHTML = `
+                    <span class="text-8xl mb-4">${current.emoji}</span>
+                    <p class="text-xl font-bold uppercase text-slate-800">${current.name}</p>
+                `;
+
+                // SUGERENCIA DE VERSO PARA LA PRÓXIMA CARTA
+                const versoEl = document.getElementById('m-verso');
+                if(next) {
+                    versoEl.innerText = `"${next.verso}"`;
+                    // Actualizar Previsualización secreta
+                    document.getElementById('m-next-preview-slot').innerText = next.emoji;
+                    document.getElementById('m-next-name').innerText = next.name;
+                } else {
+                    versoEl.innerText = "¡Última carta del mazo!";
+                    document.getElementById('m-next-preview-slot').innerText = "?";
+                    document.getElementById('m-next-name').innerText = "FIN DEL MAZO";
+                }
+
+                // Actualizar Espectador
+                updateViewer(current);
+                // Notificar al Jugador
+                const notif = document.getElementById('game-current-card-notif');
+                if(notif) notif.innerText = `Última: ${current.emoji} ${current.name}`;
+            }
+        }
+
+        function confirmFinalize() {
+            if(confirm("¿Estás seguro de finalizar la ronda? Se mostrará el podium global.")) {
+                finalizeRonda();
+            }
+        }
+
+        function finalizeRonda() {
+            alert("Ronda finalizada. El sistema acumula los puntos y muestra el podium.");
+            switchView('home');
+            location.reload();
+        }
+
+        // LÓGICA DEL JUGADOR
+        function setMarker(type) {
+            state.player.marker = type;
+            document.querySelectorAll('.marker-opt').forEach(b => b.classList.remove('border-emerald-500', 'bg-emerald-50'));
+            document.getElementById('opt-' + type).classList.add('border-emerald-500', 'bg-emerald-50');
+        }
+
+        function renderTableOptions() {
+            const container = document.getElementById('table-options');
+            container.innerHTML = '';
+            // Mostrar 4 tablas aleatorias del catálogo de 89 (simulado)
+            for (let i = 0; i < 4; i++) {
+                const mockTable = [...CARDS].sort(() => Math.random() - 0.5).slice(0, 16);
+                const tableDiv = document.createElement('button');
+                tableDiv.className = "bg-white p-2 rounded-xl shadow border border-slate-200 cursor-pointer hover:border-emerald-500 hover:scale-105 transition-all text-left";
+                tableDiv.onclick = () => {
+                    state.player.table = mockTable;
+                    state.player.marks = []; // Limpiar marcas al elegir tabla nueva
+                    switchView('player-game');
+                };
+                
+                let inner = `<div class="grid grid-cols-4 gap-1">`;
+                mockTable.forEach(c => {
+                    inner += `<div class="bg-slate-50 aspect-square flex items-center justify-center text-[10px] rounded">${c.emoji}</div>`;
+                });
+                inner += `</div><p class="text-center text-[10px] font-bold mt-2 text-slate-400">TABLA #${Math.floor(Math.random()*89) + 1}</p>`;
+                tableDiv.innerHTML = inner;
+                container.appendChild(tableDiv);
+            }
+        }
+
+        function confirmChangeTable() {
+            if(confirm("Si cambias de tabla, perderás tus marcas actuales. ¿Continuar?")) {
+                switchView('player-table-select');
+            }
+        }
+
+        function setupGame() {
+            state.player.name = document.getElementById('p-name').value || "Jugador_Anónimo";
+            document.getElementById('p-display-name').innerText = state.player.name;
+            const markerEmoji = { bean: '🫘', corn: '🌽', coin: '🪙' }[state.player.marker];
+            document.getElementById('p-active-marker').innerText = markerEmoji;
+            
+            const tableContainer = document.getElementById('active-table');
+            tableContainer.innerHTML = '';
+            state.player.table.forEach(card => {
+                const slot = document.createElement('div');
+                slot.className = "slot bg-slate-50 border border-slate-100 rounded-lg flex flex-col items-center justify-center p-1 text-center";
+                // Lógica de marcas por ID
+                const isMarked = state.player.marks.includes(card.id);
+                slot.innerHTML = `
+                    <span class="text-3xl">${card.emoji}</span>
+                    <span class="text-[8px] uppercase font-bold text-slate-400 leading-tight">${card.name}</span>
+                    <div class="marker ${isMarked ? '' : 'hidden'}">${markerEmoji}</div>
+                `;
+                slot.onclick = () => toggleMark(card.id, slot);
+                tableContainer.appendChild(slot);
+            });
+        }
+
+        function toggleMark(cardId, el) {
+            const markerDiv = el.querySelector('.marker');
+            if (state.player.marks.includes(cardId)) {
+                state.player.marks = state.player.marks.filter(id => id !== cardId);
+                markerDiv.classList.add('hidden');
+            } else {
+                state.player.marks.push(cardId);
+                markerDiv.classList.remove('hidden');
+            }
+        }
+
+        function shoutLoteria() {
+            alert("¡Has gritado LOTERÍA! El Gritón procederá a revisar tu tabla en la lista de jugadores.");
+        }
+
+        // LÓGICA DEL ESPECTADOR
+        function updateViewer(card) {
+            const vCard = document.getElementById('v-current-card');
+            const vName = document.getElementById('v-card-name');
+            const vHist = document.getElementById('v-history');
+
+            if(!vCard) return;
+
+            vCard.innerHTML = `<span class="text-8xl">${card.emoji}</span>`;
+            vName.innerText = card.name;
+            vName.classList.remove('text-slate-400');
+            vName.classList.add('text-indigo-600');
+
+            state.viewer.history.unshift(card);
+            vHist.innerHTML = '';
+            // Modo Fácil: muestra últimas 5
+            state.viewer.history.slice(1, 6).forEach(c => {
+                vHist.innerHTML += `
+                    <div class="min-w-[64px] h-24 bg-white border border-slate-200 rounded-lg flex flex-col items-center justify-center shadow-sm shrink-0">
+                        <span class="text-2xl">${c.emoji}</span>
+                        <span class="text-[8px] font-bold text-slate-400 uppercase text-center px-1">${c.name}</span>
+                    </div>`;
+            });
+        }
+
+        // MODALES DE VERIFICACIÓN
+        function showVerifyModal() {
+            const modal = document.getElementById('modal-verify');
+            const tableGrid = document.getElementById('verify-table-view');
+            tableGrid.innerHTML = '';
+            
+            // Simulación de revisión: comparamos marcas de ID contra historial del mazo
+            const currentHistoryIds = state.manager.deck.slice(0, state.manager.currentIndex + 1).map(c => c.id);
+            
+            state.player.table.forEach(c => {
+                // Simulamos que el jugador marcó algunas cartas (ej: las primeras 3 que han salido)
+                const isMarked = state.player.marks.includes(c.id);
+                const isCorrect = currentHistoryIds.includes(c.id);
+                
+                let statusClass = "bg-white";
+                if(isMarked) {
+                    statusClass = isCorrect ? 'ring-4 ring-emerald-400 bg-emerald-50' : 'ring-4 ring-red-400 bg-red-50';
+                }
+                
+                tableGrid.innerHTML += `
+                    <div class="${statusClass} aspect-square flex items-center justify-center rounded-lg border border-slate-200 relative">
+                        <span class="text-2xl">${c.emoji}</span>
+                        ${isMarked ? `<span class="absolute -top-1 -right-1 text-[12px]">${isCorrect ? '✅' : '❌'}</span>` : ''}
+                    </div>`;
+            });
+
+            modal.classList.remove('hidden');
+            lucide.createIcons();
+        }
+
+        function closeVerifyModal(approved) {
+            document.getElementById('modal-verify').classList.add('hidden');
+            if(approved) {
+                alert("¡Gane otorgado! Se suma 1 victoria a Pepe_El_Toro. La ronda continúa hasta que el Manager decida finalizar.");
+                // Nota: No cerramos la vista aquí para permitir que el Manager siga cantando cartas
+            } else {
+                alert("Revisión rechazada. El juego continúa.");
+            }
+        }
+
+        // INICIALIZACIÓN
+        window.onload = () => {
+            lucide.createIcons();
+            setMarker('bean');
+        }
+
+    </script>
+</body>
+</html>
