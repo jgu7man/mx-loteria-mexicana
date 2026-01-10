@@ -15,7 +15,7 @@ export const CARDS: Card[] = [
   { id: 8, name: 'La Botella', emoji: '🍾', verso: 'La herramienta del borracho', color: '#48DBFB' },
   { id: 9, name: 'El Barril', emoji: '🛢️', verso: 'Tanto bebió el albañil', color: '#341F97' },
   { id: 10, name: 'El Árbol', emoji: '🌳', verso: 'El que a tu sombra se puso', color: '#10AC84' },
-  { id: 11, name: 'El Melón', emoji: '🍉', verso: 'Me lo das o me lo quitas', color: '#2ECC71' },
+  { id: 11, name: 'El Melón', emoji: '🍈', verso: 'Me lo das o me lo quitas', color: '#2ECC71' },
   { id: 12, name: 'El Valiente', emoji: '⚔️', verso: 'No le saco al compromiso', color: '#E74C3C' },
   { id: 13, name: 'El Gorrito', emoji: '🧢', verso: 'De la Virgen de Zapopan', color: '#3498DB' },
   { id: 14, name: 'La Muerte', emoji: '💀', verso: 'La que a todos nos lleva', color: '#34495E' },

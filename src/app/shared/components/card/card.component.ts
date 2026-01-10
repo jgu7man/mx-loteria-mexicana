@@ -1,7 +1,6 @@
-import { Component, Input, input } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Card } from '../../../core/models/game.model';
-import { getRandomColor } from '../../../core/constants/game-data';
 
 @Component({
   selector: 'app-card',
@@ -17,6 +16,8 @@ export class CardComponent {
   @Input() isMarked: boolean = false;
   @Input() markerEmoji?: string;
   
-  // Random background color
-  backgroundColor: string = getRandomColor();
+  // Use the color from the card itself (each card has a predefined color)
+  get backgroundColor(): string {
+    return this.card?.color || '#667eea';
+  }
 }
