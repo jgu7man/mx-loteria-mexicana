@@ -23,13 +23,51 @@
 
   <!-- Authenticated - No room -->
   <div *ngIf="isAuthenticated() && !room()" class="text-center">
-    <div class="bg-white rounded-2xl shadow-2xl p-12 max-w-2xl mx-auto">
+    <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-4xl mx-auto">
       <h2 class="text-2xl font-bold text-gray-800 mb-6">Bienvenido, {{ currentUser()?.displayName }}!</h2>
       
+      <!-- Salas creadas -->
+      <div *ngIf="managerRooms().length > 0" class="mb-8">
+        <h3 class="text-xl font-bold text-gray-700 mb-4 text-left">Tus Salas</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <button
+            *ngFor="let managerRoom of managerRooms()"
+            (click)="selectRoom(managerRoom)"
+            class="p-4 border-2 border-gray-300 rounded-lg hover:border-purple-500 hover:shadow-lg transition text-left">
+            <div class="flex justify-between items-start mb-2">
+              <h4 class="text-lg font-bold text-gray-800">{{ managerRoom.name }}</h4>
+              <span class="px-2 py-1 text-xs rounded-full"
+                [class.bg-green-100]="managerRoom.state === 'playing'"
+                [class.text-green-700]="managerRoom.state === 'playing'"
+                [class.bg-yellow-100]="managerRoom.state === 'waiting'"
+                [class.text-yellow-700]="managerRoom.state === 'waiting'"
+                [class.bg-gray-100]="managerRoom.state !== 'playing' && managerRoom.state !== 'waiting'"
+                [class.text-gray-700]="managerRoom.state !== 'playing' && managerRoom.state !== 'waiting'">
+                {{ managerRoom.state }}
+              </span>
+            </div>
+            <div class="text-sm text-gray-600">
+              <div>Ronda: {{ managerRoom.currentRound }}/{{ managerRoom.config.maxRounds }}</div>
+              <div>Cartas: {{ managerRoom.currentIndex + 1 }}/54</div>
+              <div class="text-xs text-purple-600 mt-2">ID: {{ managerRoom.id }}</div>
+            </div>
+          </button>
+        </div>
+      </div>
+
+      <div *ngIf="loadingRooms()" class="text-gray-500 mb-6">
+        Cargando salas...
+      </div>
+
+      <div *ngIf="!loadingRooms() && managerRooms().length === 0" class="text-gray-500 mb-6">
+        No tienes salas creadas aún.
+      </div>
+
+      <!-- Botón crear sala -->
       <button 
         *ngIf="!showCreateForm()"
         (click)="toggleCreateForm()"
-        class="bg-green-500 text-white px-8 py-4 rounded-lg font-semibold hover:bg-green-600 transition text-xl">
+        class="bg-purple-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-purple-700 transition">
         ➕ Crear Nueva Sala
       </button>
 
@@ -125,7 +163,7 @@
     <!-- Controls -->
     <div class="bg-white rounded-2xl shadow-2xl p-8">
       <h3 class="text-2xl font-bold text-gray-800 mb-6">Controles</h3>
-      <div class="flex gap-4 justify-center">
+      <div class="flex gap-4 justify-center flex-wrap">
         <button 
           *ngIf="room()!.state === 'waiting'"
           (click)="startRound()"
@@ -145,6 +183,15 @@
           (click)="finishRound()"
           class="bg-red-500 text-white px-8 py-4 rounded-lg font-semibold hover:bg-red-600 transition text-xl">
           ⏹️ Finalizar Ronda
+        </button>
+      </div>
+
+      <!-- Delete room button -->
+      <div class="mt-8 pt-8 border-t border-gray-200">
+        <button 
+          (click)="deleteRoom()"
+          class="bg-red-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-red-700 transition">
+          🗑️ Eliminar Sala
         </button>
       </div>
     </div>

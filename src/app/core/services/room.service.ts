@@ -2,39 +2,36 @@ import { Injectable, inject } from '@angular/core';
 import {
   Firestore,
   collection,
-  doc,
-  setDoc,
-  updateDoc,
   deleteDoc,
+  doc,
   getDoc,
   getDocs,
-  query,
-  where,
   onSnapshot,
-  Unsubscribe,
+  query,
   serverTimestamp,
-  CollectionReference,
-  DocumentReference
+  setDoc,
+  updateDoc,
+  where,
 } from '@angular/fire/firestore';
 import { Observable } from 'rxjs';
 import {
-  Room,
   Participant,
+  Room,
   RoomConfig,
   RoomState,
+  RoundHistory,
   RoundWinner,
-  RoundHistory
 } from '../models/game.model';
 import { GameUtilsService } from './game-utils.service';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class RoomService {
   private firestore = inject(Firestore);
   private gameUtils = inject(GameUtilsService);
 
-  constructor() { }
+  constructor() {}
 
   /**
    * Crear una nueva sala
@@ -62,7 +59,7 @@ export class RoomService {
         currentRoundWinners: [],
         roundHistory: [],
         createdAt: new Date(),
-        inviteLink: `${window.location.origin}/join/${roomId}`
+        inviteLink: `${window.location.origin}/join/${roomId}`,
       };
 
       await setDoc(roomRef, this.serializeRoom(room));
@@ -92,13 +89,30 @@ export class RoomService {
   }
 
   /**
+   * Obtener todas las salas de un manager
+   */
+  async getRoomsByManager(managerId: string): Promise<Room[]> {
+    try {
+      const roomsRef = collection(this.firestore, 'salas');
+      const q = query(roomsRef, where('managerId', '==', managerId));
+      const querySnapshot = await getDocs(q);
+
+      return querySnapshot.docs.map((doc) => this.deserializeRoom(doc.data()));
+    } catch (error) {
+      console.error('Error getting rooms by manager:', error);
+      throw error;
+    }
+  }
+
+  /**
    * Escuchar cambios en tiempo real de una sala
    */
   observeRoom(roomId: string): Observable<Room | null> {
-    return new Observable(observer => {
+    return new Observable((observer) => {
       const roomRef = doc(this.firestore, 'salas', roomId);
-      
-      const unsubscribe = onSnapshot(roomRef, 
+
+      const unsubscribe = onSnapshot(
+        roomRef,
         (snapshot) => {
           if (snapshot.exists()) {
             observer.next(this.deserializeRoom(snapshot.data()));
@@ -148,7 +162,7 @@ export class RoomService {
         currentRound: newRound,
         state: 'playing',
         currentRoundWinners: [],
-        startedAt: room.currentRound === 0 ? serverTimestamp() : room.startedAt
+        startedAt: room.currentRound === 0 ? serverTimestamp() : room.startedAt,
       });
     } catch (error) {
       console.error('Error starting new round:', error);
@@ -170,7 +184,7 @@ export class RoomService {
       }
 
       await updateDoc(roomRef, {
-        currentIndex: room.currentIndex + 1
+        currentIndex: room.currentIndex + 1,
       });
     } catch (error) {
       console.error('Error advancing card:', error);
@@ -189,10 +203,10 @@ export class RoomService {
       if (!room) throw new Error('Room not found');
 
       const updatedWinners = [...room.currentRoundWinners, winnerId];
-      
+
       await updateDoc(roomRef, {
         currentRoundWinners: updatedWinners,
-        state: 'verifying'
+        state: 'verifying',
       });
     } catch (error) {
       console.error('Error adding winner:', error);
@@ -214,7 +228,7 @@ export class RoomService {
         roundNumber: room.currentRound,
         deck: room.deck,
         winners,
-        completedAt: new Date()
+        completedAt: new Date(),
       };
 
       const updatedHistory = [...room.roundHistory, roundHistory];
@@ -224,7 +238,7 @@ export class RoomService {
         roundHistory: this.serializeRoundHistory(updatedHistory),
         state: isLastRound ? 'finished' : 'waiting',
         currentRoundWinners: [],
-        finishedAt: isLastRound ? serverTimestamp() : undefined
+        finishedAt: isLastRound ? serverTimestamp() : undefined,
       });
     } catch (error) {
       console.error('Error finishing round:', error);
@@ -240,11 +254,15 @@ export class RoomService {
     participant: Omit<Participant, 'joinedAt'>
   ): Promise<void> {
     try {
-      const participantRef = doc(this.firestore, `salas/${roomId}/participantes`, participant.uid);
-      
+      const participantRef = doc(
+        this.firestore,
+        `salas/${roomId}/participantes`,
+        participant.uid
+      );
+
       await setDoc(participantRef, {
         ...participant,
-        joinedAt: serverTimestamp()
+        joinedAt: serverTimestamp(),
       });
     } catch (error) {
       console.error('Error joining room:', error);
@@ -261,7 +279,11 @@ export class RoomService {
     updates: Partial<Participant>
   ): Promise<void> {
     try {
-      const participantRef = doc(this.firestore, `salas/${roomId}/participantes`, uid);
+      const participantRef = doc(
+        this.firestore,
+        `salas/${roomId}/participantes`,
+        uid
+      );
       await updateDoc(participantRef, updates);
     } catch (error) {
       console.error('Error updating participant:', error);
@@ -272,11 +294,15 @@ export class RoomService {
   /**
    * Cambiar la tabla de un participante (resetea las marcas)
    */
-  async changeTabla(roomId: string, uid: string, newTablaId: number): Promise<void> {
+  async changeTabla(
+    roomId: string,
+    uid: string,
+    newTablaId: number
+  ): Promise<void> {
     try {
       await this.updateParticipant(roomId, uid, {
         tablaId: newTablaId,
-        marks: [] // Reset marks when changing tabla
+        marks: [], // Reset marks when changing tabla
       });
     } catch (error) {
       console.error('Error changing tabla:', error);
@@ -289,7 +315,11 @@ export class RoomService {
    */
   async markCard(roomId: string, uid: string, cardId: number): Promise<void> {
     try {
-      const participantRef = doc(this.firestore, `salas/${roomId}/participantes`, uid);
+      const participantRef = doc(
+        this.firestore,
+        `salas/${roomId}/participantes`,
+        uid
+      );
       const participantSnap = await getDoc(participantRef);
 
       if (!participantSnap.exists()) {
@@ -314,7 +344,11 @@ export class RoomService {
    */
   async unmarkCard(roomId: string, uid: string, cardId: number): Promise<void> {
     try {
-      const participantRef = doc(this.firestore, `salas/${roomId}/participantes`, uid);
+      const participantRef = doc(
+        this.firestore,
+        `salas/${roomId}/participantes`,
+        uid
+      );
       const participantSnap = await getDoc(participantRef);
 
       if (!participantSnap.exists()) {
@@ -323,7 +357,7 @@ export class RoomService {
 
       const participant = participantSnap.data() as Participant;
       const marks = participant.marks || [];
-      const updatedMarks = marks.filter(id => id !== cardId);
+      const updatedMarks = marks.filter((id) => id !== cardId);
 
       await updateDoc(participantRef, { marks: updatedMarks });
     } catch (error) {
@@ -336,13 +370,17 @@ export class RoomService {
    * Observar participantes de una sala en tiempo real
    */
   observeParticipants(roomId: string): Observable<Participant[]> {
-    return new Observable(observer => {
-      const participantsRef = collection(this.firestore, `salas/${roomId}/participantes`);
-      
-      const unsubscribe = onSnapshot(participantsRef,
+    return new Observable((observer) => {
+      const participantsRef = collection(
+        this.firestore,
+        `salas/${roomId}/participantes`
+      );
+
+      const unsubscribe = onSnapshot(
+        participantsRef,
         (snapshot) => {
           const participants: Participant[] = [];
-          snapshot.forEach(doc => {
+          snapshot.forEach((doc) => {
             participants.push(this.deserializeParticipant(doc.data()));
           });
           observer.next(participants);
@@ -362,7 +400,11 @@ export class RoomService {
    */
   async leaveRoom(roomId: string, uid: string): Promise<void> {
     try {
-      const participantRef = doc(this.firestore, `salas/${roomId}/participantes`, uid);
+      const participantRef = doc(
+        this.firestore,
+        `salas/${roomId}/participantes`,
+        uid
+      );
       await deleteDoc(participantRef);
     } catch (error) {
       console.error('Error leaving room:', error);
@@ -376,10 +418,15 @@ export class RoomService {
   async deleteRoom(roomId: string): Promise<void> {
     try {
       // Primero eliminar todos los participantes
-      const participantsRef = collection(this.firestore, `salas/${roomId}/participantes`);
+      const participantsRef = collection(
+        this.firestore,
+        `salas/${roomId}/participantes`
+      );
       const participantsSnap = await getDocs(participantsRef);
-      
-      const deletePromises = participantsSnap.docs.map(doc => deleteDoc(doc.ref));
+
+      const deletePromises = participantsSnap.docs.map((doc) =>
+        deleteDoc(doc.ref)
+      );
       await Promise.all(deletePromises);
 
       // Luego eliminar la sala
@@ -394,51 +441,75 @@ export class RoomService {
   // Métodos de serialización/deserialización
 
   private serializeRoom(room: Room): any {
-    return {
+    const serialized: any = {
       ...room,
       createdAt: room.createdAt,
-      startedAt: room.startedAt,
-      finishedAt: room.finishedAt,
-      roundHistory: this.serializeRoundHistory(room.roundHistory)
+      roundHistory: this.serializeRoundHistory(room.roundHistory),
     };
+
+    // Solo incluir startedAt y finishedAt si tienen valor
+    if (room.startedAt !== undefined) {
+      serialized.startedAt = room.startedAt;
+    }
+    if (room.finishedAt !== undefined) {
+      serialized.finishedAt = room.finishedAt;
+    }
+
+    return serialized;
   }
 
   private deserializeRoom(data: any): Room {
     return {
       ...data,
-      createdAt: data.createdAt?.toDate ? data.createdAt.toDate() : new Date(data.createdAt),
-      startedAt: data.startedAt?.toDate ? data.startedAt.toDate() : data.startedAt ? new Date(data.startedAt) : undefined,
-      finishedAt: data.finishedAt?.toDate ? data.finishedAt.toDate() : data.finishedAt ? new Date(data.finishedAt) : undefined,
-      roundHistory: this.deserializeRoundHistory(data.roundHistory || [])
+      createdAt: data.createdAt?.toDate
+        ? data.createdAt.toDate()
+        : new Date(data.createdAt),
+      startedAt: data.startedAt?.toDate
+        ? data.startedAt.toDate()
+        : data.startedAt
+        ? new Date(data.startedAt)
+        : undefined,
+      finishedAt: data.finishedAt?.toDate
+        ? data.finishedAt.toDate()
+        : data.finishedAt
+        ? new Date(data.finishedAt)
+        : undefined,
+      roundHistory: this.deserializeRoundHistory(data.roundHistory || []),
     } as Room;
   }
 
   private serializeRoundHistory(history: RoundHistory[]): any[] {
-    return history.map(round => ({
+    return history.map((round) => ({
       ...round,
       completedAt: round.completedAt,
-      winners: round.winners.map(w => ({
+      winners: round.winners.map((w) => ({
         ...w,
-        verifiedAt: w.verifiedAt
-      }))
+        verifiedAt: w.verifiedAt,
+      })),
     }));
   }
 
   private deserializeRoundHistory(data: any[]): RoundHistory[] {
-    return data.map(round => ({
+    return data.map((round) => ({
       ...round,
-      completedAt: round.completedAt?.toDate ? round.completedAt.toDate() : new Date(round.completedAt),
+      completedAt: round.completedAt?.toDate
+        ? round.completedAt.toDate()
+        : new Date(round.completedAt),
       winners: round.winners.map((w: any) => ({
         ...w,
-        verifiedAt: w.verifiedAt?.toDate ? w.verifiedAt.toDate() : new Date(w.verifiedAt)
-      }))
+        verifiedAt: w.verifiedAt?.toDate
+          ? w.verifiedAt.toDate()
+          : new Date(w.verifiedAt),
+      })),
     }));
   }
 
   private deserializeParticipant(data: any): Participant {
     return {
       ...data,
-      joinedAt: data.joinedAt?.toDate ? data.joinedAt.toDate() : new Date(data.joinedAt)
+      joinedAt: data.joinedAt?.toDate
+        ? data.joinedAt.toDate()
+        : new Date(data.joinedAt),
     } as Participant;
   }
 }
