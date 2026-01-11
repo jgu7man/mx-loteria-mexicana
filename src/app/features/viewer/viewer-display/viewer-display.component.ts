@@ -1,21 +1,22 @@
-import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Component, inject, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
+import { CARDS } from '../../../core/constants/game-data';
+import { Room } from '../../../core/models/game.model';
 import { RoomService } from '../../../core/services/room.service';
 import { CardComponent } from '../../../shared/components/card/card.component';
-import { Room } from '../../../core/models/game.model';
-import { CARDS } from '../../../core/constants/game-data';
 
 @Component({
   selector: 'app-viewer-display',
   standalone: true,
   imports: [CommonModule, FormsModule, CardComponent],
   templateUrl: './viewer-display.component.html',
-  styleUrl: './viewer-display.component.css'
+  styleUrl: './viewer-display.component.css',
 })
 export class ViewerDisplayComponent implements OnInit {
   private router = inject(Router);
+  private route = inject(ActivatedRoute);
   private roomService = inject(RoomService);
 
   room = signal<Room | null>(null);
@@ -24,7 +25,15 @@ export class ViewerDisplayComponent implements OnInit {
   roomId = '';
   showJoinForm = signal(true);
 
-  ngOnInit() {}
+  ngOnInit() {
+    this.route.params.subscribe((params) => {
+      const roomId = params['roomId'];
+      if (roomId) {
+        this.roomId = roomId;
+        this.joinRoom();
+      }
+    });
+  }
 
   async joinRoom() {
     if (!this.roomId.trim()) {
@@ -40,19 +49,26 @@ export class ViewerDisplayComponent implements OnInit {
       }
 
       // Observe room
-      this.roomService.observeRoom(this.roomId).subscribe(r => {
+      this.roomService.observeRoom(this.roomId).subscribe((r) => {
         this.room.set(r);
         if (r && r.currentIndex >= 0) {
           const cardId = r.deck[r.currentIndex];
-          this.currentCard.set(CARDS.find(c => c.id === cardId));
-          
+          this.currentCard.set(CARDS.find((c) => c.id === cardId));
+
           // Get recent cards based on difficulty
           let limit = 5; // easy
           if (r.config.viewerDifficulty === 'medium') limit = 2;
           if (r.config.viewerDifficulty === 'hard') limit = 1;
-          
-          const recentCardIds = r.deck.slice(Math.max(0, r.currentIndex - limit + 1), r.currentIndex + 1);
-          this.recentCards.set(recentCardIds.map(id => CARDS.find(c => c.id === id)).filter(c => c));
+
+          const recentCardIds = r.deck.slice(
+            Math.max(0, r.currentIndex - limit + 1),
+            r.currentIndex + 1
+          );
+          this.recentCards.set(
+            recentCardIds
+              .map((id) => CARDS.find((c) => c.id === id))
+              .filter((c) => c)
+          );
         }
       });
 

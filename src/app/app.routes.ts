@@ -8,7 +8,8 @@ export const routes: Routes = [
   { path: '', component: HomeComponent },
   { path: 'manager', component: ManagerDashboardComponent },
   { path: 'player', component: PlayerGameComponent },
+  { path: 'viewer/:roomId', component: ViewerDisplayComponent },
   { path: 'viewer', component: ViewerDisplayComponent },
   { path: 'join/:roomId', component: PlayerGameComponent },
-  { path: '**', redirectTo: '' }
+  { path: '**', redirectTo: '' },
 ];

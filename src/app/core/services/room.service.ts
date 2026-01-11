@@ -57,6 +57,7 @@ export class RoomService {
         currentIndex: -1,
         currentRound: 0,
         currentRoundWinners: [],
+        currentRoundVerifiedWinners: [],
         roundHistory: [],
         createdAt: new Date(),
         inviteLink: `${window.location.origin}/join/${roomId}`,
@@ -162,6 +163,7 @@ export class RoomService {
         currentRound: newRound,
         state: 'playing',
         currentRoundWinners: [],
+        currentRoundVerifiedWinners: [],
         startedAt: room.currentRound === 0 ? serverTimestamp() : room.startedAt,
       });
     } catch (error) {
@@ -202,7 +204,9 @@ export class RoomService {
 
       if (!room) throw new Error('Room not found');
 
-      const updatedWinners = [...room.currentRoundWinners, winnerId];
+      const updatedWinners = Array.from(
+        new Set([...(room.currentRoundWinners || []), winnerId])
+      );
 
       await updateDoc(roomRef, {
         currentRoundWinners: updatedWinners,
@@ -238,10 +242,43 @@ export class RoomService {
         roundHistory: this.serializeRoundHistory(updatedHistory),
         state: isLastRound ? 'finished' : 'waiting',
         currentRoundWinners: [],
+        currentRoundVerifiedWinners: [],
         finishedAt: isLastRound ? serverTimestamp() : undefined,
       });
     } catch (error) {
       console.error('Error finishing round:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Aprobar un ganador (sin finalizar la ronda)
+   */
+  async approveWinner(roomId: string, winner: RoundWinner): Promise<void> {
+    try {
+      const roomRef = doc(this.firestore, 'salas', roomId);
+      const room = await this.getRoom(roomId);
+      if (!room) throw new Error('Room not found');
+
+      const verified = [...(room.currentRoundVerifiedWinners || [])];
+      const existingIndex = verified.findIndex((w) => w.uid === winner.uid);
+      if (existingIndex >= 0) {
+        verified[existingIndex] = winner;
+      } else {
+        verified.push(winner);
+      }
+
+      const pending = (room.currentRoundWinners || []).filter(
+        (uid) => uid !== winner.uid
+      );
+
+      await updateDoc(roomRef, {
+        currentRoundVerifiedWinners: this.serializeRoundWinners(verified),
+        currentRoundWinners: pending,
+        state: pending.length > 0 ? 'verifying' : 'playing',
+      });
+    } catch (error) {
+      console.error('Error approving winner:', error);
       throw error;
     }
   }
@@ -396,6 +433,39 @@ export class RoomService {
   }
 
   /**
+   * Observar un participante específico en tiempo real
+   */
+  observeParticipant(
+    roomId: string,
+    uid: string
+  ): Observable<Participant | null> {
+    return new Observable((observer) => {
+      const participantRef = doc(
+        this.firestore,
+        `salas/${roomId}/participantes`,
+        uid
+      );
+
+      const unsubscribe = onSnapshot(
+        participantRef,
+        (snapshot) => {
+          if (!snapshot.exists()) {
+            observer.next(null);
+            return;
+          }
+          observer.next(this.deserializeParticipant(snapshot.data()));
+        },
+        (error) => {
+          console.error('Error observing participant:', error);
+          observer.error(error);
+        }
+      );
+
+      return () => unsubscribe();
+    });
+  }
+
+  /**
    * Salir de una sala
    */
   async leaveRoom(roomId: string, uid: string): Promise<void> {
@@ -444,6 +514,9 @@ export class RoomService {
     const serialized: any = {
       ...room,
       createdAt: room.createdAt,
+      currentRoundVerifiedWinners: this.serializeRoundWinners(
+        room.currentRoundVerifiedWinners || []
+      ),
       roundHistory: this.serializeRoundHistory(room.roundHistory),
     };
 
@@ -474,8 +547,27 @@ export class RoomService {
         : data.finishedAt
         ? new Date(data.finishedAt)
         : undefined,
+      currentRoundVerifiedWinners: this.deserializeRoundWinners(
+        data.currentRoundVerifiedWinners || []
+      ),
       roundHistory: this.deserializeRoundHistory(data.roundHistory || []),
     } as Room;
+  }
+
+  private serializeRoundWinners(winners: RoundWinner[]): any[] {
+    return winners.map((w) => ({
+      ...w,
+      verifiedAt: w.verifiedAt,
+    }));
+  }
+
+  private deserializeRoundWinners(data: any[]): RoundWinner[] {
+    return (data || []).map((w: any) => ({
+      ...w,
+      verifiedAt: w.verifiedAt?.toDate
+        ? w.verifiedAt.toDate()
+        : new Date(w.verifiedAt),
+    }));
   }
 
   private serializeRoundHistory(history: RoundHistory[]): any[] {

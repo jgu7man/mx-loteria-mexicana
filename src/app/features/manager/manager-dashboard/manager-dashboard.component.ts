@@ -2,17 +2,23 @@ import { CommonModule } from '@angular/common';
 import { Component, computed, effect, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { CARDS } from '../../../core/constants/game-data';
-import { Room, RoomConfig } from '../../../core/models/game.model';
+import { CARDS, MARKERS } from '../../../core/constants/game-data';
+import {
+  Participant,
+  Room,
+  RoomConfig,
+  RoundWinner,
+} from '../../../core/models/game.model';
 import { AuthService } from '../../../core/services/auth.service';
 import { GameUtilsService } from '../../../core/services/game-utils.service';
 import { RoomService } from '../../../core/services/room.service';
 import { CardComponent } from '../../../shared/components/card/card.component';
+import { TablaComponent } from '../../../shared/components/tabla/tabla.component';
 
 @Component({
   selector: 'app-manager-dashboard',
   standalone: true,
-  imports: [CommonModule, FormsModule, CardComponent],
+  imports: [CommonModule, FormsModule, CardComponent, TablaComponent],
   templateUrl: './manager-dashboard.component.html',
   styleUrl: './manager-dashboard.component.css',
 })
@@ -22,12 +28,45 @@ export class ManagerDashboardComponent {
   private roomService = inject(RoomService);
   private gameUtils = inject(GameUtilsService);
 
+  readonly origin = window.location.origin;
+
   // Signals
   currentUser = this.authService.currentUser;
   isAuthenticated = computed(() => this.currentUser() !== null);
   showCreateForm = signal(false);
   room = signal<Room | null>(null);
   currentCard = signal<any>(null);
+  nextCardPreview = computed(() => {
+    const r = this.room();
+    if (!r) return null;
+    const nextIndex = r.currentIndex + 1;
+    if (!Array.isArray(r.deck) || nextIndex < 0 || nextIndex >= r.deck.length)
+      return null;
+    const nextId = r.deck[nextIndex];
+    return CARDS.find((c) => c.id === nextId) ?? null;
+  });
+  nextVersoSuggestion = computed(() => {
+    const r = this.room();
+    if (!r || r.state === 'waiting') return '"Presiona Iniciar para barajar"';
+    const next = this.nextCardPreview();
+    return next?.verso ? `"${next.verso}"` : '"..."';
+  });
+
+  participants = signal<Participant[]>([]);
+  players = computed(() =>
+    this.participants().filter((p) => p.role === 'player')
+  );
+  reviewingParticipant = signal<Participant | null>(null);
+  isReviewModalOpen = computed(() => this.reviewingParticipant() !== null);
+  pendingWinners = computed(() => {
+    const r = this.room();
+    const participants = this.players();
+    if (!r || !Array.isArray(r.currentRoundWinners)) return [] as Participant[];
+    const winnerIds = new Set(r.currentRoundWinners);
+    return participants.filter((p) => winnerIds.has(p.uid));
+  });
+
+  activeRoomId = computed(() => this.room()?.id ?? null);
   managerRooms = signal<Room[]>([]);
   loadingRooms = signal(false);
 
@@ -53,6 +92,25 @@ export class ManagerDashboardComponent {
         } else {
           this.managerRooms.set([]);
         }
+      },
+      { allowSignalWrites: true }
+    );
+
+    // Mantener lista de participantes en tiempo real para la sala activa
+    effect(
+      (onCleanup) => {
+        const roomId = this.activeRoomId();
+        if (!roomId) {
+          this.participants.set([]);
+          this.reviewingParticipant.set(null);
+          return;
+        }
+
+        const sub = this.roomService.observeParticipants(roomId).subscribe({
+          next: (list) => this.participants.set(list),
+          error: (err) => console.error('Error observing participants:', err),
+        });
+        onCleanup(() => sub.unsubscribe());
       },
       { allowSignalWrites: true }
     );
@@ -183,12 +241,58 @@ export class ManagerDashboardComponent {
     }
   }
 
+  openViewerView() {
+    const currentRoom = this.room();
+    if (!currentRoom) return;
+    this.router.navigate(['/viewer', currentRoom.id]);
+  }
+
+  reviewParticipant(p: Participant) {
+    this.reviewingParticipant.set(p);
+  }
+
+  clearReview() {
+    this.reviewingParticipant.set(null);
+  }
+
+  async approveWinner() {
+    const currentRoom = this.room();
+    const p = this.reviewingParticipant();
+    if (!currentRoom || !p) return;
+
+    const winner: RoundWinner = {
+      uid: p.uid,
+      displayName: p.displayName,
+      tablaId: p.tablaId ?? -1,
+      marks: p.marks || [],
+      verifiedAt: new Date(),
+    };
+
+    try {
+      await this.roomService.approveWinner(currentRoom.id, winner);
+      this.clearReview();
+      alert('Ganador registrado (sin finalizar la ronda).');
+    } catch (error) {
+      console.error('Error approving winner:', error);
+      alert('Error al aprobar el ganador');
+    }
+  }
+
+  getMarkerEmoji(markerId?: string): string {
+    if (!markerId) return '🫘';
+    return MARKERS.find((m) => m.id === markerId)?.emoji ?? '🫘';
+  }
+
   async finishRound() {
     const currentRoom = this.room();
     if (!currentRoom) return;
 
     try {
-      await this.roomService.finishRound(currentRoom.id, []);
+      await this.roomService.finishRound(
+        currentRoom.id,
+        currentRoom.currentRoundVerifiedWinners || []
+      );
+      this.clearReview();
       alert('¡Ronda finalizada!');
     } catch (error) {
       console.error('Error finishing round:', error);

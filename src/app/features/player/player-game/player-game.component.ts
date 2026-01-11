@@ -1,5 +1,13 @@
 import { CommonModule } from '@angular/common';
-import { Component, effect, inject, OnInit, signal } from '@angular/core';
+import {
+  Component,
+  DestroyRef,
+  effect,
+  inject,
+  OnInit,
+  signal,
+} from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CARDS, MARKERS } from '../../../core/constants/game-data';
@@ -30,6 +38,7 @@ export class PlayerGameComponent implements OnInit {
   private authService = inject(AuthService);
   private roomService = inject(RoomService);
   private gameUtils = inject(GameUtilsService);
+  private destroyRef = inject(DestroyRef);
 
   // Signals
   currentUser = this.authService.currentUser;
@@ -97,6 +106,7 @@ export class PlayerGameComponent implements OnInit {
     const markerId =
       session?.markerId ?? this.parseLegacyMarkerId(legacyMarker);
     const tabla = session?.tabla ?? this.parseLegacyTabla(legacyTabla);
+    const marks = session?.marks ?? [];
 
     if (roomIdCandidate && user) {
       try {
@@ -132,6 +142,35 @@ export class PlayerGameComponent implements OnInit {
           this.myTabla.set(restoredTabla);
         }
 
+        // Restaurar marcas (fallback; la fuente de verdad es Firestore)
+        if (Array.isArray(marks) && marks.length > 0) {
+          this.myMarks.set(marks);
+        }
+
+        // Mantener el participante (incl. marcas) en tiempo real
+        this.roomService
+          .observeParticipant(roomIdCandidate, user.uid)
+          .pipe(takeUntilDestroyed(this.destroyRef))
+          .subscribe((p) => {
+            this.participant.set(p);
+            if (p?.marks) this.myMarks.set(p.marks);
+            if (p?.tablaCards && this.myTabla().length === 0) {
+              this.myTabla.set(p.tablaCards);
+            }
+          });
+
+        // Best-effort: sincronizar marker/tabla a Firestore (útil tras recargas)
+        const restoreUpdates: Partial<Participant> = {};
+        if (restoredMarker?.id) restoreUpdates.marker = restoredMarker.id;
+        if (restoredTabla) restoreUpdates.tablaCards = restoredTabla;
+        if (Object.keys(restoreUpdates).length > 0) {
+          this.roomService
+            .updateParticipant(roomIdCandidate, user.uid, restoreUpdates)
+            .catch(() => {
+              // Puede fallar si el participante aún no existe; es best-effort.
+            });
+        }
+
         // Elegir correctamente el paso de UI.
         // Si no hay marcador/tabla guardados, NO mostrar la vista del juego vacía.
         this.showJoinForm.set(false);
@@ -150,6 +189,7 @@ export class PlayerGameComponent implements OnInit {
         this.savePlayerSession(user.uid, roomIdCandidate, {
           markerId: restoredMarker?.id ?? null,
           tabla: restoredTabla,
+          marks: this.myMarks(),
         });
 
         console.log('Sesión de jugador restaurada');
@@ -167,20 +207,29 @@ export class PlayerGameComponent implements OnInit {
   private loadPlayerSession(
     uid: string,
     roomId: string
-  ): { markerId: string | null; tabla: number[] | null } | null {
+  ): {
+    markerId: string | null;
+    tabla: number[] | null;
+    marks: number[];
+  } | null {
     const raw = localStorage.getItem(this.getPlayerSessionKey(uid, roomId));
     if (!raw) return null;
     try {
       const parsed = JSON.parse(raw) as {
         markerId?: string | null;
         tabla?: unknown;
+        marks?: unknown;
       };
       const tabla = Array.isArray(parsed.tabla)
         ? (parsed.tabla as number[])
         : null;
+      const marks = Array.isArray(parsed.marks)
+        ? (parsed.marks as unknown[]).filter((n) => typeof n === 'number')
+        : [];
       return {
         markerId: parsed.markerId ?? null,
         tabla,
+        marks: marks as number[],
       };
     } catch {
       return null;
@@ -190,7 +239,7 @@ export class PlayerGameComponent implements OnInit {
   private savePlayerSession(
     uid: string,
     roomId: string,
-    data: { markerId: string | null; tabla: number[] | null }
+    data: { markerId: string | null; tabla: number[] | null; marks?: number[] }
   ) {
     localStorage.setItem(
       this.getPlayerSessionKey(uid, roomId),
@@ -322,7 +371,17 @@ export class PlayerGameComponent implements OnInit {
     this.savePlayerSession(this.currentUser()!.uid, this.roomId, {
       markerId: this.selectedMarker()?.id ?? null,
       tabla: this.myTabla().length ? this.myTabla() : null,
+      marks: this.myMarks(),
     });
+
+    // Mantener el participante (incl. marcas) en tiempo real
+    this.roomService
+      .observeParticipant(this.roomId, this.currentUser()!.uid)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((p) => {
+        this.participant.set(p);
+        if (p?.marks) this.myMarks.set(p.marks);
+      });
 
     // Observe room
     this.roomService.observeRoom(this.roomId).subscribe((r) => {
@@ -343,6 +402,7 @@ export class PlayerGameComponent implements OnInit {
       this.savePlayerSession(this.currentUser()!.uid, this.roomId, {
         markerId: marker.id,
         tabla: this.myTabla().length ? this.myTabla() : null,
+        marks: this.myMarks(),
       });
     }
     this.showMarkerSelector.set(false);
@@ -362,6 +422,7 @@ export class PlayerGameComponent implements OnInit {
       this.savePlayerSession(this.currentUser()!.uid, this.roomId, {
         markerId: this.selectedMarker()?.id ?? null,
         tabla,
+        marks: [],
       });
     }
     this.showTablaSelector.set(false);
@@ -372,7 +433,36 @@ export class PlayerGameComponent implements OnInit {
       this.roomService.updateParticipant(this.roomId, this.currentUser()!.uid, {
         tablaId,
         marker: this.selectedMarker()?.id,
+        tablaCards: tabla,
+        marks: [],
       });
+    }
+  }
+
+  async shoutLoteria() {
+    if (!this.currentUser() || !this.roomId) return;
+    try {
+      // Asegurar que la tabla esté registrada antes de pedir verificación
+      const syncUpdates: Partial<Participant> = {};
+      const markerId = this.selectedMarker()?.id;
+      const tablaCards = this.myTabla();
+      if (markerId) syncUpdates.marker = markerId;
+      if (Array.isArray(tablaCards) && tablaCards.length > 0) {
+        syncUpdates.tablaCards = tablaCards;
+      }
+      if (Object.keys(syncUpdates).length > 0) {
+        await this.roomService.updateParticipant(
+          this.roomId,
+          this.currentUser()!.uid,
+          syncUpdates
+        );
+      }
+
+      await this.roomService.addWinner(this.roomId, this.currentUser()!.uid);
+      alert('¡Solicitud enviada! El gritón verificará tu tabla.');
+    } catch (error: any) {
+      console.error('Error shouting lotería:', error);
+      alert('No se pudo enviar la solicitud: ' + (error.message || error));
     }
   }
 
@@ -385,7 +475,13 @@ export class PlayerGameComponent implements OnInit {
         this.currentUser()!.uid,
         cardId
       );
-      this.myMarks.set(marks.filter((id) => id !== cardId));
+      const updated = marks.filter((id) => id !== cardId);
+      this.myMarks.set(updated);
+      this.savePlayerSession(this.currentUser()!.uid, this.roomId, {
+        markerId: this.selectedMarker()?.id ?? null,
+        tabla: this.myTabla().length ? this.myTabla() : null,
+        marks: updated,
+      });
     } else {
       // Mark
       await this.roomService.markCard(
@@ -393,7 +489,13 @@ export class PlayerGameComponent implements OnInit {
         this.currentUser()!.uid,
         cardId
       );
-      this.myMarks.set([...marks, cardId]);
+      const updated = [...marks, cardId];
+      this.myMarks.set(updated);
+      this.savePlayerSession(this.currentUser()!.uid, this.roomId, {
+        markerId: this.selectedMarker()?.id ?? null,
+        tabla: this.myTabla().length ? this.myTabla() : null,
+        marks: updated,
+      });
     }
   }
 

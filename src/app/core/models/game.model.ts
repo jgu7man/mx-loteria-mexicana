@@ -31,7 +31,13 @@ export interface Marker {
 /**
  * Tipos de patrones de victoria
  */
-export type PatternType = 'full' | 'horizontal' | 'vertical' | 'diagonal' | 'corners' | 'center';
+export type PatternType =
+  | 'full'
+  | 'horizontal'
+  | 'vertical'
+  | 'diagonal'
+  | 'corners'
+  | 'center';
 
 /**
  * Patrón de victoria
@@ -53,6 +59,7 @@ export interface Participant {
   role: 'player' | 'viewer';
   marker?: string; // ID del marcador seleccionado
   tablaId?: number; // ID de la tabla actual
+  tablaCards?: number[]; // Cartas de la tabla (para verificación/visualización)
   marks: number[]; // IDs de las cartas marcadas
   victories: number; // Número de victorias en esta sala
   isActive: boolean;
@@ -110,16 +117,17 @@ export interface Room {
   managerName: string;
   state: RoomState;
   config: RoomConfig;
-  
+
   // Estado del juego actual
   deck: number[]; // Orden aleatorio de las 54 cartas para esta ronda
   currentIndex: number; // Índice de la carta actual siendo mostrada
   currentRound: number;
-  
+
   // Ganadores
   currentRoundWinners: string[]; // UIDs de ganadores en la ronda actual
+  currentRoundVerifiedWinners?: RoundWinner[]; // Ganadores aprobados por el manager (sin finalizar ronda)
   roundHistory: RoundHistory[];
-  
+
   // Metadatos
   createdAt: Date;
   startedAt?: Date;

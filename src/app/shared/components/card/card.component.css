@@ -1,41 +1,63 @@
+/* Ensure the component participates in layout predictably */
+:host {
+  display: block;
+}
+
 /* Card sizes */
 .card-small {
-  width: 80px;
-  height: 100px;
+  width: 100%;
+  max-width: 80px;
+  aspect-ratio: 4 / 5;
 }
 
 .card-small .card-emoji {
-  font-size: 2rem;
+  font-size: clamp(1.5rem, 14cqw, 2rem);
 }
 
 .card-small .card-name {
-  font-size: 0.65rem;
+  font-size: clamp(0.55rem, 4.6cqw, 0.65rem);
 }
 
 .card-medium {
-  width: 120px;
-  height: 150px;
+  width: 100%;
+  max-width: 120px;
+  aspect-ratio: 4 / 5;
 }
 
 .card-medium .card-emoji {
-  font-size: 3rem;
+  font-size: clamp(2.2rem, 14cqw, 3rem);
 }
 
 .card-medium .card-name {
-  font-size: 0.85rem;
+  font-size: clamp(0.7rem, 4.6cqw, 0.85rem);
 }
 
 .card-large {
-  width: 200px;
-  height: 250px;
+  width: 100%;
+  max-width: 200px;
+  aspect-ratio: 4 / 5;
 }
 
 .card-large .card-emoji {
-  font-size: 5rem;
+  font-size: clamp(1.5rem, 14cqw, 5rem);
 }
 
 .card-large .card-name {
-  font-size: 1.2rem;
+  font-size: clamp(0.5rem, 4.6cqw, 1.2rem);
+}
+
+/* Container-driven scaling (so emoji/text react to card size) */
+.card-container {
+  container-type: inline-size;
+  width: 17vw;
+}
+
+.card-content {
+  padding: clamp(0.35rem, 5cqw, 1rem);
+}
+
+.card-verso {
+  font-size: clamp(0.55rem, 3.2cqw, 0.8rem);
 }
 
 /* Marker overlay */
@@ -51,4 +73,25 @@
 
 .card-container:active {
   transform: translateY(-2px);
+}
+
+@media screen and (min-width: 500px) {
+  .card-container {
+    width: 14vw;
+  }
+  .marker-emoji {
+    font-size: 3rem;
+  }
+  .card-large .card-name {
+    font-size: clamp(0.5rem, 12cqw, 0.65rem);
+  }
+  .card-large .card-emoji {
+    font-size: clamp(1.5rem, 50cqw, 2rem);
+  }
+}
+
+@media screen and (min-width: 1200px) {
+  .card-container {
+    width: 8vw;
+  }
 }
