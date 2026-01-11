@@ -83,20 +83,22 @@
         <button (click)="goHome()"
                 class="top-0 left-0 z-10 bg-red-600 text-white px-4 py-2 md:px-6 md:py-3 rounded-lg font-semibold hover:bg-red-700 transition text-sm md:text-base">
           ABANDONAR </button>
-        <div *ngIf="currentCard()" class="bg-blue-100 rounded-2xl p-4 border-4 border-blue-300">
+        <div *ngIf="currentCard()" class="rounded-2xl p-4">
           <h3 class="text-center text-gray-800 font-bold mb-2 text-sm uppercase">Carta Actual</h3>
           <div class="flex justify-center">
             <app-card [card]="currentCard()!" [size]="'large'" [showVerso]="false"></app-card>
           </div>
         </div>
-        <!-- Placeholders (para historial o info futura) -->
+        <!-- Historial de cartas -->
         <div class="grid grid-cols-2 gap-2">
-          <div
-               class="bg-blue-200/50 rounded-xl aspect-[4/5] flex items-center justify-center text-white text-xs">
-            -1</div>
-          <div
-               class="bg-blue-200/50 rounded-xl aspect-[4/5] flex items-center justify-center text-white text-xs">
-            -2</div>
+          <div *ngFor="let card of historyCards().slice(0, 2); let i = index"
+               class="bg-blue-100 rounded-xl border-2 border-blue-200 overflow-hidden">
+            <app-card [card]="card" [size]="'small'" [showVerso]="false"></app-card>
+          </div>
+          <!-- Placeholders si hay menos de 2 cartas -->
+          <div *ngFor="let _ of [].constructor(Math.max(0, 2 - historyCards().length)); let i = index"
+               class="bg-blue-200/50 rounded-xl aspect-[4/5] flex items-center justify-center text-gray-400 text-xs">
+          </div>
         </div>
       </div>
       <!-- Center: Tabla -->
@@ -126,7 +128,7 @@
       <div class="space-y-4">
         <div class="grid grid-cols-4 gap-4">
           <!-- Tabla (izquierda, 2 columnas) -->
-          <div class="col-span-3 bg-blue-100 rounded-2xl p-4 border-4 border-blue-300">
+          <div class="col-span-3 bg rounded-2xl">
             <app-tabla [tablaCards]="myTabla()" [marks]="myMarks()"
                        [markerEmoji]="selectedMarker()?.emoji || '🫘'" [isInteractive]="true"
                        [size]="'large'" (cardClicked)="onCardClicked($event)">
@@ -142,16 +144,15 @@
                 <app-card [card]="currentCard()!" [size]="'medium'" [showVerso]="false"></app-card>
               </div>
             </div>
-            <!-- Historial placeholders -->
+            <!-- Historial de cartas -->
             <div class="space-y-2">
-              <div
-                   class="bg-blue-200/50 rounded-xl aspect-[4/5] flex items-center justify-center text-white text-xs">
+              <div *ngFor="let card of historyCards().slice(0, 3)"
+                   class="bg-blue-100 rounded-xl border-2 border-blue-200 overflow-hidden">
+                <app-card [card]="card" [size]="'small'" [showVerso]="false"></app-card>
               </div>
-              <div
-                   class="bg-blue-200/50 rounded-xl aspect-[4/5] flex items-center justify-center text-white text-xs">
-              </div>
-              <div
-                   class="bg-blue-200/50 rounded-xl aspect-[4/5] flex items-center justify-center text-white text-xs">
+              <!-- Placeholders si hay menos de 3 cartas -->
+              <div *ngFor="let _ of [].constructor(Math.max(0, 3 - historyCards().length))"
+                   class="bg-blue-200/50 rounded-xl aspect-[4/5] flex items-center justify-center text-gray-400 text-xs">
               </div>
             </div>
           </div>
@@ -184,21 +185,20 @@
             <app-card [card]="currentCard()!" [size]="'small'" [showVerso]="false"></app-card>
           </div>
         </div>
-        <!-- Historial placeholders -->
+        <!-- Historial de cartas -->
         <div class="col-span-3 grid grid-cols-3 gap-2">
-          <div
-               class="bg-blue-200/50 rounded-lg aspect-[4/5] flex items-center justify-center text-white text-xs">
+          <div *ngFor="let card of historyCards().slice(0, 3)"
+               class="bg-blue-100 rounded-lg border-2 border-blue-200 overflow-hidden">
+            <app-card [card]="card" [size]="'small'" [showVerso]="false"></app-card>
           </div>
-          <div
-               class="bg-blue-200/50 rounded-lg aspect-[4/5] flex items-center justify-center text-white text-xs">
-          </div>
-          <div
-               class="bg-blue-200/50 rounded-lg aspect-[4/5] flex items-center justify-center text-white text-xs">
+          <!-- Placeholders si hay menos de 3 cartas -->
+          <div *ngFor="let _ of [].constructor(Math.max(0, 3 - historyCards().length))"
+               class="bg-blue-200/50 rounded-lg aspect-[4/5] flex items-center justify-center text-gray-400 text-xs">
           </div>
         </div>
       </div>
       <!-- Tabla -->
-      <div class="bg-blue-100 rounded-2xl p-3 border-4 border-blue-300">
+      <div class="rounded-2xl">
         <app-tabla [tablaCards]="myTabla()" [marks]="myMarks()"
                    [markerEmoji]="selectedMarker()?.emoji || '🫘'" [isInteractive]="true"
                    [size]="'large'" (cardClicked)="onCardClicked($event)">

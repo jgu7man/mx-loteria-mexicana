@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import {
   Component,
+  computed,
   DestroyRef,
   effect,
   inject,
@@ -40,11 +41,34 @@ export class PlayerGameComponent implements OnInit {
   private gameUtils = inject(GameUtilsService);
   private destroyRef = inject(DestroyRef);
 
+  // Expose Math for template
+  Math = Math;
+
   // Signals
   currentUser = this.authService.currentUser;
   room = signal<Room | null>(null);
   participant = signal<Participant | null>(null);
   currentCard = signal<any>(null);
+  historyCards = computed(() => {
+    const r = this.room();
+    if (!r || r.currentIndex < 0 || !Array.isArray(r.deck)) return [];
+
+    // Determinar cuántas cartas mostrar según dificultad
+    let limit = 3; // easy (default)
+    if (r.config.viewerDifficulty === 'medium') limit = 1;
+    if (r.config.viewerDifficulty === 'hard') limit = 0;
+
+    if (limit === 0) return [];
+
+    // Obtener las últimas N cartas (excluyendo la actual)
+    const startIndex = Math.max(0, r.currentIndex - limit);
+    const historyIds = r.deck.slice(startIndex, r.currentIndex);
+
+    return historyIds
+      .map((id) => CARDS.find((c) => c.id === id))
+      .filter((c) => c !== undefined)
+      .reverse(); // Más reciente primero
+  });
 
   // UI state
   roomId = '';
