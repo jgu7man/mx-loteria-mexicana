@@ -158,15 +158,21 @@ export class RoomService {
       const newDeck = this.gameUtils.generateNewDeck();
       const newRound = room.currentRound + 1;
 
-      await updateDoc(roomRef, {
+      const updateData: any = {
         deck: newDeck,
         currentIndex: -1,
         currentRound: newRound,
         state: ROOM_STATES.PLAYING,
         currentRoundWinners: [],
         currentRoundVerifiedWinners: [],
-        startedAt: room.currentRound === 0 ? serverTimestamp() : room.startedAt,
-      });
+      };
+
+      // Solo establecer startedAt en la primera ronda
+      if (room.currentRound === 0) {
+        updateData.startedAt = serverTimestamp();
+      }
+
+      await updateDoc(roomRef, updateData);
     } catch (error) {
       console.error('Error starting new round:', error);
       throw error;
@@ -239,13 +245,19 @@ export class RoomService {
       const updatedHistory = [...room.roundHistory, roundHistory];
       const isLastRound = room.currentRound >= room.config.maxRounds;
 
-      await updateDoc(roomRef, {
+      const updateData: any = {
         roundHistory: this.serializeRoundHistory(updatedHistory),
         state: isLastRound ? ROOM_STATES.FINISHED : ROOM_STATES.WAITING,
         currentRoundWinners: [],
         currentRoundVerifiedWinners: [],
-        finishedAt: isLastRound ? serverTimestamp() : undefined,
-      });
+      };
+
+      // Solo agregar finishedAt si es la última ronda
+      if (isLastRound) {
+        updateData.finishedAt = serverTimestamp();
+      }
+
+      await updateDoc(roomRef, updateData);
     } catch (error) {
       console.error('Error finishing round:', error);
       throw error;
