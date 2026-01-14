@@ -1,21 +1,23 @@
-<div class="manager-container min-h-screen bg-gradient-to-br from-indigo-600 to-purple-700 p-8">
+<div class="manager-container min-h-screen bg-gray-50 p-8">
   <!-- Header -->
-  <header class="flex justify-between items-center mb-8">
-    <h1 class="text-4xl font-bold text-white">👨‍💼 Manager Dashboard</h1>
+  <header class="flex justify-between items-center mb-2 p-2">
+    <h1 class="text-2xl font-bold text-gray-800 flex items-center gap-3">
+      🎙️ Panel del Gritón
+    </h1>
     <button 
       (click)="goHome()"
-      class="bg-white text-purple-600 px-6 py-2 rounded-lg font-semibold hover:bg-gray-100 transition">
+      class="bg-gray-100 text-gray-700 px-6 py-2 rounded-xl font-semibold hover:bg-gray-200 transition">
       ← Volver
     </button>
   </header>
 
   <!-- Not authenticated -->
   <div *ngIf="!isAuthenticated()" class="text-center">
-    <div class="bg-white rounded-2xl shadow-2xl p-12 max-w-md mx-auto">
+    <div class="bg-white rounded-lg p-6 max-w-md mx-auto">
       <h2 class="text-2xl font-bold text-gray-800 mb-6">Inicia sesión para crear salas</h2>
       <button 
         (click)="signInWithGoogle()"
-        class="bg-blue-500 text-white px-8 py-3 rounded-lg font-semibold hover:bg-blue-600 transition">
+        class="bg-indigo-600 text-white px-8 py-3 rounded-2xl font-semibold hover:bg-indigo-700 transition shadow-lg">
         🔐 Iniciar sesión con Google
       </button>
     </div>
@@ -23,7 +25,7 @@
 
   <!-- Authenticated - No room -->
   <div *ngIf="isAuthenticated() && !room()" class="text-center">
-    <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-4xl mx-auto">
+    <div class="bg-white rounded-3xl shadow-lg p-8 max-w-4xl mx-auto">
       <h2 class="text-2xl font-bold text-gray-800 mb-6">Bienvenido, {{ currentUser()?.displayName }}!</h2>
       
       <!-- Salas creadas -->
@@ -33,23 +35,18 @@
           <button
             *ngFor="let managerRoom of managerRooms()"
             (click)="selectRoom(managerRoom)"
-            class="p-4 border-2 border-gray-300 rounded-lg hover:border-purple-500 hover:shadow-lg transition text-left">
+            class="p-6 border-2 border-gray-200 rounded-2xl hover:border-indigo-400 hover:shadow-lg transition text-left bg-gray-50">
             <div class="flex justify-between items-start mb-2">
               <h4 class="text-lg font-bold text-gray-800">{{ managerRoom.name }}</h4>
-              <span class="px-2 py-1 text-xs rounded-full"
-                [class.bg-green-100]="managerRoom.state === 'playing'"
-                [class.text-green-700]="managerRoom.state === 'playing'"
-                [class.bg-yellow-100]="managerRoom.state === 'waiting'"
-                [class.text-yellow-700]="managerRoom.state === 'waiting'"
-                [class.bg-gray-100]="managerRoom.state !== 'playing' && managerRoom.state !== 'waiting'"
-                [class.text-gray-700]="managerRoom.state !== 'playing' && managerRoom.state !== 'waiting'">
-                {{ managerRoom.state }}
+              <span class="px-3 py-1 text-xs rounded-full font-semibold"
+                [ngClass]="[getRoomStateColors(managerRoom.state).bg, getRoomStateColors(managerRoom.state).text]">
+                {{ getRoomStateLabel(managerRoom.state) }}
               </span>
             </div>
             <div class="text-sm text-gray-600">
               <div>Ronda: {{ managerRoom.currentRound }}/{{ managerRoom.config.maxRounds }}</div>
               <div>Cartas: {{ managerRoom.currentIndex + 1 }}/54</div>
-              <div class="text-xs text-purple-600 mt-2">ID: {{ managerRoom.id }}</div>
+              <div class="text-xs text-indigo-600 mt-2 font-mono">ID: {{ managerRoom.id }}</div>
             </div>
           </button>
         </div>
@@ -67,7 +64,7 @@
       <button 
         *ngIf="!showCreateForm()"
         (click)="toggleCreateForm()"
-        class="bg-purple-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-purple-700 transition">
+        class="bg-indigo-600 text-white px-8 py-4 rounded-2xl font-semibold hover:bg-indigo-700 transition shadow-lg">
         ➕ Crear Nueva Sala
       </button>
 
@@ -80,7 +77,7 @@
               type="text"
               [(ngModel)]="roomName"
               name="roomName"
-              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+              class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
               placeholder="Ej: Lotería del Viernes">
           </div>
 
@@ -92,7 +89,7 @@
               name="maxRounds"
               min="1"
               max="20"
-              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
+              class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
           </div>
 
           <div>
@@ -100,7 +97,7 @@
             <select 
               [(ngModel)]="difficulty"
               name="difficulty"
-              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
+              class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
               <option value="easy">Fácil (últimas 5 cartas)</option>
               <option value="medium">Medio (últimas 2 cartas)</option>
               <option value="hard">Difícil (solo carta actual)</option>
@@ -110,13 +107,13 @@
           <div class="flex gap-4">
             <button 
               type="submit"
-              class="flex-1 bg-purple-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-purple-700 transition">
+              class="flex-1 bg-indigo-600 text-white px-6 py-3 rounded-2xl font-semibold hover:bg-indigo-700 transition shadow-lg">
               Crear Sala
             </button>
             <button 
               type="button"
               (click)="toggleCreateForm()"
-              class="flex-1 bg-gray-300 text-gray-700 px-6 py-3 rounded-lg font-semibold hover:bg-gray-400 transition">
+              class="flex-1 bg-gray-200 text-gray-700 px-6 py-3 rounded-2xl font-semibold hover:bg-gray-300 transition">
               Cancelar
             </button>
           </div>
@@ -126,161 +123,488 @@
   </div>
 
   <!-- Room active -->
-  <div *ngIf="room()" class="space-y-8">
-    <!-- Room info -->
-    <div class="bg-white rounded-2xl shadow-2xl p-8">
-      <div class="flex items-start justify-between gap-4 flex-wrap">
-        <div>
-          <h2 class="text-3xl font-bold text-gray-800 mb-2">{{ room()!.name }}</h2>
-          <div class="text-sm text-gray-600">ID: <span class="text-purple-700 font-semibold">{{ room()!.id }}</span></div>
+  <div *ngIf="room()" class="space-y-3">
+    <!-- DESKTOP LAYOUT (xl) -->
+    <div class="hidden xl:grid xl:grid-cols-12 gap-6">
+      <!-- Left column: Header + Botones de acción -->
+      <div class="xl:col-span-3 space-y-3">
+        <!-- Header compacto -->
+        <div class="bg-white rounded-lg p-6 shadow-md">
+          <h2 class="text-lg font-bold text-gray-800 mb-3">{{ room()!.name }}</h2>
+          
+          <div class="space-y-2">
+            <div class="bg-cyan-50 p-4 rounded-2xl">
+              <div class="text-xs text-gray-600 font-semibold">Ronda</div>
+              <div class="text-lg font-bold text-gray-800">{{ room()!.currentRound }}</div>
+            </div>
+            <div class="bg-yellow-50 p-4 rounded-2xl">
+              <div class="text-xs text-gray-600 font-semibold">Cartas</div>
+              <div class="text-lg font-bold text-gray-800">{{ room()!.currentIndex + 1 }}/54</div>
+            </div>
+            <div class="bg-purple-50 p-4 rounded-2xl">
+              <div class="text-xs text-gray-600 font-semibold">Estado</div>
+              <div class="text-lg font-bold text-gray-800">{{ getRoomStateLabel(room()!.state) }}</div>
+            </div>
+          </div>
         </div>
+        <!-- TODO: Implementar copyInviteLink -->
+        <button
+          disabled
+          class="w-full bg-gray-300 text-gray-500 px-4 py-3 rounded-lg font-semibold cursor-not-allowed transition text-sm">
+          🔗 Compartir Link
+        </button>
+        <!-- TODO: Implementar showQR -->
+        <button
+          disabled
+          class="w-full bg-gray-300 text-gray-500 px-4 py-3 rounded-lg font-semibold cursor-not-allowed transition text-sm">
+          📱 Compartir QR
+        </button>
         <button
           (click)="openViewerView()"
-          class="bg-white border-2 border-gray-300 text-gray-700 px-4 py-2 rounded-lg font-semibold hover:bg-gray-50 transition">
-          👁️ Vista Visitante
+          class="w-full bg-indigo-600 text-white px-4 py-3 rounded-lg font-semibold hover:bg-indigo-700 transition text-sm shadow-md">
+          👁️ Vista de visitante
+        </button>
+        <!-- TODO: Implementar historial de cartas -->
+        <button
+          disabled
+          class="w-full bg-gray-300 text-gray-500 px-4 py-3 rounded-lg font-semibold cursor-not-allowed transition text-sm">
+          📜 Historial de cartas
+        </button>
+        <button
+          *ngIf="isRoomActive(room()!.state)"
+          (click)="finishRound()"
+          class="w-full bg-white text-red-600 px-4 py-3 rounded-lg font-semibold hover:bg-red-50 transition text-sm border-2 border-red-500 shadow-md">
+          ⏹️ Finalizar Ronda
+        </button>
+        <button
+          (click)="deleteRoom()"
+          class="w-full bg-red-600 text-white px-4 py-3 rounded-lg font-semibold hover:bg-red-700 transition text-sm shadow-md">
+          🗑️ Eliminar Sala
         </button>
       </div>
 
-      <div class="grid grid-cols-3 gap-4 text-center mt-6">
-        <div class="bg-purple-100 p-4 rounded-lg">
-          <div class="text-2xl font-bold text-purple-600">{{ room()!.currentRound }}</div>
-          <div class="text-sm text-gray-600">Ronda Actual</div>
-        </div>
-        <div class="bg-blue-100 p-4 rounded-lg">
-          <div class="text-2xl font-bold text-blue-600">{{ room()!.currentIndex + 1 }}/54</div>
-          <div class="text-sm text-gray-600">Cartas Cantadas</div>
-        </div>
-        <div class="bg-green-100 p-4 rounded-lg">
-          <div class="text-2xl font-bold text-green-600">{{ room()!.state }}</div>
-          <div class="text-sm text-gray-600">Estado</div>
-        </div>
-      </div>
-
-      <!-- Room link -->
-      <div class="mt-6 p-4 bg-gray-100 rounded-lg">
-        <p class="text-sm text-gray-600 mb-2">Link de invitación (jugadores):</p>
-        <code class="text-purple-600 font-mono break-all">{{ room()!.inviteLink }}</code>
-        <div class="mt-3 text-sm text-gray-600">
-          Vista visitante: <code class="text-gray-800 font-mono break-all">{{ origin }}/viewer/{{ room()!.id }}</code>
-        </div>
-      </div>
-    </div>
-
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-      <!-- Left: current card + suggestion + controls -->
-      <div class="md:col-span-2 space-y-6">
-        <div class="bg-white rounded-2xl shadow-2xl p-8 text-center">
-          <h3 class="text-2xl font-bold text-gray-800 mb-6">Carta Actual</h3>
-          <div class="flex justify-center">
+      <!-- Center: Carta Actual -->
+      <div class="xl:col-span-6">
+        <div class="bg-white rounded-lg shadow-md p-6">
+          <div id="current-card" class="flex justify-center mb-6">
             <app-card
               *ngIf="currentCard()"
               [card]="currentCard()!"
               [size]="'large'"
               [showVerso]="true"></app-card>
-            <div *ngIf="!currentCard()" class="w-full flex justify-center">
-              <div class="w-64 h-96 bg-gray-100 rounded-2xl border-4 border-gray-200 flex flex-col items-center justify-center">
-                <div class="text-7xl text-gray-400">?</div>
-                <div class="text-gray-500 font-semibold mt-4">ESPERANDO…</div>
-              </div>
+            <div *ngIf="!currentCard()" class="w-64 h-80 bg-gradient-to-br from-gray-50 to-gray-100 rounded-3xl border-4 border-gray-200 flex flex-col items-center justify-center shadow-inner">
+              <div class="text-7xl text-gray-800 font-bold mb-2">?</div>
+              <div class="text-gray-400 font-semibold tracking-widest text-sm">ESPERANDO…</div>
             </div>
           </div>
 
-          <div class="mt-6 flex gap-4 justify-center flex-wrap">
+          <div class="bg-indigo-50 rounded-lg p-4 mb-6">
+            <p class="text-[10px] uppercase font-bold text-indigo-400 mb-1 text-center tracking-widest">Sugerencia para la próxima</p>
+            <p class="text-indigo-700 italic font-semibold text-center text-lg">{{ nextVersoSuggestion() }}</p>
+          </div>
+
+          <div class="flex justify-center">
             <button
-              *ngIf="room()!.state === 'waiting'"
+              *ngIf="isRoomWaiting(room()!.state)"
               (click)="startRound()"
-              class="bg-purple-600 text-white px-8 py-4 rounded-lg font-semibold hover:bg-purple-700 transition text-xl">
-              ▶️ Iniciar Ronda
+              class="bg-indigo-600 text-white px-12 py-4 rounded-lg font-bold hover:bg-indigo-700 transition text-lg shadow-md">
+              Iniciar Ronda
             </button>
-
             <button
-              *ngIf="room()!.state === 'playing' || room()!.state === 'verifying'"
+              *ngIf="isRoomActive(room()!.state)"
               (click)="nextCard()"
-              class="bg-purple-600 text-white px-8 py-4 rounded-lg font-semibold hover:bg-purple-700 transition text-xl">
-              ➡️ Siguiente Carta
-            </button>
-
-            <button
-              *ngIf="room()!.state === 'playing' || room()!.state === 'verifying'"
-              (click)="finishRound()"
-              class="border-2 border-red-200 text-red-600 px-8 py-4 rounded-lg font-semibold hover:bg-red-50 transition text-xl">
-              ⏹️ Finalizar Ronda
+              class="bg-indigo-600 text-white px-12 py-4 rounded-lg font-bold hover:bg-indigo-700 transition text-lg shadow-md">
+              ➡️ Siguiente carta
             </button>
           </div>
-        </div>
-
-        <!-- Delete room button -->
-        <div class="bg-white rounded-2xl shadow-2xl p-8">
-          <button
-            (click)="deleteRoom()"
-            class="bg-red-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-red-700 transition">
-            🗑️ Eliminar Sala
-          </button>
         </div>
       </div>
 
-      <!-- Right: next card + verification + players -->
-      <div class="space-y-6">
-        <div class="bg-gray-900 text-white p-6 rounded-2xl shadow-2xl">
-          <p class="text-gray-300 text-xs uppercase font-bold mb-4">Próxima carta (solo tú ves)</p>
+      <!-- Right column: Próxima carta + Verificación + Jugadores -->
+      <div class="xl:col-span-3 space-y-6">
+        <!-- Próxima carta -->
+        <div class="bg-gray-800 text-white p-6 rounded-3xl shadow-lg">
+          <p class="text-gray-400 text-xs uppercase font-bold mb-4 tracking-wider">PRÓXIMA CARTA (SÓLO TÚ VES)</p>
           <div class="flex items-center gap-4">
-            <div class="w-16 h-24 bg-gray-800 rounded-lg flex items-center justify-center text-3xl border border-gray-700">
+            <div class="w-20 h-28 bg-gray-700 rounded-xl flex items-center justify-center text-4xl shadow-md">
               {{ nextCardPreview()?.emoji || '?' }}
             </div>
-            <div>
-              <p class="font-bold text-gray-100">{{ nextCardPreview()?.name || '???' }}</p>
-              <p class="text-[10px] text-gray-400">LISTA PARA CANTAR</p>
+            <div class="flex-1">
+              <p class="font-bold text-white text-lg mb-1">{{ nextCardPreview()?.name || '???' }}</p>
+              <p class="text-[10px] text-gray-400 uppercase tracking-widest">LISTA PARA CANTAR</p>
             </div>
-          </div>
-
-          <div class="mt-4 text-center bg-gray-800/40 p-4 rounded-xl border border-gray-700">
-            <p class="text-[10px] uppercase font-bold text-gray-300 mb-1 tracking-widest">Sugerencia para la próxima</p>
-            <p class="text-gray-100 italic font-semibold">{{ nextVersoSuggestion() }}</p>
           </div>
         </div>
 
-        <div class="bg-white p-6 rounded-2xl shadow-2xl border border-gray-100">
-          <h4 class="font-bold mb-4 flex items-center gap-2 text-gray-700">✅ Verificación</h4>
+        <!-- Verificación -->
+        <div class="bg-white p-6 rounded-3xl shadow-lg">
+          <h4 class="font-bold mb-4 text-gray-700 flex items-center gap-2 text-base">✅ Verificación</h4>
 
-          <div *ngIf="pendingWinners().length === 0" class="text-gray-500 text-sm">
-            Sin solicitudes de verificación.
+          <div *ngIf="pendingWinners().length === 0" class="text-gray-400 text-sm italic">
+            Sin solicitudes
           </div>
 
           <div *ngIf="pendingWinners().length > 0" class="space-y-3">
             <div
               *ngFor="let p of pendingWinners()"
-              class="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
+              class="flex items-center justify-between p-4 bg-gray-50 rounded-2xl">
               <div>
-                <p class="font-bold text-sm">{{ p.displayName }}</p>
+                <p class="font-bold text-sm text-gray-800">{{ p.displayName }}</p>
                 <p class="text-xs text-gray-500">Gritó ¡Lotería!</p>
               </div>
               <button
                 (click)="reviewParticipant(p)"
-                class="bg-purple-100 text-purple-700 px-3 py-1 rounded-lg text-xs font-bold hover:bg-purple-200">
+                class="bg-indigo-600 text-white px-4 py-2 rounded-xl text-xs font-bold hover:bg-indigo-700 shadow-md">
                 Revisar
               </button>
             </div>
           </div>
-
         </div>
 
-        <div class="bg-white p-6 rounded-2xl shadow-2xl border border-gray-100">
-          <h4 class="font-bold mb-4 text-gray-700">👥 Jugadores</h4>
-          <div *ngIf="players().length === 0" class="text-gray-500 text-sm">Sin jugadores aún.</div>
+        <!-- Jugadores -->
+        <div class="bg-white p-6 rounded-3xl shadow-lg">
+          <h4 class="font-bold mb-4 text-gray-700 flex items-center gap-2 text-base">👥 Jugadores</h4>
+          <div *ngIf="players().length === 0" class="text-gray-400 text-sm italic">Sin jugadores</div>
           <div *ngIf="players().length > 0" class="space-y-2">
-            <div *ngFor="let p of players()" class="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
+            <div *ngFor="let p of players()" class="flex items-center justify-between p-4 bg-gray-50 rounded-2xl">
               <div class="min-w-0">
                 <div class="font-semibold text-gray-800 text-sm truncate">{{ p.displayName }}</div>
-                <div class="text-xs text-gray-500">
-                  marcador: {{ getMarkerEmoji(p.marker) }} · tabla: {{ p.tablaCards?.length ? '✅' : '—' }}
-                </div>
+                <div class="text-xs text-gray-500">{{ getMarkerEmoji(p.marker) }}</div>
               </div>
               <button
                 (click)="reviewParticipant(p)"
-                class="text-purple-700 text-xs font-bold hover:underline">
+                class="text-indigo-600 text-xs font-bold hover:text-indigo-700">
                 Ver tabla
               </button>
             </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TABLET LAYOUT (md) -->
+    <div class="hidden md:grid xl:hidden md:grid-cols-12 gap-6">
+      <!-- Left: Carta Actual + Próxima carta -->
+      <div class="md:col-span-7 space-y-6">
+        <div class="bg-white rounded-lg shadow-md p-6">
+          <div id="current-card" class="flex justify-center mb-4">
+            <app-card
+              *ngIf="currentCard()"
+              [card]="currentCard()!"
+              [size]="'medium'"
+              [showVerso]="true"></app-card>
+            <div *ngIf="!currentCard()" class="w-48 h-60 bg-gradient-to-br from-gray-50 to-gray-100 rounded-3xl border-4 border-gray-200 flex flex-col items-center justify-center shadow-inner">
+              <div class="text-6xl text-gray-800 font-bold mb-2">?</div>
+              <div class="text-gray-400 font-semibold tracking-widest text-xs">ESPERANDO…</div>
+            </div>
+          </div>
+
+          <div class="bg-indigo-50 rounded-lg p-4 mb-4">
+            <p class="text-[10px] uppercase font-bold text-indigo-400 mb-1 text-center tracking-widest">Sugerencia</p>
+            <p class="text-indigo-700 italic font-semibold text-center">{{ nextVersoSuggestion() }}</p>
+          </div>
+
+          <div class="flex justify-center">
+            <button
+              *ngIf="isRoomWaiting(room()!.state)"
+              (click)="startRound()"
+              class="bg-indigo-600 text-white px-8 py-3 rounded-lg font-bold hover:bg-indigo-700 transition shadow-md">
+              Iniciar Ronda
+            </button>
+            <button
+              *ngIf="isRoomActive(room()!.state)"
+              (click)="nextCard()"
+              class="bg-indigo-600 text-white px-8 py-3 rounded-lg font-bold hover:bg-indigo-700 transition shadow-md">
+              ➡️ Siguiente carta
+            </button>
+          </div>
+        </div>
+
+        <!-- Próxima carta -->
+        <div class="bg-gray-800 text-white p-6 rounded-3xl shadow-lg">
+          <p class="text-gray-400 text-xs uppercase font-bold mb-4 tracking-wider">PRÓXIMA CARTA (SÓLO TÚ VES)</p>
+          <div class="flex items-center gap-4">
+            <div class="w-20 h-28 bg-gray-700 rounded-xl flex items-center justify-center text-4xl shadow-md">
+              {{ nextCardPreview()?.emoji || '?' }}
+            </div>
+            <div class="flex-1">
+              <p class="font-bold text-white text-lg mb-1">{{ nextCardPreview()?.name || '???' }}</p>
+              <p class="text-[10px] text-gray-400 uppercase tracking-widest">LISTA PARA CANTAR</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: Jugadores + Verificación + Botones -->
+      <div class="md:col-span-5 space-y-6">
+        <!-- Header compacto -->
+        <div class="bg-white rounded-lg p-4 shadow-md">
+          <h2 class="text-lg font-bold text-gray-800 mb-3">{{ room()!.name }}</h2>
+          
+          <div class="space-y-2">
+            <div class="bg-cyan-50 p-2 rounded-lg flex justify-between items-center">
+              <div class="text-xs text-gray-600 font-semibold">Ronda</div>
+              <div class="text-base font-bold text-gray-800">{{ room()!.currentRound }}</div>
+            </div>
+            <div class="bg-yellow-50 p-2 rounded-lg flex justify-between items-center">
+              <div class="text-xs text-gray-600 font-semibold">Cartas</div>
+              <div class="text-base font-bold text-gray-800">{{ room()!.currentIndex + 1 }}/54</div>
+            </div>
+            <div class="bg-purple-50 p-2 rounded-lg flex justify-between items-center">
+              <div class="text-xs text-gray-600 font-semibold">Estado</div>
+              <div class="text-base font-bold text-gray-800">{{ getRoomStateLabel(room()!.state) }}</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Jugadores -->
+        <div class="bg-white p-6 rounded-3xl shadow-lg">
+          <h4 class="font-bold mb-4 text-gray-700 flex items-center gap-2 text-base">👥 Jugadores</h4>
+          <div *ngIf="players().length === 0" class="text-gray-400 text-sm italic">Sin jugadores</div>
+          <div *ngIf="players().length > 0" class="space-y-2">
+            <div *ngFor="let p of players()" class="flex items-center justify-between p-4 bg-gray-50 rounded-2xl">
+              <div class="min-w-0">
+                <div class="font-semibold text-gray-800 text-sm truncate">{{ p.displayName }}</div>
+                <div class="text-xs text-gray-500">{{ getMarkerEmoji(p.marker) }}</div>
+              </div>
+              <button
+                (click)="reviewParticipant(p)"
+                class="text-indigo-600 text-lg hover:text-indigo-700">
+                👁️
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Verificación -->
+        <div class="bg-white p-6 rounded-3xl shadow-lg">
+          <h4 class="font-bold mb-4 text-gray-700 flex items-center gap-2 text-base">✅ Verificación</h4>
+
+          <div *ngIf="pendingWinners().length === 0" class="text-gray-400 text-sm italic">
+            Sin solicitudes
+          </div>
+
+          <div *ngIf="pendingWinners().length > 0" class="space-y-3">
+            <div
+              *ngFor="let p of pendingWinners()"
+              class="flex items-center justify-between p-4 bg-gray-50 rounded-2xl">
+              <div>
+                <p class="font-bold text-sm text-gray-800">{{ p.displayName }}</p>
+                <p class="text-xs text-gray-500">Gritó ¡Lotería!</p>
+              </div>
+              <button
+                (click)="reviewParticipant(p)"
+                class="bg-indigo-600 text-white px-4 py-2 rounded-xl text-xs font-bold hover:bg-indigo-700 shadow-md">
+                ✏️
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Botones -->
+        <div class="space-y-3">
+          <!-- TODO: Implementar copyInviteLink -->
+          <button
+            disabled
+            class="w-full bg-gray-300 text-gray-500 px-4 py-3 rounded-lg font-semibold cursor-not-allowed transition text-sm">
+            🔗 Compartir Link
+          </button>
+          <!-- TODO: Implementar showQR -->
+          <button
+            disabled
+            class="w-full bg-gray-300 text-gray-500 px-4 py-3 rounded-lg font-semibold cursor-not-allowed transition text-sm">
+            📱 Compartir QR
+          </button>
+          <button
+            (click)="openViewerView()"
+            class="w-full bg-indigo-600 text-white px-4 py-3 rounded-lg font-semibold hover:bg-indigo-700 transition text-sm shadow-md">
+            👁️ Vista de visitante
+          </button>
+          <!-- TODO: Implementar historial de cartas -->
+          <button
+            disabled
+            class="w-full bg-gray-300 text-gray-500 px-4 py-3 rounded-lg font-semibold cursor-not-allowed transition text-sm">
+            📜 Historial de cartas
+          </button>
+          <button
+            *ngIf="isRoomActive(room()!.state)"
+            (click)="finishRound()"
+            class="w-full bg-white text-red-600 px-4 py-3 rounded-lg font-semibold hover:bg-red-50 transition text-sm border-2 border-red-500 shadow-md">
+            ⏹️ Finalizar Ronda
+          </button>
+          <button
+            (click)="deleteRoom()"
+            class="w-full bg-red-600 text-white px-4 py-3 rounded-lg font-semibold hover:bg-red-700 transition text-sm shadow-md">
+            🗑️ Eliminar Sala
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MOBILE LAYOUT (< md) -->
+    <div class="md:hidden space-y-3">
+        <div class="bg-white rounded-lg p-6 shadow-md sm:hidden">
+        <h2 class="text-2xl font-bold text-gray-800 mb-4">{{ room()!.name }}</h2>
+        
+        <div class="overflow-x-scroll w-auto">
+          <div class="grid grid-cols-3 gap-4 text-center w-screen">
+            <div class="bg-cyan-50 p-4 rounded-2xl">
+              <div class="text-sm text-gray-600 font-semibold">Ronda actual</div>
+              <div class="text-2xl font-bold text-gray-800">{{ room()!.currentRound }}</div>
+            </div>
+            <div class="bg-yellow-50 p-4 rounded-2xl">
+              <div class="text-sm text-gray-600 font-semibold">Cartas cantadas</div>
+              <div class="text-2xl font-bold text-gray-800">{{ room()!.currentIndex + 1 }}/54</div>
+            </div>
+            <div class="bg-purple-50 p-4 rounded-2xl">
+              <div class="text-sm text-gray-600 font-semibold">Estado</div>
+              <div class="text-2xl font-bold text-gray-800">{{ getRoomStateLabel(room()!.state) }}</div>
+            </div>
+          </div>
+        </div>
+    </div>
+
+      <!-- Iconos de acción -->
+      <div class="bg-white p-4 rounded-lg shadow-md">
+        <div class="flex justify-center gap-3">
+          <!-- TODO: Implementar copyInviteLink -->
+          <button
+            disabled
+            class="flex flex-col items-center gap-1 cursor-not-allowed">
+            <div class="w-14 h-14 bg-gray-200 rounded-lg flex items-center justify-center text-2xl">
+              🔗
+            </div>
+            <span class="text-[9px] text-gray-400 font-semibold">Compartir Link</span>
+          </button>
+          <!-- TODO: Implementar showQR -->
+          <button
+            disabled
+            class="flex flex-col items-center gap-1 cursor-not-allowed">
+            <div class="w-14 h-14 bg-gray-200 rounded-lg flex items-center justify-center text-2xl">
+              📱
+            </div>
+            <span class="text-[9px] text-gray-400 font-semibold">Compartir QR</span>
+          </button>
+          <button
+            (click)="openViewerView()"
+            class="flex flex-col items-center gap-1">
+            <div class="w-14 h-14 bg-indigo-600 text-white rounded-lg flex items-center justify-center text-2xl hover:bg-indigo-700 transition shadow-md">
+              👁️
+            </div>
+            <span class="text-[9px] text-indigo-600 font-semibold">Vista de visitante</span>
+          </button>
+          <!-- TODO: Implementar historial de cartas -->
+          <button
+            disabled
+            class="flex flex-col items-center gap-1 cursor-not-allowed">
+            <div class="w-14 h-14 bg-gray-200 rounded-lg flex items-center justify-center text-2xl">
+              📜
+            </div>
+            <span class="text-[9px] text-gray-400 font-semibold">Historial de cartas</span>
+          </button>
+          <button
+            *ngIf="isRoomActive(room()!.state)"
+            (click)="finishRound()"
+            class="flex flex-col items-center gap-1">
+            <div class="w-14 h-14 bg-white border-2 border-red-500 rounded-lg flex items-center justify-center text-2xl hover:bg-red-50 transition shadow-md text-red-600">
+              ⏹️
+            </div>
+            <span class="text-[9px] text-red-600 font-semibold">Finalizar Ronda</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Carta Actual -->
+      <div class="p-6">
+        <div id="current-card" class="flex justify-center mb-4">
+          <app-card
+            *ngIf="currentCard()"
+            [card]="currentCard()!"
+            [size]="'large'"
+            [showVerso]="true"></app-card>
+          <div *ngIf="!currentCard()" class="w-40 h-50 bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg border-4 border-gray-200 flex flex-col items-center justify-center shadow-inner">
+            <div class="text-5xl text-gray-800 font-bold mb-2">?</div>
+            <div class="text-gray-400 font-semibold tracking-widest text-xs">ESPERANDO…</div>
+          </div>
+        </div>
+
+          <div class="bg-indigo-50 rounded-lg p-4 mb-6">
+            <p class="text-[10px] uppercase font-bold text-indigo-400 mb-1 text-center tracking-widest">Sugerencia para la próxima</p>
+            <p class="text-indigo-700 italic font-semibold text-center text-lg">{{ nextVersoSuggestion() }}</p>
+          </div>
+
+        <div class="flex justify-center">
+          <button
+            *ngIf="isRoomWaiting(room()!.state)"
+            (click)="startRound()"
+            class="bg-indigo-600 text-white px-8 py-3 rounded-lg font-bold hover:bg-indigo-700 transition shadow-md">
+            Iniciar Ronda
+          </button>
+          <button
+            *ngIf="isRoomActive(room()!.state)"
+            (click)="nextCard()"
+            class="bg-indigo-600 text-white px-8 py-3 rounded-lg font-bold hover:bg-indigo-700 transition shadow-md">
+            ➡️ Siguiente carta
+          </button>
+        </div>
+
+      </div>
+
+      <!-- Próxima carta -->
+      <div class="bg-gray-800 text-white p-6 rounded-lg shadow-md">
+        <p class="text-gray-400 text-xs uppercase font-bold mb-4 tracking-wider">PRÓXIMA CARTA (SÓLO TÚ VES)</p>
+        <div class="flex items-center gap-4">
+          <div class="w-20 h-28 bg-gray-700 rounded-lg flex items-center justify-center text-4xl shadow-md">
+            {{ nextCardPreview()?.emoji || '?' }}
+          </div>
+          <div class="flex-1">
+            <p class="font-bold text-white text-base mb-1">{{ nextCardPreview()?.name || '???' }}</p>
+            <p class="text-[10px] text-gray-400 uppercase tracking-widest">SUGERENCIA PARA CANTAR</p>
+            <p class="text-indigo-400 italic mt-2">{{ nextVersoSuggestion() }}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Jugadores -->
+      <div class="bg-white p-6 rounded-lg shadow-md">
+        <h4 class="font-bold mb-4 text-gray-700 flex items-center gap-2 text-base">👥 Jugadores</h4>
+        <div *ngIf="players().length === 0" class="text-gray-400 text-sm italic">Sin jugadores</div>
+        <div *ngIf="players().length > 0" class="space-y-2">
+          <div *ngFor="let p of players()" class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+            <div class="min-w-0">
+              <div class="font-semibold text-gray-800 text-sm truncate">{{ p.displayName }}</div>
+              <div class="text-xs text-gray-500">{{ getMarkerEmoji(p.marker) }}</div>
+            </div>
+            <button
+              (click)="reviewParticipant(p)"
+              class="bg-indigo-600 text-white px-3 py-2 rounded-lg text-lg hover:bg-indigo-700 shadow-md">
+              👁️
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Verificación -->
+      <div class="bg-white p-6 rounded-lg shadow-md">
+        <h4 class="font-bold mb-4 text-gray-700 flex items-center gap-2 text-base">✅ Verificación</h4>
+
+        <div *ngIf="pendingWinners().length === 0" class="text-gray-400 text-sm italic">
+          Sin solicitudes
+        </div>
+
+        <div *ngIf="pendingWinners().length > 0" class="space-y-3">
+          <div
+            *ngFor="let p of pendingWinners()"
+            class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+            <div>
+              <p class="font-bold text-sm text-gray-800">{{ p.displayName }}</p>
+              <p class="text-xs text-gray-500">Gritó ¡Lotería!</p>
+            </div>
+            <button
+              (click)="reviewParticipant(p)"
+              class="bg-indigo-600 text-white px-3 py-2 rounded-lg text-xs font-bold hover:bg-indigo-700 shadow-md">
+              ✏️ Revisar
+            </button>
           </div>
         </div>
       </div>
@@ -292,7 +616,7 @@
 <div
   *ngIf="isReviewModalOpen()"
   class="fixed inset-0 bg-gray-900/80 backdrop-blur-sm z-50 flex items-start justify-center p-4 overflow-y-auto">
-  <div class="bg-white w-full max-w-3xl rounded-2xl p-6 shadow-2xl flex flex-col max-h-[90vh]">
+  <div class="bg-white w-full max-w-3xl rounded-lg p-6 shadow-md flex flex-col max-h-[90vh]">
     <div class="flex justify-between items-start gap-4">
       <div>
         <h3 class="text-xl font-bold text-gray-900">
@@ -308,7 +632,7 @@
         Este jugador todavía no tiene tabla registrada.
       </div>
 
-      <div *ngIf="reviewingParticipant()!.tablaCards?.length" class="bg-gray-50 p-4 rounded-xl border border-gray-200 overflow-auto">
+      <div *ngIf="reviewingParticipant()!.tablaCards?.length" class="bg-gray-50 p-4 rounded-lg border border-gray-200 overflow-auto">
         <app-tabla
           [tablaCards]="reviewingParticipant()!.tablaCards || []"
           [marks]="reviewingParticipant()!.marks || []"

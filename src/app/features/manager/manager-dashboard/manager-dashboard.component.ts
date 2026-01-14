@@ -4,6 +4,13 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { CARDS, MARKERS } from '../../../core/constants/game-data';
 import {
+  getRoomStateColors,
+  getRoomStateLabel,
+  isRoomActive,
+  isRoomWaiting,
+  ROOM_STATES,
+} from '../../../core/constants/room-states';
+import {
   Participant,
   Room,
   RoomConfig,
@@ -47,7 +54,7 @@ export class ManagerDashboardComponent {
   });
   nextVersoSuggestion = computed(() => {
     const r = this.room();
-    if (!r || r.state === 'waiting') return '"Presiona Iniciar para barajar"';
+    if (!r || isRoomWaiting(r.state)) return '"Presiona Iniciar para barajar"';
     const next = this.nextCardPreview();
     return next?.verso ? `"${next.verso}"` : '"..."';
   });
@@ -74,6 +81,13 @@ export class ManagerDashboardComponent {
   roomName = '';
   maxRounds = 10;
   difficulty: 'easy' | 'medium' | 'hard' = 'easy';
+
+  // Helpers para el template
+  readonly ROOM_STATES = ROOM_STATES;
+  readonly getRoomStateLabel = getRoomStateLabel;
+  readonly getRoomStateColors = getRoomStateColors;
+  readonly isRoomActive = isRoomActive;
+  readonly isRoomWaiting = isRoomWaiting;
 
   constructor() {
     // Effect para detectar cambios en la autenticación

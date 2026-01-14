@@ -17,11 +17,6 @@
       {{ card.name }}
     </div>
     
-    <!-- Verso (optional) -->
-    <div *ngIf="showVerso" class="card-verso text-white text-xs text-center mt-2 italic opacity-90">
-      "{{ card.verso }}"
-    </div>
-    
     <!-- Marker overlay (when marked) -->
     <div *ngIf="isMarked && markerEmoji" 
          class="marker-overlay absolute inset-0 flex items-center justify-center bg-black bg-opacity-30">

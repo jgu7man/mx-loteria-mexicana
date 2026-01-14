@@ -14,6 +14,7 @@ import {
   where,
 } from '@angular/fire/firestore';
 import { Observable } from 'rxjs';
+import { ROOM_STATES } from '../constants/room-states';
 import {
   Participant,
   Room,
@@ -51,7 +52,7 @@ export class RoomService {
         name: roomName,
         managerId,
         managerName,
-        state: 'waiting',
+        state: ROOM_STATES.WAITING,
         config,
         deck: [],
         currentIndex: -1,
@@ -161,7 +162,7 @@ export class RoomService {
         deck: newDeck,
         currentIndex: -1,
         currentRound: newRound,
-        state: 'playing',
+        state: ROOM_STATES.PLAYING,
         currentRoundWinners: [],
         currentRoundVerifiedWinners: [],
         startedAt: room.currentRound === 0 ? serverTimestamp() : room.startedAt,
@@ -210,7 +211,7 @@ export class RoomService {
 
       await updateDoc(roomRef, {
         currentRoundWinners: updatedWinners,
-        state: 'verifying',
+        state: ROOM_STATES.VERIFYING,
       });
     } catch (error) {
       console.error('Error adding winner:', error);
@@ -240,7 +241,7 @@ export class RoomService {
 
       await updateDoc(roomRef, {
         roundHistory: this.serializeRoundHistory(updatedHistory),
-        state: isLastRound ? 'finished' : 'waiting',
+        state: isLastRound ? ROOM_STATES.FINISHED : ROOM_STATES.WAITING,
         currentRoundWinners: [],
         currentRoundVerifiedWinners: [],
         finishedAt: isLastRound ? serverTimestamp() : undefined,
@@ -275,7 +276,7 @@ export class RoomService {
       await updateDoc(roomRef, {
         currentRoundVerifiedWinners: this.serializeRoundWinners(verified),
         currentRoundWinners: pending,
-        state: pending.length > 0 ? 'verifying' : 'playing',
+        state: pending.length > 0 ? ROOM_STATES.VERIFYING : ROOM_STATES.PLAYING,
       });
     } catch (error) {
       console.error('Error approving winner:', error);
