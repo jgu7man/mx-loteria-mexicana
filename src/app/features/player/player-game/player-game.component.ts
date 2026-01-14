@@ -428,9 +428,26 @@ export class PlayerGameComponent implements OnInit {
         tabla: this.myTabla().length ? this.myTabla() : null,
         marks: this.myMarks(),
       });
+      
+      // Actualizar marcador en Firestore
+      this.roomService.updateParticipant(this.roomId, this.currentUser()!.uid, {
+        marker: marker.id,
+      });
     }
     this.showMarkerSelector.set(false);
-    this.showTablaSelector.set(true);
+    
+    // Solo mostrar selector de tabla si NO existe tabla previa
+    if (this.myTabla().length === 0) {
+      this.showTablaSelector.set(true);
+    }
+  }
+
+  cancelMarkerSelection() {
+    this.showMarkerSelector.set(false);
+  }
+
+  cancelTablaSelection() {
+    this.showTablaSelector.set(false);
   }
 
   getCardsByIds(cardIds: number[]): any[] {

@@ -1,6 +1,5 @@
 .marker-option {
   border: 3px solid transparent;
-  min-width: 150px;
 }
 
 .marker-option:hover {
@@ -8,7 +7,7 @@
 }
 
 .marker-option.selected {
-  border-color: #10B981;
+  border-color: #10b981;
   box-shadow: 0 0 20px rgba(16, 185, 129, 0.5);
 }
 
@@ -17,7 +16,8 @@
 }
 
 @keyframes bounce {
-  0%, 100% {
+  0%,
+  100% {
     transform: translateY(0);
   }
   50% {

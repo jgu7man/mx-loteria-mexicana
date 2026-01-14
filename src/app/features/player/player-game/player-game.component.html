@@ -46,12 +46,26 @@
   <!-- Marker selector -->
   <div *ngIf="showMarkerSelector()" class="max-w-2xl mx-auto">
     <div class="bg-white rounded-2xl shadow-2xl p-8">
+      <div *ngIf="selectedMarker() || myTabla().length > 0" class="mb-4">
+        <button
+          (click)="cancelMarkerSelection()"
+          class="bg-gray-200 text-gray-700 px-6 py-3 rounded-lg font-semibold hover:bg-gray-300 transition">
+          ← Cancelar
+        </button>
+      </div>
       <app-marker (markerSelected)="onMarkerSelected($event)"></app-marker>
     </div>
   </div>
   <!-- Tabla selector -->
   <div *ngIf="showTablaSelector()" class="max-w-6xl mx-auto">
     <div class="bg-white rounded-2xl shadow-2xl p-8">
+      <div *ngIf="myTabla().length > 0" class="mb-4">
+        <button
+          (click)="cancelTablaSelection()"
+          class="bg-gray-200 text-gray-700 px-6 py-3 rounded-lg font-semibold hover:bg-gray-300 transition">
+          ← Cancelar
+        </button>
+      </div>
       <h2 class="text-2xl font-bold text-gray-800 mb-6">Selecciona tu Tabla</h2>
       <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
         <button *ngFor="let tabla of availableTablas(); let i = index" (click)="selectTabla(tabla)"
@@ -90,7 +104,8 @@
           </div>
         </div>
         <!-- Historial de cartas -->
-        <div class="grid grid-cols-2 gap-2">
+        <h3 class="text-center text-gray-800 font-bold mb-2 text-sm uppercase">Historial</h3>
+        <div class="flex gap-3">
           <div *ngFor="let card of historyCards().slice(0, 2); let i = index"
                class="bg-blue-100 rounded-xl border-2 border-blue-200 overflow-hidden">
             <app-card [card]="card" [size]="'small'" [showVerso]="false"></app-card>
@@ -147,12 +162,8 @@
             <!-- Historial de cartas -->
             <div class="space-y-2">
               <div *ngFor="let card of historyCards().slice(0, 3)"
-                   class="bg-blue-100 rounded-xl border-2 border-blue-200 overflow-hidden">
+                   class="overflow-hidden">
                 <app-card [card]="card" [size]="'small'" [showVerso]="false"></app-card>
-              </div>
-              <!-- Placeholders si hay menos de 3 cartas -->
-              <div *ngFor="let _ of [].constructor(Math.max(0, 3 - historyCards().length))"
-                   class="bg-blue-200/50 rounded-xl aspect-[4/5] flex items-center justify-center text-gray-400 text-xs">
               </div>
             </div>
           </div>
@@ -186,14 +197,10 @@
           </div>
         </div>
         <!-- Historial de cartas -->
-        <div class="col-span-3 grid grid-cols-3 gap-2">
+        <div class="col-span-3 flex gap-3 overflow-x-auto pb-2">
           <div *ngFor="let card of historyCards().slice(0, 3)"
-               class="bg-blue-100 rounded-lg border-2 border-blue-200 overflow-hidden">
+               class=" overflow-hidden">
             <app-card [card]="card" [size]="'small'" [showVerso]="false"></app-card>
-          </div>
-          <!-- Placeholders si hay menos de 3 cartas -->
-          <div *ngFor="let _ of [].constructor(Math.max(0, 3 - historyCards().length))"
-               class="bg-blue-200/50 rounded-lg aspect-[4/5] flex items-center justify-center text-gray-400 text-xs">
           </div>
         </div>
       </div>
