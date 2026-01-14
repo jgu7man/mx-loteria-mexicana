@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, computed, effect, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import Swal from 'sweetalert2';
 import { CARDS, MARKERS } from '../../../core/constants/game-data';
 import {
   getRoomStateColors,
@@ -180,7 +181,12 @@ export class ManagerDashboardComponent {
       await this.authService.signInWithGoogle();
     } catch (error) {
       console.error('Error signing in:', error);
-      alert('Error al iniciar sesión');
+      Swal.fire({
+        icon: 'error',
+        title: 'Error al iniciar sesión',
+        text: 'No se pudo iniciar sesión con Google',
+        confirmButtonColor: '#6366f1',
+      });
     }
   }
 
@@ -190,7 +196,12 @@ export class ManagerDashboardComponent {
 
   async createRoom() {
     if (!this.currentUser()?.uid || !this.roomName.trim()) {
-      alert('Por favor completa todos los campos');
+      Swal.fire({
+        icon: 'warning',
+        title: 'Campos incompletos',
+        text: 'Por favor completa todos los campos',
+        confirmButtonColor: '#6366f1',
+      });
       return;
     }
 
@@ -223,10 +234,20 @@ export class ManagerDashboardComponent {
 
       this.showCreateForm.set(false);
       this.loadManagerRooms(); // Recargar la lista de salas
-      alert(`¡Sala creada! ID: ${roomId}`);
+      Swal.fire({
+        icon: 'success',
+        title: '¡Sala creada!',
+        html: `<p class="text-gray-600">ID de la sala:</p><p class="text-2xl font-bold text-indigo-600">${roomId}</p>`,
+        confirmButtonColor: '#6366f1',
+      });
     } catch (error) {
       console.error('Error creating room:', error);
-      alert('Error al crear la sala');
+      Swal.fire({
+        icon: 'error',
+        title: 'Error al crear la sala',
+        text: 'No se pudo crear la sala. Intenta nuevamente.',
+        confirmButtonColor: '#6366f1',
+      });
     }
   }
 
@@ -236,10 +257,20 @@ export class ManagerDashboardComponent {
 
     try {
       await this.roomService.startNewRound(currentRoom.id);
-      alert('¡Ronda iniciada!');
+      Swal.fire({
+        icon: 'success',
+        title: '¡Ronda iniciada!',
+        text: 'Las cartas han sido barajadas',
+        timer: 2000,
+        showConfirmButton: false,
+      });
     } catch (error) {
       console.error('Error starting round:', error);
-      alert('Error al iniciar la ronda');
+      Swal.fire({
+        icon: 'error',
+        title: 'Error al iniciar la ronda',
+        confirmButtonColor: '#6366f1',
+      });
     }
   }
 
@@ -251,7 +282,11 @@ export class ManagerDashboardComponent {
       await this.roomService.nextCard(currentRoom.id);
     } catch (error) {
       console.error('Error advancing card:', error);
-      alert('Error al avanzar carta');
+      Swal.fire({
+        icon: 'error',
+        title: 'Error al avanzar carta',
+        confirmButtonColor: '#6366f1',
+      });
     }
   }
 
@@ -285,10 +320,20 @@ export class ManagerDashboardComponent {
     try {
       await this.roomService.approveWinner(currentRoom.id, winner);
       this.clearReview();
-      alert('Ganador registrado (sin finalizar la ronda).');
+      Swal.fire({
+        icon: 'success',
+        title: '¡Ganador registrado!',
+        text: 'La ronda continúa',
+        timer: 2000,
+        showConfirmButton: false,
+      });
     } catch (error) {
       console.error('Error approving winner:', error);
-      alert('Error al aprobar el ganador');
+      Swal.fire({
+        icon: 'error',
+        title: 'Error al aprobar el ganador',
+        confirmButtonColor: '#6366f1',
+      });
     }
   }
 
@@ -307,10 +352,19 @@ export class ManagerDashboardComponent {
         currentRoom.currentRoundVerifiedWinners || []
       );
       this.clearReview();
-      alert('¡Ronda finalizada!');
+      Swal.fire({
+        icon: 'success',
+        title: '¡Ronda finalizada!',
+        text: 'Los ganadores han sido registrados',
+        confirmButtonColor: '#6366f1',
+      });
     } catch (error) {
       console.error('Error finishing round:', error);
-      alert('Error al finalizar la ronda');
+      Swal.fire({
+        icon: 'error',
+        title: 'Error al finalizar la ronda',
+        confirmButtonColor: '#6366f1',
+      });
     }
   }
 
@@ -325,20 +379,37 @@ export class ManagerDashboardComponent {
     const currentRoom = this.room();
     if (!currentRoom) return;
 
-    if (
-      confirm(
-        '¿Estás seguro de que quieres eliminar esta sala? Esta acción no se puede deshacer.'
-      )
-    ) {
+    const result = await Swal.fire({
+      icon: 'warning',
+      title: '¿Eliminar sala?',
+      text: 'Esta acción no se puede deshacer',
+      showCancelButton: true,
+      confirmButtonColor: '#dc2626',
+      cancelButtonColor: '#6b7280',
+      confirmButtonText: 'Sí, eliminar',
+      cancelButtonText: 'Cancelar',
+    });
+
+    if (result.isConfirmed) {
       try {
         await this.roomService.deleteRoom(currentRoom.id);
         localStorage.removeItem('activeManagerRoom');
         this.room.set(null);
         this.loadManagerRooms(); // Recargar la lista de salas
-        alert('Sala eliminada correctamente');
+        Swal.fire({
+          icon: 'success',
+          title: 'Sala eliminada',
+          text: 'La sala ha sido eliminada correctamente',
+          timer: 2000,
+          showConfirmButton: false,
+        });
       } catch (error) {
         console.error('Error deleting room:', error);
-        alert('Error al eliminar la sala');
+        Swal.fire({
+          icon: 'error',
+          title: 'Error al eliminar la sala',
+          confirmButtonColor: '#6366f1',
+        });
       }
     }
   }

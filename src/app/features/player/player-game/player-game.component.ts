@@ -11,6 +11,7 @@ import {
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
+import Swal from 'sweetalert2';
 import { CARDS, MARKERS } from '../../../core/constants/game-data';
 import { Marker, Participant, Room } from '../../../core/models/game.model';
 import { AuthService } from '../../../core/services/auth.service';
@@ -329,7 +330,12 @@ export class PlayerGameComponent implements OnInit {
 
   async signInAnonymously() {
     if (!this.displayName.trim() || !this.roomId.trim()) {
-      alert('Por favor completa todos los campos');
+      Swal.fire({
+        icon: 'warning',
+        title: 'Campos incompletos',
+        text: 'Por favor completa todos los campos',
+        confirmButtonColor: '#10b981',
+      });
       return;
     }
 
@@ -344,18 +350,31 @@ export class PlayerGameComponent implements OnInit {
       console.error('Error joining room:', error);
 
       if (error.code === 'auth/admin-restricted-operation') {
-        alert(
-          'La autenticación anónima no está habilitada. Por favor, usa "Entrar con Google" o contacta al administrador.'
-        );
+        Swal.fire({
+          icon: 'error',
+          title: 'Autenticación deshabilitada',
+          text: 'La autenticación anónima no está habilitada. Por favor, usa "Entrar con Google"',
+          confirmButtonColor: '#10b981',
+        });
       } else {
-        alert('Error al unirse a la sala: ' + (error.message || error));
+        Swal.fire({
+          icon: 'error',
+          title: 'Error al unirse',
+          text: error.message || 'No se pudo unirse a la sala',
+          confirmButtonColor: '#10b981',
+        });
       }
     }
   }
 
   async signInWithGoogle() {
     if (!this.roomId.trim()) {
-      alert('Por favor ingresa el código de la sala');
+      Swal.fire({
+        icon: 'warning',
+        title: 'Código requerido',
+        text: 'Por favor ingresa el código de la sala',
+        confirmButtonColor: '#10b981',
+      });
       return;
     }
 
@@ -367,7 +386,12 @@ export class PlayerGameComponent implements OnInit {
       await this.joinRoom();
     } catch (error: any) {
       console.error('Error joining room:', error);
-      alert('Error al unirse a la sala: ' + (error.message || error));
+      Swal.fire({
+        icon: 'error',
+        title: 'Error al unirse',
+        text: error.message || 'No se pudo unirse a la sala',
+        confirmButtonColor: '#10b981',
+      });
     }
   }
 
@@ -375,7 +399,12 @@ export class PlayerGameComponent implements OnInit {
     // Check if room exists
     const room = await this.roomService.getRoom(this.roomId);
     if (!room) {
-      alert('Sala no encontrada');
+      Swal.fire({
+        icon: 'error',
+        title: 'Sala no encontrada',
+        text: 'Verifica el código e inténtalo nuevamente',
+        confirmButtonColor: '#10b981',
+      });
       return;
     }
 
@@ -428,14 +457,14 @@ export class PlayerGameComponent implements OnInit {
         tabla: this.myTabla().length ? this.myTabla() : null,
         marks: this.myMarks(),
       });
-      
+
       // Actualizar marcador en Firestore
       this.roomService.updateParticipant(this.roomId, this.currentUser()!.uid, {
         marker: marker.id,
       });
     }
     this.showMarkerSelector.set(false);
-    
+
     // Solo mostrar selector de tabla si NO existe tabla previa
     if (this.myTabla().length === 0) {
       this.showTablaSelector.set(true);
@@ -500,10 +529,20 @@ export class PlayerGameComponent implements OnInit {
       }
 
       await this.roomService.addWinner(this.roomId, this.currentUser()!.uid);
-      alert('¡Solicitud enviada! El gritón verificará tu tabla.');
+      Swal.fire({
+        icon: 'success',
+        title: '¡Solicitud enviada!',
+        text: 'El gritón verificará tu tabla',
+        confirmButtonColor: '#10b981',
+      });
     } catch (error: any) {
       console.error('Error shouting lotería:', error);
-      alert('No se pudo enviar la solicitud: ' + (error.message || error));
+      Swal.fire({
+        icon: 'error',
+        title: 'No se pudo enviar',
+        text: error.message || 'Intenta nuevamente',
+        confirmButtonColor: '#10b981',
+      });
     }
   }
 
