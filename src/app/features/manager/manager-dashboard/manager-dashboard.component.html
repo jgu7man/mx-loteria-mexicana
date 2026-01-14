@@ -1,4 +1,13 @@
 <div class="manager-container min-h-screen bg-gray-50 p-8">
+  <!-- Podium overlay -->
+  <app-podium
+    *ngIf="showPodium()"
+    [winners]="currentRoundWinners()"
+    [roundNumber]="room()?.currentRound || 0"
+    [maxRounds]="room()?.config?.maxRounds || 0"
+    [isLastRound]="room()?.state === 'finished'">
+  </app-podium>
+
   <!-- Header -->
   <header class="flex justify-between items-center mb-2 p-2">
     <h1 class="text-2xl font-bold text-gray-800 flex items-center gap-3">
@@ -147,16 +156,14 @@
             </div>
           </div>
         </div>
-        <!-- TODO: Implementar copyInviteLink -->
         <button
-          disabled
-          class="w-full bg-gray-300 text-gray-500 px-4 py-3 rounded-lg font-semibold cursor-not-allowed transition text-sm">
+          (click)="copyInviteLink()"
+          class="w-full bg-green-600 text-white px-4 py-3 rounded-lg font-semibold hover:bg-green-700 transition text-sm shadow-md">
           🔗 Compartir Link
         </button>
-        <!-- TODO: Implementar showQR -->
         <button
-          disabled
-          class="w-full bg-gray-300 text-gray-500 px-4 py-3 rounded-lg font-semibold cursor-not-allowed transition text-sm">
+          (click)="showQRCode()"
+          class="w-full bg-blue-600 text-white px-4 py-3 rounded-lg font-semibold hover:bg-blue-700 transition text-sm shadow-md">
           📱 Compartir QR
         </button>
         <button
@@ -164,10 +171,9 @@
           class="w-full bg-indigo-600 text-white px-4 py-3 rounded-lg font-semibold hover:bg-indigo-700 transition text-sm shadow-md">
           👁️ Vista de visitante
         </button>
-        <!-- TODO: Implementar historial de cartas -->
         <button
-          disabled
-          class="w-full bg-gray-300 text-gray-500 px-4 py-3 rounded-lg font-semibold cursor-not-allowed transition text-sm">
+          (click)="showCardHistory()"
+          class="w-full bg-purple-600 text-white px-4 py-3 rounded-lg font-semibold hover:bg-purple-700 transition text-sm shadow-md">
           📜 Historial de cartas
         </button>
         <button
@@ -403,16 +409,14 @@
 
         <!-- Botones -->
         <div class="space-y-3">
-          <!-- TODO: Implementar copyInviteLink -->
           <button
-            disabled
-            class="w-full bg-gray-300 text-gray-500 px-4 py-3 rounded-lg font-semibold cursor-not-allowed transition text-sm">
+            (click)="copyInviteLink()"
+            class="w-full bg-green-600 text-white px-4 py-3 rounded-lg font-semibold hover:bg-green-700 transition text-sm shadow-md">
             🔗 Compartir Link
           </button>
-          <!-- TODO: Implementar showQR -->
           <button
-            disabled
-            class="w-full bg-gray-300 text-gray-500 px-4 py-3 rounded-lg font-semibold cursor-not-allowed transition text-sm">
+            (click)="showQRCode()"
+            class="w-full bg-blue-600 text-white px-4 py-3 rounded-lg font-semibold hover:bg-blue-700 transition text-sm shadow-md">
             📱 Compartir QR
           </button>
           <button
@@ -420,10 +424,9 @@
             class="w-full bg-indigo-600 text-white px-4 py-3 rounded-lg font-semibold hover:bg-indigo-700 transition text-sm shadow-md">
             👁️ Vista de visitante
           </button>
-          <!-- TODO: Implementar historial de cartas -->
           <button
-            disabled
-            class="w-full bg-gray-300 text-gray-500 px-4 py-3 rounded-lg font-semibold cursor-not-allowed transition text-sm">
+            (click)="showCardHistory()"
+            class="w-full bg-purple-600 text-white px-4 py-3 rounded-lg font-semibold hover:bg-purple-700 transition text-sm shadow-md">
             📜 Historial de cartas
           </button>
           <button
@@ -467,23 +470,21 @@
       <!-- Iconos de acción -->
       <div class="bg-white p-4 rounded-lg shadow-md">
         <div class="flex justify-center gap-3">
-          <!-- TODO: Implementar copyInviteLink -->
           <button
-            disabled
-            class="flex flex-col items-center gap-1 cursor-not-allowed">
-            <div class="w-14 h-14 bg-gray-200 rounded-lg flex items-center justify-center text-2xl">
+            (click)="copyInviteLink()"
+            class="flex flex-col items-center gap-1">
+            <div class="w-14 h-14 bg-green-600 text-white rounded-lg flex items-center justify-center text-2xl hover:bg-green-700 transition shadow-md">
               🔗
             </div>
-            <span class="text-[9px] text-gray-400 font-semibold">Compartir Link</span>
+            <span class="text-[9px] text-green-600 font-semibold">Compartir Link</span>
           </button>
-          <!-- TODO: Implementar showQR -->
           <button
-            disabled
-            class="flex flex-col items-center gap-1 cursor-not-allowed">
-            <div class="w-14 h-14 bg-gray-200 rounded-lg flex items-center justify-center text-2xl">
+            (click)="showQRCode()"
+            class="flex flex-col items-center gap-1">
+            <div class="w-14 h-14 bg-blue-600 text-white rounded-lg flex items-center justify-center text-2xl hover:bg-blue-700 transition shadow-md">
               📱
             </div>
-            <span class="text-[9px] text-gray-400 font-semibold">Compartir QR</span>
+            <span class="text-[9px] text-blue-600 font-semibold">Compartir QR</span>
           </button>
           <button
             (click)="openViewerView()"
@@ -493,14 +494,13 @@
             </div>
             <span class="text-[9px] text-indigo-600 font-semibold">Vista de visitante</span>
           </button>
-          <!-- TODO: Implementar historial de cartas -->
           <button
-            disabled
-            class="flex flex-col items-center gap-1 cursor-not-allowed">
-            <div class="w-14 h-14 bg-gray-200 rounded-lg flex items-center justify-center text-2xl">
+            (click)="showCardHistory()"
+            class="flex flex-col items-center gap-1">
+            <div class="w-14 h-14 bg-purple-600 text-white rounded-lg flex items-center justify-center text-2xl hover:bg-purple-700 transition shadow-md">
               📜
             </div>
-            <span class="text-[9px] text-gray-400 font-semibold">Historial de cartas</span>
+            <span class="text-[9px] text-purple-600 font-semibold">Historial de cartas</span>
           </button>
           <button
             *ngIf="isRoomActive(room()!.state)"

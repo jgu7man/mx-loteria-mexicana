@@ -1,5 +1,15 @@
 <div
      class="player-container min-h-screen bg-gradient-to-br from-green-600 to-teal-700 p-4 md:p-6 xl:p-8">
+  
+  <!-- Podium overlay -->
+  <app-podium
+    *ngIf="showPodium()"
+    [winners]="currentRoundWinners()"
+    [roundNumber]="room()?.currentRound || 0"
+    [maxRounds]="room()?.config?.maxRounds || 0"
+    [isLastRound]="room()?.state === 'finished'">
+  </app-podium>
+
   <!-- Join form -->
   <div *ngIf="showJoinForm()" class="max-w-md mx-auto">
     <div class="bg-white rounded-2xl shadow-2xl p-8">
@@ -86,17 +96,28 @@
   </div>
   <!-- Game view -->
   <div *ngIf="!showJoinForm() && !showMarkerSelector() && !showTablaSelector()" class="relative">
-    <!-- Botón Abandonar (siempre visible) -->
+    <!-- Header con info de la sala -->
+    <div class="bg-white/90 backdrop-blur-sm shadow-lg p-3 mb-3 rounded-lg">
+      <div class="flex justify-between items-center">
+        <div class="flex-1">
+          <div class="text-xs text-gray-600 font-semibold">Sala: {{ roomId }}</div>
+          <div class="text-sm font-bold text-gray-800">Ronda {{ room()?.currentRound || 0 }} / {{ room()?.config?.maxRounds || 0 }}</div>
+        </div>
+        <button (click)="goHome()"
+                class="bg-red-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-red-700 transition text-sm">
+          ABANDONAR
+        </button>
+      </div>
+    </div>
+
+    <!-- Botón Abandonar (siempre visible) - OCULTO EN XL porque está en el header -->
     <button (click)="goHome()"
-            class="xl:hidden absolute top-0 left-0 z-10 bg-red-600 text-white px-4 py-2 md:px-6 md:py-3 rounded-lg font-semibold hover:bg-red-700 transition text-sm md:text-base">
+            class="xl:hidden absolute top-0 left-0 z-10 bg-red-600 text-white px-4 py-2 md:px-6 md:py-3 rounded-lg font-semibold hover:bg-red-700 transition text-sm md:text-base hidden">
       ABANDONAR </button>
     <!-- DESKTOP LAYOUT (xl) -->
     <div class="hidden xl:grid xl:grid-cols-12 gap-6 pt-0">
       <!-- Left column: Carta Actual + placeholders -->
       <div class="xl:col-span-3 space-y-4">
-        <button (click)="goHome()"
-                class="top-0 left-0 z-10 bg-red-600 text-white px-4 py-2 md:px-6 md:py-3 rounded-lg font-semibold hover:bg-red-700 transition text-sm md:text-base">
-          ABANDONAR </button>
         <div *ngIf="currentCard()" class="rounded-2xl p-4">
           <h3 class="text-center text-gray-800 font-bold mb-2 text-sm uppercase">Carta Actual</h3>
           <div class="flex justify-center">
@@ -139,7 +160,7 @@
       </div>
     </div>
     <!-- TABLET LAYOUT (md) -->
-    <div class="hidden md:block xl:hidden pt-16">
+    <div class="hidden md:block xl:hidden">
       <div class="space-y-4">
         <div class="grid grid-cols-4 gap-4">
           <!-- Tabla (izquierda, 2 columnas) -->
@@ -185,7 +206,7 @@
       </div>
     </div>
     <!-- MOBILE LAYOUT (< md) -->
-    <div class="md:hidden pt-16 space-y-4">
+    <div class="md:hidden space-y-4">
       <!-- Top: Carta Actual + historial placeholders (horizontal) -->
       <div class="grid grid-cols-4 gap-2">
         <div *ngIf="currentCard()"
