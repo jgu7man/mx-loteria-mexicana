@@ -462,7 +462,7 @@ export class ManagerDashboardComponent {
     const historyCards = currentRoom.deck
       .slice(0, currentRoom.currentIndex + 1)
       .map((id) => CARDS.find((c) => c.id === id))
-      .filter((c): c is NonNullable<typeof c> => c !== undefined);
+      .filter((c): c is typeof CARDS[number] => c != null);
 
     if (historyCards.length === 0) {
       Swal.fire({

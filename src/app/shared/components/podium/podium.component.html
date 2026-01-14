@@ -48,7 +48,7 @@
               {{ winner.displayName }}
             </div>
             <div class="text-sm text-gray-600">
-              Tabla #{{ winner.tablaId + 1 }} • {{ winner.marks.length }} cartas marcadas
+              Tabla #{{ getTablaNumber(winner.tablaId) }} • {{ winner.marks.length }} cartas marcadas
             </div>
           </div>
 

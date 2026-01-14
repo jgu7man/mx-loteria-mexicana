@@ -14,4 +14,8 @@ export class PodiumComponent {
   @Input() roundNumber: number = 0;
   @Input() maxRounds: number = 0;
   @Input() isLastRound: boolean = false;
+
+  getTablaNumber(tablaId: number): number {
+    return tablaId + 1;
+  }
 }
