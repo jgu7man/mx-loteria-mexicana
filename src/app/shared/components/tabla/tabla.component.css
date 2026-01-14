@@ -1,0 +1,25 @@
+:host {
+  display: block;
+}
+
+.tabla-container {
+  display: block;
+  width: 100%;
+}
+
+.tabla-grid {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  container-type: inline-size;
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  padding: clamp(6px, 1.2cqw, 12px);
+  border-radius: clamp(10px, 2cqw, 16px);
+  gap: clamp(6px, 1.2cqw, 12px);
+  align-items: stretch;
+}
+
+.tabla-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

@@ -1,0 +1,24 @@
+<div class="marker-selector">
+  <h3 class="text-lg font-semibold mb-4 text-gray-800">Selecciona tu marcador:</h3>
+  
+  <div class="flex gap-4 justify-center">
+    <button
+      *ngFor="let marker of markers"
+      (click)="selectMarker(marker)"
+      class="marker-option relative p-6 rounded-xl shadow-lg transition-all duration-300 hover:scale-110 cursor-pointer"
+      [class.selected]="isSelected(marker)"
+      [style.background-color]="marker.color">
+      
+      <div class="marker-emoji text-6xl">{{ marker.emoji }}</div>
+      <div class="marker-name text-white font-bold mt-2 text-center drop-shadow-lg">
+        {{ marker.name }}
+      </div>
+      
+      <!-- Selected indicator -->
+      <div *ngIf="isSelected(marker)" 
+           class="selected-indicator absolute -top-2 -right-2 bg-green-500 rounded-full p-2">
+        <span class="text-white text-xl">✓</span>
+      </div>
+    </button>
+  </div>
+</div>

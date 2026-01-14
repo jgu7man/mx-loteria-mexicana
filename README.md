@@ -136,11 +136,26 @@ src/app/
 - **Marcadores**: Frijol, maíz, moneda
 - **Responsive**: Diseño adaptable para móviles y desktop
 
+## ✅ Estado de Implementación
+
+### Completado
+- ✅ Estructura core (constants, models, services)
+- ✅ 54 cartas con emojis y colores únicos
+- ✅ Servicios de autenticación (Google + Anónimo)
+- ✅ Servicio de salas con Firestore
+- ✅ Utilidades de juego (barajar, generar tablas, verificar patrones)
+- ✅ Componente Home (selección de rol)
+- ✅ Componente Manager (crear y controlar salas)
+- ✅ Componente Player (unirse, seleccionar marcador y tabla, jugar)
+- ✅ Componente Viewer (observar partidas)
+- ✅ Componentes compartidos (Card, Tabla, Marker)
+- ✅ Configuración de rutas
+- ✅ Build exitoso
+
 ## 📝 Próximos Pasos
 
-1. Implementar componentes de las features (home, manager, player, viewer)
-2. Crear componentes compartidos (carta, tabla, marcador)
-3. Agregar guards para protección de rutas
-4. Implementar pipes personalizados
-5. Agregar tests unitarios
-6. Deploy a Firebase Hosting
+1. Configurar credenciales de Firebase
+2. Agregar guards para protección de rutas
+3. Implementar pipes personalizados
+4. Agregar tests unitarios
+5. Deploy a Firebase Hosting

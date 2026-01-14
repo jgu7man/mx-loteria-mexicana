@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Lotería Cards Demo</title>
+    <style>
+        body {
+            font-family: system-ui, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 40px;
+            margin: 0;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        h1 {
+            text-align: center;
+            color: white;
+            font-size: 3em;
+            margin-bottom: 40px;
+        }
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 20px;
+        }
+        .card {
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            overflow: hidden;
+            transition: transform 0.3s;
+            cursor: pointer;
+        }
+        .card:hover {
+            transform: translateY(-8px);
+        }
+        .card-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            height: 180px;
+        }
+        .card-emoji {
+            font-size: 4em;
+            margin-bottom: 10px;
+        }
+        .card-name {
+            color: white;
+            font-weight: bold;
+            text-align: center;
+            font-size: 1.1em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        .card-verso {
+            color: white;
+            text-align: center;
+            font-size: 0.75em;
+            margin-top: 8px;
+            font-style: italic;
+            opacity: 0.9;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎲 Lotería Mexicana - Cartas 🎲</h1>
+        <div class="cards-grid" id="cardsGrid"></div>
+    </div>
+    
+    <script>
+        const colors = [
+            '#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A', '#98D8C8',
+            '#F7DC6F', '#BB8FCE', '#85C1E2', '#F8B739', '#52B788',
+            '#FFB4A2', '#E5989B', '#B5838D', '#6D6875', '#FFCDB2'
+        ];
+        
+        const cards = [
+            { id: 1, name: 'El Gallo', emoji: '🐓', verso: 'El que le cantó a San Pedro' },
+            { id: 2, name: 'El Diablito', emoji: '😈', verso: 'Portate bien cuatito' },
+            { id: 3, name: 'La Dama', emoji: '💃', verso: 'Puliendo el pasador' },
+            { id: 4, name: 'El Catrín', emoji: '🎩', verso: 'Don Ferruco en el alameda' },
+            { id: 5, name: 'El Paraguas', emoji: '☂️', verso: 'Para el sol y para el agua' },
+            { id: 6, name: 'La Sirena', emoji: '🧜‍♀️', verso: 'No te dejes llevar por ella' },
+            { id: 7, name: 'La Escalera', emoji: '🪜', verso: 'La que subió Don Ferruco' },
+            { id: 8, name: 'La Botella', emoji: '🍾', verso: 'La herramienta del borracho' },
+            { id: 9, name: 'El Barril', emoji: '🛢️', verso: 'Tanto bebió el albañil' },
+            { id: 10, name: 'El Árbol', emoji: '🌳', verso: 'El que a tu sombra se puso' },
+            { id: 11, name: 'El Melón', emoji: '🍉', verso: 'Me lo das o me lo quitas' },
+            { id: 12, name: 'El Valiente', emoji: '⚔️', verso: 'No le saco al compromiso' },
+            { id: 13, name: 'El Gorrito', emoji: '🧢', verso: 'De la Virgen de Zapopan' },
+            { id: 14, name: 'La Muerte', emoji: '💀', verso: 'La que a todos nos lleva' },
+            { id: 15, name: 'La Pera', emoji: '🍐', verso: 'El que espera desespera' },
+            { id: 16, name: 'La Bandera', emoji: '🇲🇽', verso: 'Verde blanco y colorado' }
+        ];
+        
+        function getRandomColor() {
+            return colors[Math.floor(Math.random() * colors.length)];
+        }
+        
+        const grid = document.getElementById('cardsGrid');
+        cards.forEach(card => {
+            const cardDiv = document.createElement('div');
+            cardDiv.className = 'card';
+            cardDiv.style.backgroundColor = getRandomColor();
+            cardDiv.innerHTML = `
+                <div class="card-content">
+                    <div class="card-emoji">${card.emoji}</div>
+                    <div class="card-name">${card.name}</div>
+                    <div class="card-verso">"${card.verso}"</div>
+                </div>
+            `;
+            grid.appendChild(cardDiv);
+        });
+    </script>
+</body>
+</html>
