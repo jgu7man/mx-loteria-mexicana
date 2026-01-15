@@ -24,6 +24,9 @@ import { RoomService } from '../../../core/services/room.service';
 import { CardComponent } from '../../../shared/components/card/card.component';
 import { PodiumComponent } from '../../../shared/components/podium/podium.component';
 import { TablaComponent } from '../../../shared/components/tabla/tabla.component';
+import { ManagerGamePanelComponent } from './components/manager-game-panel.component';
+import { ManagerReviewModalComponent } from './components/manager-review-modal.component';
+import { ManagerRoomListComponent } from './components/manager-room-list.component';
 
 @Component({
   selector: 'app-manager-dashboard',
@@ -35,6 +38,9 @@ import { TablaComponent } from '../../../shared/components/tabla/tabla.component
     CardComponent,
     TablaComponent,
     PodiumComponent,
+    ManagerRoomListComponent,
+    ManagerGamePanelComponent,
+    ManagerReviewModalComponent,
   ],
   templateUrl: './manager-dashboard.component.html',
   styleUrl: './manager-dashboard.component.css',
@@ -51,7 +57,6 @@ export class ManagerDashboardComponent {
   // Signals
   currentUser = this.authService.currentUser;
   isAuthenticated = computed(() => this.currentUser() !== null);
-  showCreateForm = signal(false);
   room = signal<Room | null>(null);
   currentCard = signal<any>(null);
   nextCardPreview = computed(() => {
@@ -121,11 +126,6 @@ export class ManagerDashboardComponent {
   activeRoomId = computed(() => this.room()?.id ?? null);
   managerRooms = signal<Room[]>([]);
   loadingRooms = signal(false);
-
-  // Form data
-  roomName = '';
-  maxRounds = 10;
-  difficulty: 'easy' | 'medium' | 'hard' = 'easy';
 
   // Helpers para el template
   readonly ROOM_STATES = ROOM_STATES;
@@ -252,12 +252,20 @@ export class ManagerDashboardComponent {
     }
   }
 
-  toggleCreateForm() {
-    this.showCreateForm.set(!this.showCreateForm());
+  handleCreateRoom(data: {
+    roomName: string;
+    maxRounds: number;
+    difficulty: 'easy' | 'medium' | 'hard';
+  }) {
+    this.createRoom(data.roomName, data.maxRounds, data.difficulty);
   }
 
-  async createRoom() {
-    if (!this.currentUser()?.uid || !this.roomName.trim()) {
+  async createRoom(
+    roomName: string,
+    maxRounds: number,
+    difficulty: 'easy' | 'medium' | 'hard'
+  ) {
+    if (!this.currentUser()?.uid || !roomName.trim()) {
       Swal.fire({
         icon: 'warning',
         title: 'Campos incompletos',
@@ -269,8 +277,8 @@ export class ManagerDashboardComponent {
 
     try {
       const config: RoomConfig = {
-        maxRounds: this.maxRounds,
-        viewerDifficulty: this.difficulty,
+        maxRounds: maxRounds,
+        viewerDifficulty: difficulty,
         allowLateJoin: true,
         autoVerify: false,
       };
@@ -278,7 +286,7 @@ export class ManagerDashboardComponent {
       const roomId = await this.roomService.createRoom(
         this.currentUser()!.uid,
         this.currentUser()!.displayName,
-        this.roomName,
+        roomName,
         config
       );
 
@@ -294,7 +302,6 @@ export class ManagerDashboardComponent {
         }
       });
 
-      this.showCreateForm.set(false);
       this.loadManagerRooms(); // Recargar la lista de salas
       Swal.fire({
         icon: 'success',
