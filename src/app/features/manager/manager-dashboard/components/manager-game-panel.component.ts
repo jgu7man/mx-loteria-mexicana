@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { MARKERS } from '../../../../core/constants/game-data';
 import {
   getRoomStateColors,
   getRoomStateLabel,
@@ -156,7 +157,7 @@ import { CardComponent } from '../../../../shared/components/card/card.component
             <div *ngFor="let p of players" class="flex items-center justify-between p-4 bg-gray-50 rounded-2xl">
               <div class="min-w-0">
                 <div class="font-semibold text-gray-800 text-sm truncate">{{ p.displayName }}</div>
-                <div class="text-xs text-gray-500">{{ p.marker }}</div>
+                <div class="text-xs text-gray-500">{{ getMarkerEmoji(p.marker) }}</div>
               </div>
               <button
                 (click)="reviewParticipant.emit(p)"
@@ -252,7 +253,7 @@ import { CardComponent } from '../../../../shared/components/card/card.component
             <div *ngFor="let p of players" class="flex items-center justify-between p-4 bg-gray-50 rounded-2xl">
               <div class="min-w-0">
                 <div class="font-semibold text-gray-800 text-sm truncate">{{ p.displayName }}</div>
-                <div class="text-xs text-gray-500">{{ p.marker }}</div>
+                <div class="text-xs text-gray-500">{{ getMarkerEmoji(p.marker) }}</div>
               </div>
               <button
                 (click)="reviewParticipant.emit(p)"
@@ -454,7 +455,7 @@ import { CardComponent } from '../../../../shared/components/card/card.component
           <div *ngFor="let p of players" class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
             <div class="min-w-0">
               <div class="font-semibold text-gray-800 text-sm truncate">{{ p.displayName }}</div>
-              <div class="text-xs text-gray-500">{{ p.marker }}</div>
+              <div class="text-xs text-gray-500">{{ getMarkerEmoji(p.marker) }}</div>
             </div>
             <button
               (click)="reviewParticipant.emit(p)"
@@ -516,4 +517,9 @@ export class ManagerGamePanelComponent {
   readonly getRoomStateColors = getRoomStateColors;
   readonly isRoomActive = isRoomActive;
   readonly isRoomWaiting = isRoomWaiting;
+
+  getMarkerEmoji(markerId?: string): string {
+    if (!markerId) return '🫘';
+    return MARKERS.find((m) => m.id === markerId)?.emoji ?? '🫘';
+  }
 }
