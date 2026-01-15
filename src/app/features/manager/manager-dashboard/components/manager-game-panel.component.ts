@@ -511,7 +511,6 @@ export class ManagerGamePanelComponent {
   @Output() finishRound = new EventEmitter<void>();
   @Output() deleteRoom = new EventEmitter<void>();
   @Output() reviewParticipant = new EventEmitter<Participant>();
-  @Output() goHome = new EventEmitter<void>();
 
   readonly getRoomStateLabel = getRoomStateLabel;
   readonly getRoomStateColors = getRoomStateColors;
