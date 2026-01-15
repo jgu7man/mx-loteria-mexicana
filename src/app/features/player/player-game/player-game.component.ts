@@ -14,18 +14,17 @@ import { ActivatedRoute, Router } from '@angular/router';
 import Swal from 'sweetalert2';
 import { CARDS, MARKERS } from '../../../core/constants/game-data';
 import {
-  ROOM_STATE_COLORS,
-  ROOM_STATE_LABELS,
   ROOM_STATES,
 } from '../../../core/constants/room-states';
 import { Marker, Participant, Room } from '../../../core/models/game.model';
 import { AuthService } from '../../../core/services/auth.service';
 import { GameUtilsService } from '../../../core/services/game-utils.service';
 import { RoomService } from '../../../core/services/room.service';
-import { CardComponent } from '../../../shared/components/card/card.component';
 import { MarkerComponent } from '../../../shared/components/marker/marker.component';
 import { PodiumComponent } from '../../../shared/components/podium/podium.component';
-import { TablaComponent } from '../../../shared/components/tabla/tabla.component';
+import { PlayerJoinFormComponent } from './components/player-join-form/player-join-form.component';
+import { PlayerTablaSelectorComponent } from './components/player-tabla-selector/player-tabla-selector.component';
+import { PlayerGameBoardComponent } from './components/player-game-board/player-game-board.component';
 
 @Component({
   selector: 'app-player-game',
@@ -34,9 +33,10 @@ import { TablaComponent } from '../../../shared/components/tabla/tabla.component
     CommonModule,
     FormsModule,
     MarkerComponent,
-    TablaComponent,
-    CardComponent,
     PodiumComponent,
+    PlayerJoinFormComponent,
+    PlayerTablaSelectorComponent,
+    PlayerGameBoardComponent,
   ],
   templateUrl: './player-game.component.html',
   styleUrl: './player-game.component.css',
@@ -48,9 +48,6 @@ export class PlayerGameComponent implements OnInit {
   private roomService = inject(RoomService);
   private gameUtils = inject(GameUtilsService);
   private destroyRef = inject(DestroyRef);
-
-  // Expose Math for template
-  Math = Math;
 
   // Signals
   currentUser = this.authService.currentUser;
@@ -522,12 +519,6 @@ export class PlayerGameComponent implements OnInit {
     this.showTablaSelector.set(false);
   }
 
-  getCardsByIds(cardIds: number[]): any[] {
-    return cardIds
-      .map((id) => CARDS.find((c) => c.id === id))
-      .filter((c) => c !== undefined);
-  }
-
   selectTabla(tabla: number[]) {
     this.myTabla.set(tabla);
     this.myMarks.set([]);
@@ -620,18 +611,6 @@ export class PlayerGameComponent implements OnInit {
         marks: updated,
       });
     }
-  }
-
-  getRoomStateLabel(): string {
-    const state = this.room()?.state;
-    return state ? ROOM_STATE_LABELS[state] : 'Desconocido';
-  }
-
-  getRoomStateColors(): string {
-    const state = this.room()?.state;
-    if (!state) return 'bg-gray-100 text-gray-700';
-    const colors = ROOM_STATE_COLORS[state];
-    return `${colors.bg} ${colors.text}`;
   }
 
   goHome() {
