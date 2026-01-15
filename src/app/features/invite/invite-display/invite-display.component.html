@@ -1,0 +1,156 @@
+<div class="invite-container min-h-screen bg-gradient-to-br from-green-600 to-teal-700 p-6">
+  <!-- Header -->
+  <header class="flex justify-between items-center mb-8">
+    <h1 class="text-3xl font-bold text-white">🎉 Invitación</h1>
+    <button 
+      (click)="goHome()"
+      class="bg-white text-green-600 px-6 py-2 rounded-lg font-semibold hover:bg-gray-100 transition">
+      ← Volver
+    </button>
+  </header>
+
+  <!-- Content -->
+  <div *ngIf="room()" class="max-w-4xl mx-auto">
+    <!-- Main Card -->
+    <div class="bg-white rounded-3xl shadow-2xl overflow-hidden">
+      <!-- Header Section -->
+      <div class="bg-gradient-to-r from-green-600 to-teal-600 p-8 text-center text-white">
+        <h2 class="text-4xl font-bold mb-3">{{ room()!.name }}</h2>
+        <p class="text-xl opacity-90">¡Únete a la Lotería Mexicana!</p>
+      </div>
+
+      <!-- Content Grid -->
+      <div class="p-8">
+        <div class="grid md:grid-cols-2 gap-8">
+          <!-- Left Column: QR Code -->
+          <div class="flex flex-col items-center justify-center">
+            <div class="bg-white p-4 rounded-2xl shadow-lg border-4 border-green-200">
+              <qrcode 
+                *ngIf="joinLink()"
+                [qrdata]="joinLink()" 
+                [width]="256" 
+                [errorCorrectionLevel]="'M'"
+                [cssClass]="'qr-code'">
+              </qrcode>
+            </div>
+            <p class="text-sm text-gray-500 mt-4 text-center">Escanea el código para unirte</p>
+          </div>
+
+          <!-- Right Column: Room Info -->
+          <div class="space-y-6">
+            <!-- Room Code -->
+            <div class="bg-gradient-to-br from-green-50 to-teal-50 p-6 rounded-2xl border-2 border-green-200">
+              <div class="text-sm text-gray-600 font-semibold mb-2">Código de Sala</div>
+              <div class="text-4xl font-bold text-green-600 tracking-wider">{{ roomId() }}</div>
+            </div>
+
+            <!-- Status -->
+            <div class="bg-gray-50 p-6 rounded-2xl">
+              <div class="text-sm text-gray-600 font-semibold mb-3">Estado de la Sala</div>
+              <div class="flex items-center gap-3">
+                <span class="px-4 py-2 rounded-full text-base font-semibold"
+                  [ngClass]="getRoomStateColors(room()!.state)">
+                  {{ getRoomStateLabel(room()!.state) }}
+                </span>
+              </div>
+            </div>
+
+            <!-- Rounds Info -->
+            <div class="grid grid-cols-2 gap-4">
+              <div class="bg-yellow-50 p-4 rounded-xl border-2 border-yellow-200 text-center">
+                <div class="text-3xl font-bold text-yellow-600">{{ room()!.currentRound }}</div>
+                <div class="text-xs text-gray-600 mt-1">Ronda Actual</div>
+              </div>
+              <div class="bg-orange-50 p-4 rounded-xl border-2 border-orange-200 text-center">
+                <div class="text-3xl font-bold text-orange-600">{{ room()!.config.maxRounds }}</div>
+                <div class="text-xs text-gray-600 mt-1">Total de Rondas</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Players Section -->
+        <div class="mt-8 border-t-2 border-gray-200 pt-8">
+          <h3 class="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-3">
+            <span>👥</span>
+            <span>Jugadores</span>
+            <span class="text-lg text-gray-500">({{ players().length }})</span>
+          </h3>
+
+          <div *ngIf="players().length === 0" class="text-center text-gray-500 py-8 bg-gray-50 rounded-xl">
+            <p class="text-lg">Aún no hay jugadores</p>
+            <p class="text-sm mt-2">¡Sé el primero en unirte!</p>
+          </div>
+
+          <div *ngIf="players().length > 0" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            <div *ngFor="let player of players()" 
+                 class="flex flex-col items-center gap-3 p-4 bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl border-2 border-purple-100 hover:border-purple-300 transition">
+              <div *ngIf="player.photoURL" 
+                   class="w-16 h-16 rounded-full overflow-hidden bg-gray-200 ring-4 ring-purple-200">
+                <img [src]="player.photoURL" [alt]="player.displayName" class="w-full h-full object-cover">
+              </div>
+              <div *ngIf="!player.photoURL" 
+                   class="w-16 h-16 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 text-white flex items-center justify-center font-bold text-2xl ring-4 ring-purple-200">
+                {{ player.displayName.charAt(0).toUpperCase() }}
+              </div>
+              <div class="text-center w-full">
+                <div class="font-bold text-gray-800 text-sm truncate">{{ player.displayName }}</div>
+                <div class="text-xs text-gray-500 mt-1">
+                  <span *ngIf="player.victories > 0" class="text-yellow-600 font-semibold">🏆 {{ player.victories }}</span>
+                  <span *ngIf="player.victories === 0" class="text-gray-400">Sin victorias</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="mt-8 space-y-4">
+          <div class="grid md:grid-cols-2 gap-4">
+            <button 
+              (click)="joinAsPlayer()"
+              class="bg-gradient-to-r from-green-600 to-teal-600 text-white px-8 py-4 rounded-xl font-bold text-lg hover:from-green-700 hover:to-teal-700 transition shadow-lg">
+              🎮 Unirse como Jugador
+            </button>
+            <button 
+              (click)="joinAsViewer()"
+              class="bg-gradient-to-r from-yellow-600 to-orange-600 text-white px-8 py-4 rounded-xl font-bold text-lg hover:from-yellow-700 hover:to-orange-700 transition shadow-lg">
+              👁️ Ver como Espectador
+            </button>
+          </div>
+
+          <!-- Viewer Link Section -->
+          <div class="bg-gradient-to-br from-yellow-50 to-orange-50 p-6 rounded-2xl border-2 border-yellow-200">
+            <div class="text-sm text-gray-600 font-semibold mb-3">Link para Espectadores</div>
+            <div class="flex items-center gap-3">
+              <input 
+                type="text" 
+                [value]="origin + '/viewer/' + roomId()" 
+                readonly 
+                class="flex-1 bg-white px-4 py-3 rounded-lg border-2 border-yellow-300 text-gray-700 text-sm font-mono">
+              <button 
+                (click)="copyViewerLink()"
+                class="bg-yellow-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-yellow-700 transition shadow-md whitespace-nowrap">
+                📋 Copiar
+              </button>
+            </div>
+            <p class="text-xs text-gray-500 mt-2">Comparte este link con quienes solo quieran observar el juego</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer Info -->
+    <div class="text-center mt-6 text-white opacity-90">
+      <p class="text-sm">Lotería Mexicana Online • Comparte este link con tus amigos</p>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="!room()" class="flex items-center justify-center min-h-[60vh]">
+    <div class="text-center">
+      <div class="animate-spin rounded-full h-16 w-16 border-b-4 border-white mx-auto mb-4"></div>
+      <p class="text-white text-xl">Cargando invitación...</p>
+    </div>
+  </div>
+</div>

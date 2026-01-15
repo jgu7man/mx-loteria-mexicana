@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, computed, effect, inject, OnInit, signal } from '@angular/core';
+import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CARDS } from '../../../core/constants/game-data';
@@ -23,8 +23,8 @@ export class ViewerDisplayComponent implements OnInit {
   currentCard = signal<any>(null);
   recentCards = signal<any[]>([]);
   participants = signal<Participant[]>([]);
-  players = computed(() => 
-    this.participants().filter(p => p.role === 'player')
+  players = computed(() =>
+    this.participants().filter((p) => p.role === 'player')
   );
   roomId = '';
   showJoinForm = signal(true);
@@ -86,9 +86,11 @@ export class ViewerDisplayComponent implements OnInit {
       });
 
       // Observe participants
-      this.roomService.observeParticipants(this.roomId).subscribe((participants) => {
-        this.participants.set(participants);
-      });
+      this.roomService
+        .observeParticipants(this.roomId)
+        .subscribe((participants) => {
+          this.participants.set(participants);
+        });
 
       this.showJoinForm.set(false);
     } catch (error) {
