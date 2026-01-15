@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { HomeComponent } from './features/home/home.component';
+import { InviteDisplayComponent } from './features/invite/invite-display/invite-display.component';
 import { ManagerDashboardComponent } from './features/manager/manager-dashboard/manager-dashboard.component';
 import { PlayerGameComponent } from './features/player/player-game/player-game.component';
 import { ViewerDisplayComponent } from './features/viewer/viewer-display/viewer-display.component';
@@ -7,9 +8,11 @@ import { ViewerDisplayComponent } from './features/viewer/viewer-display/viewer-
 export const routes: Routes = [
   { path: '', component: HomeComponent },
   { path: 'manager', component: ManagerDashboardComponent },
+  { path: 'manager/:roomId', component: ManagerDashboardComponent },
   { path: 'player', component: PlayerGameComponent },
   { path: 'viewer/:roomId', component: ViewerDisplayComponent },
   { path: 'viewer', component: ViewerDisplayComponent },
+  { path: 'invite/:roomId', component: InviteDisplayComponent },
   { path: 'join/:roomId', component: PlayerGameComponent },
   { path: '**', redirectTo: '' },
 ];

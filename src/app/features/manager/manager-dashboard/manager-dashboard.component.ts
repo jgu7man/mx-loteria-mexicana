@@ -1,7 +1,8 @@
 import { CommonModule } from '@angular/common';
 import { Component, computed, effect, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
+import { QRCodeModule } from 'angularx-qrcode';
 import Swal from 'sweetalert2';
 import { CARDS, MARKERS } from '../../../core/constants/game-data';
 import {
@@ -21,17 +22,26 @@ import { AuthService } from '../../../core/services/auth.service';
 import { GameUtilsService } from '../../../core/services/game-utils.service';
 import { RoomService } from '../../../core/services/room.service';
 import { CardComponent } from '../../../shared/components/card/card.component';
+import { PodiumComponent } from '../../../shared/components/podium/podium.component';
 import { TablaComponent } from '../../../shared/components/tabla/tabla.component';
 
 @Component({
   selector: 'app-manager-dashboard',
   standalone: true,
-  imports: [CommonModule, FormsModule, CardComponent, TablaComponent],
+  imports: [
+    CommonModule,
+    FormsModule,
+    QRCodeModule,
+    CardComponent,
+    TablaComponent,
+    PodiumComponent,
+  ],
   templateUrl: './manager-dashboard.component.html',
   styleUrl: './manager-dashboard.component.css',
 })
 export class ManagerDashboardComponent {
   private router = inject(Router);
+  private route = inject(ActivatedRoute);
   private authService = inject(AuthService);
   private roomService = inject(RoomService);
   private gameUtils = inject(GameUtilsService);
@@ -74,6 +84,40 @@ export class ManagerDashboardComponent {
     return participants.filter((p) => winnerIds.has(p.uid));
   });
 
+  showPodium = computed(() => {
+    const r = this.room();
+    if (!r) return false;
+    // Show podium when round finishes (winners verified and round completed)
+    return (
+      r.state === ROOM_STATES.FINISHED ||
+      (r.state === ROOM_STATES.WAITING &&
+        r.currentRound > 0 &&
+        r.roundHistory.length > 0 &&
+        r.roundHistory[r.roundHistory.length - 1]?.roundNumber ===
+          r.currentRound - 1)
+    );
+  });
+
+  currentRoundWinners = computed(() => {
+    const r = this.room();
+    if (!r || !this.showPodium()) return [];
+
+    // If finished, show all winners from last round
+    if (r.state === ROOM_STATES.FINISHED && r.roundHistory.length > 0) {
+      return r.roundHistory[r.roundHistory.length - 1]?.winners || [];
+    }
+
+    // If waiting for next round, show winners from previous round
+    if (r.state === ROOM_STATES.WAITING && r.roundHistory.length > 0) {
+      const lastRound = r.roundHistory[r.roundHistory.length - 1];
+      if (lastRound?.roundNumber === r.currentRound - 1) {
+        return lastRound.winners || [];
+      }
+    }
+
+    return [];
+  });
+
   activeRoomId = computed(() => this.room()?.id ?? null);
   managerRooms = signal<Room[]>([]);
   loadingRooms = signal(false);
@@ -91,6 +135,20 @@ export class ManagerDashboardComponent {
   readonly isRoomWaiting = isRoomWaiting;
 
   constructor() {
+    // Effect para cargar sala desde la URL
+    effect(
+      () => {
+        const user = this.currentUser();
+        const roomId = this.route.snapshot.paramMap.get('roomId');
+
+        if (user && roomId) {
+          // Si hay roomId en la URL, cargar esa sala directamente
+          this.loadRoomFromUrl(roomId);
+        }
+      },
+      { allowSignalWrites: true }
+    );
+
     // Effect para detectar cambios en la autenticación
     effect(
       () => {
@@ -102,7 +160,11 @@ export class ManagerDashboardComponent {
 
         // Cuando el usuario se autentica, verificar si tiene una sala activa
         if (user) {
-          this.restoreActiveRoom();
+          const roomId = this.route.snapshot.paramMap.get('roomId');
+          if (!roomId) {
+            // Solo restaurar sala activa si no hay roomId en URL
+            this.restoreActiveRoom();
+          }
           this.loadManagerRooms();
         } else {
           this.managerRooms.set([]);
@@ -296,6 +358,12 @@ export class ManagerDashboardComponent {
     this.router.navigate(['/viewer', currentRoom.id]);
   }
 
+  openInvitePage() {
+    const currentRoom = this.room();
+    if (!currentRoom) return;
+    window.open(`${this.origin}/invite/${currentRoom.id}`, '_blank');
+  }
+
   reviewParticipant(p: Participant) {
     this.reviewingParticipant.set(p);
   }
@@ -369,10 +437,117 @@ export class ManagerDashboardComponent {
   }
 
   goHome() {
-    // Limpiar la sala activa al salir
-    localStorage.removeItem('activeManagerRoom');
-    this.room.set(null);
-    this.router.navigate(['/']);
+    // Si hay una sala activa, regresar al dashboard del manager
+    // Si no hay sala (está en el dashboard), regresar al home
+    if (this.room()) {
+      localStorage.removeItem('activeManagerRoom');
+      this.room.set(null);
+      this.router.navigate(['/manager']);
+    } else {
+      this.router.navigate(['/']);
+    }
+  }
+
+  async copyInviteLink() {
+    const currentRoom = this.room();
+    if (!currentRoom?.inviteLink) return;
+
+    try {
+      await navigator.clipboard.writeText(currentRoom.inviteLink);
+      Swal.fire({
+        icon: 'success',
+        title: '¡Link copiado!',
+        text: 'El link de invitación ha sido copiado al portapapeles',
+        timer: 2000,
+        showConfirmButton: false,
+      });
+    } catch (error) {
+      console.error('Error copying link:', error);
+      Swal.fire({
+        icon: 'error',
+        title: 'Error al copiar',
+        text: 'No se pudo copiar el link. Inténtalo nuevamente.',
+        confirmButtonColor: '#6366f1',
+      });
+    }
+  }
+
+  showQRCode() {
+    const currentRoom = this.room();
+    if (!currentRoom) return;
+
+    const joinLink = `${this.origin}/join/${currentRoom.id}`;
+
+    // Use canvas API directly to generate QR code
+    Swal.fire({
+      title: 'Código QR',
+      html: `
+        <div class="text-center">
+          <p class="text-gray-600 mb-4">Escanea este código para unirte</p>
+          <canvas id="qr-canvas" class="mx-auto rounded-lg shadow-lg"></canvas>
+          <p class="text-sm text-gray-500 mt-4 break-all">${joinLink}</p>
+        </div>
+      `,
+      confirmButtonColor: '#6366f1',
+      confirmButtonText: 'Cerrar',
+      width: 400,
+      didOpen: () => {
+        // Use qrcode library to generate QR
+        import('qrcode').then((QRCode) => {
+          const canvas = document.getElementById('qr-canvas') as HTMLCanvasElement;
+          if (canvas) {
+            QRCode.toCanvas(canvas, joinLink, {
+              width: 256,
+              margin: 2,
+              errorCorrectionLevel: 'M'
+            });
+          }
+        });
+      },
+    });
+  }
+
+  showCardHistory() {
+    const currentRoom = this.room();
+    if (!currentRoom) return;
+
+    const historyCards = currentRoom.deck
+      .slice(0, currentRoom.currentIndex + 1)
+      .map((id) => CARDS.find((c) => c.id === id))
+      .filter((c): c is (typeof CARDS)[number] => c != null);
+
+    if (historyCards.length === 0) {
+      Swal.fire({
+        icon: 'info',
+        title: 'Sin historial',
+        text: 'Aún no se han cantado cartas en esta ronda',
+        confirmButtonColor: '#6366f1',
+      });
+      return;
+    }
+
+    const cardsHtml = historyCards
+      .map(
+        (card) => `
+        <div class="inline-block m-2 p-3 rounded-lg shadow-md" style="background-color: ${card.color}20; border: 2px solid ${card.color}">
+          <div class="text-4xl mb-1">${card.emoji}</div>
+          <div class="text-sm font-bold text-gray-800">${card.name}</div>
+        </div>
+      `
+      )
+      .join('');
+
+    Swal.fire({
+      title: `Historial de Cartas (${historyCards.length})`,
+      html: `
+        <div class="max-h-96 overflow-y-auto">
+          ${cardsHtml}
+        </div>
+      `,
+      confirmButtonColor: '#6366f1',
+      confirmButtonText: 'Cerrar',
+      width: 600,
+    });
   }
 
   async deleteRoom() {
@@ -415,11 +590,28 @@ export class ManagerDashboardComponent {
   }
 
   selectRoom(room: Room) {
+    // Navegar a la ruta con el roomId
+    this.router.navigate(['/manager', room.id]);
+
     // Guardar la sala seleccionada como activa
     localStorage.setItem('activeManagerRoom', room.id);
 
     // Observar la sala
     this.roomService.observeRoom(room.id).subscribe((r) => {
+      this.room.set(r);
+      if (r && r.currentIndex >= 0) {
+        const cardId = r.deck[r.currentIndex];
+        this.currentCard.set(CARDS.find((c) => c.id === cardId));
+      }
+    });
+  }
+
+  private loadRoomFromUrl(roomId: string) {
+    // Guardar como sala activa
+    localStorage.setItem('activeManagerRoom', roomId);
+
+    // Observar la sala
+    this.roomService.observeRoom(roomId).subscribe((r) => {
       this.room.set(r);
       if (r && r.currentIndex >= 0) {
         const cardId = r.deck[r.currentIndex];

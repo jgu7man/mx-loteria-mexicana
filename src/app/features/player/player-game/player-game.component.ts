@@ -13,12 +13,18 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import Swal from 'sweetalert2';
 import { CARDS, MARKERS } from '../../../core/constants/game-data';
+import {
+  ROOM_STATE_COLORS,
+  ROOM_STATE_LABELS,
+  ROOM_STATES,
+} from '../../../core/constants/room-states';
 import { Marker, Participant, Room } from '../../../core/models/game.model';
 import { AuthService } from '../../../core/services/auth.service';
 import { GameUtilsService } from '../../../core/services/game-utils.service';
 import { RoomService } from '../../../core/services/room.service';
 import { CardComponent } from '../../../shared/components/card/card.component';
 import { MarkerComponent } from '../../../shared/components/marker/marker.component';
+import { PodiumComponent } from '../../../shared/components/podium/podium.component';
 import { TablaComponent } from '../../../shared/components/tabla/tabla.component';
 
 @Component({
@@ -30,6 +36,7 @@ import { TablaComponent } from '../../../shared/components/tabla/tabla.component
     MarkerComponent,
     TablaComponent,
     CardComponent,
+    PodiumComponent,
   ],
   templateUrl: './player-game.component.html',
   styleUrl: './player-game.component.css',
@@ -50,6 +57,42 @@ export class PlayerGameComponent implements OnInit {
   room = signal<Room | null>(null);
   participant = signal<Participant | null>(null);
   currentCard = signal<any>(null);
+
+  // Computed for podium display
+  showPodium = computed(() => {
+    const r = this.room();
+    if (!r) return false;
+    // Show podium when round finishes (winners verified and round completed)
+    return (
+      r.state === ROOM_STATES.FINISHED ||
+      (r.state === ROOM_STATES.WAITING &&
+        r.currentRound > 0 &&
+        r.roundHistory.length > 0 &&
+        r.roundHistory[r.roundHistory.length - 1]?.roundNumber ===
+          r.currentRound - 1)
+    );
+  });
+
+  currentRoundWinners = computed(() => {
+    const r = this.room();
+    if (!r || !this.showPodium()) return [];
+
+    // If finished, show all winners from last round
+    if (r.state === ROOM_STATES.FINISHED && r.roundHistory.length > 0) {
+      return r.roundHistory[r.roundHistory.length - 1]?.winners || [];
+    }
+
+    // If waiting for next round, show winners from previous round
+    if (r.state === ROOM_STATES.WAITING && r.roundHistory.length > 0) {
+      const lastRound = r.roundHistory[r.roundHistory.length - 1];
+      if (lastRound?.roundNumber === r.currentRound - 1) {
+        return lastRound.winners || [];
+      }
+    }
+
+    return [];
+  });
+
   historyCards = computed(() => {
     const r = this.room();
     if (!r || r.currentIndex < 0 || !Array.isArray(r.deck)) return [];
@@ -577,6 +620,18 @@ export class PlayerGameComponent implements OnInit {
         marks: updated,
       });
     }
+  }
+
+  getRoomStateLabel(): string {
+    const state = this.room()?.state;
+    return state ? ROOM_STATE_LABELS[state] : 'Desconocido';
+  }
+
+  getRoomStateColors(): string {
+    const state = this.room()?.state;
+    if (!state) return 'bg-gray-100 text-gray-700';
+    const colors = ROOM_STATE_COLORS[state];
+    return `${colors.bg} ${colors.text}`;
   }
 
   goHome() {
