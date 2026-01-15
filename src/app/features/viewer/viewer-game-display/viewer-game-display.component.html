@@ -1,0 +1,150 @@
+<!-- DESKTOP LAYOUT (xl) - 3 columns -->
+<div class="hidden xl:grid xl:grid-cols-12 gap-6">
+  <!-- Left column: Room info + Participants list -->
+  <div class="xl:col-span-3 space-y-4">
+    <!-- Room info -->
+    <div class="bg-white rounded-2xl shadow-2xl p-6">
+      <h2 class="text-2xl font-bold text-gray-800 mb-4">{{ room?.name }}</h2>
+      <div class="flex justify-center gap-4">
+        <div class="bg-yellow-100 p-3 rounded-lg flex-1 text-center">
+          <div class="text-xl font-bold text-yellow-600">{{ room?.currentRound }}</div>
+          <div class="text-xs text-gray-600">Ronda</div>
+        </div>
+        <div class="bg-orange-100 p-3 rounded-lg flex-1 text-center">
+          <div class="text-xl font-bold text-orange-600">{{ (room?.currentIndex ?? -1) + 1 }}/54</div>
+          <div class="text-xs text-gray-600">Cartas</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Participants list -->
+    <div class="bg-white rounded-2xl shadow-2xl p-6 sticky top-6">
+      <h3 class="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+        <span>👥</span>
+        <span>Jugadores</span>
+        <span class="text-sm text-gray-500">({{ players.length }})</span>
+      </h3>
+      <div class="space-y-3 max-h-[calc(100vh-300px)] overflow-y-auto">
+        <div *ngFor="let player of players" 
+             class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition">
+          <div *ngIf="player.photoURL" 
+               class="w-10 h-10 rounded-full overflow-hidden bg-gray-200 flex-shrink-0">
+            <img [src]="player.photoURL" [alt]="player.displayName" class="w-full h-full object-cover">
+          </div>
+          <div *ngIf="!player.photoURL" 
+               class="w-10 h-10 rounded-full bg-yellow-500 text-white flex items-center justify-center font-bold flex-shrink-0">
+            {{ player.displayName.charAt(0).toUpperCase() }}
+          </div>
+          <div class="flex-1 min-w-0">
+            <div class="font-semibold text-gray-800 truncate">{{ player.displayName }}</div>
+            <div class="text-xs text-gray-500">
+              <span *ngIf="player.victories > 0" class="text-yellow-600">🏆 {{ player.victories }}</span>
+              <span *ngIf="player.victories === 0" class="text-gray-400">Sin victorias</span>
+            </div>
+          </div>
+        </div>
+        <div *ngIf="players.length === 0" class="text-center text-gray-500 py-8">
+          No hay jugadores aún
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Center column: Current card -->
+  <div class="xl:col-span-6">
+    <div *ngIf="currentCard" class="bg-white rounded-2xl shadow-2xl p-8 text-center">
+      <h3 class="text-2xl font-bold text-gray-800 mb-6">Carta Actual</h3>
+      <div id="current-card" class="flex justify-center">
+        <app-card [card]="currentCard!" [size]="'large'" [showVerso]="true"></app-card>
+      </div>
+    </div>
+    <div *ngIf="!currentCard" class="bg-white rounded-2xl shadow-2xl p-8 text-center text-gray-500">
+      <p class="text-xl">Esperando que comience el juego...</p>
+    </div>
+  </div>
+
+  <!-- Right column: Recent cards -->
+  <div class="xl:col-span-3">
+    <div class="bg-white rounded-2xl shadow-2xl p-6 sticky top-6">
+      <h3 class="text-xl font-bold text-gray-800 mb-4">Cartas Recientes</h3>
+      <div class="space-y-3 max-h-[calc(100vh-300px)] overflow-y-auto">
+        <div *ngFor="let card of recentCards" class="flex justify-center">
+          <app-card [card]="card!" [size]="'medium'"></app-card>
+        </div>
+        <div *ngIf="recentCards.length === 0" class="text-center text-gray-500 py-8">
+          No hay cartas recientes
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MOBILE & TABLET LAYOUT (< xl) - Stacked -->
+<div class="xl:hidden space-y-6">
+  <!-- Room info -->
+  <div class="bg-white rounded-2xl shadow-2xl p-6 text-center">
+    <h2 class="text-2xl font-bold text-gray-800 mb-4">{{ room?.name }}</h2>
+    <div class="flex justify-center gap-6">
+      <div class="bg-yellow-100 p-4 rounded-lg">
+        <div class="text-2xl font-bold text-yellow-600">{{ room?.currentRound }}</div>
+        <div class="text-sm text-gray-600">Ronda</div>
+      </div>
+      <div class="bg-orange-100 p-4 rounded-lg">
+        <div class="text-2xl font-bold text-orange-600">{{ (room?.currentIndex ?? -1) + 1 }}/54</div>
+        <div class="text-sm text-gray-600">Cartas</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Participants -->
+  <div class="bg-white rounded-2xl shadow-2xl p-6">
+    <h3 class="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+      <span>👥</span>
+      <span>Jugadores</span>
+      <span class="text-sm text-gray-500">({{ players.length }})</span>
+    </h3>
+    <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+      <div *ngFor="let player of players" 
+           class="flex flex-col items-center gap-2 p-3 bg-gray-50 rounded-lg">
+        <div *ngIf="player.photoURL" 
+             class="w-12 h-12 rounded-full overflow-hidden bg-gray-200">
+          <img [src]="player.photoURL" [alt]="player.displayName" class="w-full h-full object-cover">
+        </div>
+        <div *ngIf="!player.photoURL" 
+             class="w-12 h-12 rounded-full bg-yellow-500 text-white flex items-center justify-center font-bold text-lg">
+          {{ player.displayName.charAt(0).toUpperCase() }}
+        </div>
+        <div class="text-center w-full">
+          <div class="font-semibold text-gray-800 text-sm truncate">{{ player.displayName }}</div>
+          <div class="text-xs text-gray-500">
+            <span *ngIf="player.victories > 0" class="text-yellow-600">🏆 {{ player.victories }}</span>
+            <span *ngIf="player.victories === 0" class="text-gray-400">-</span>
+          </div>
+        </div>
+      </div>
+      <div *ngIf="players.length === 0" class="col-span-full text-center text-gray-500 py-4">
+        No hay jugadores aún
+      </div>
+    </div>
+  </div>
+
+  <!-- Current card -->
+  <div *ngIf="currentCard" class="bg-white rounded-2xl shadow-2xl p-6 text-center">
+    <h3 class="text-2xl font-bold text-gray-800 mb-4">Carta Actual</h3>
+    <div class="flex justify-center">
+      <app-card [card]="currentCard!" [size]="'large'" [showVerso]="true"></app-card>
+    </div>
+  </div>
+
+  <!-- Recent cards -->
+  <div *ngIf="recentCards.length > 0" class="bg-white rounded-2xl shadow-2xl p-6">
+    <h3 class="text-xl font-bold text-gray-800 mb-4 text-center">Cartas Recientes</h3>
+    <div class="flex justify-center gap-3 flex-wrap">
+      <app-card 
+        *ngFor="let card of recentCards"
+        [card]="card!"
+        [size]="'small'">
+      </app-card>
+    </div>
+  </div>
+</div>
