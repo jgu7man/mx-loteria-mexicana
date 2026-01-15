@@ -7,7 +7,7 @@ import {
   isRoomActive,
   isRoomWaiting,
 } from '../../../../core/constants/room-states';
-import { Participant, Room } from '../../../../core/models/game.model';
+import { Card, Participant, Room } from '../../../../core/models/game.model';
 import { CardComponent } from '../../../../shared/components/card/card.component';
 
 @Component({
@@ -495,8 +495,8 @@ import { CardComponent } from '../../../../shared/components/card/card.component
 })
 export class ManagerGamePanelComponent {
   @Input() room!: Room;
-  @Input() currentCard: any = null;
-  @Input() nextCardPreview: any = null;
+  @Input() currentCard: Card | null = null;
+  @Input() nextCardPreview: Card | null = null;
   @Input() nextVersoSuggestion = '';
   @Input() participants: Participant[] = [];
   @Input() players: Participant[] = [];
