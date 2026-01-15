@@ -7,6 +7,7 @@ import { ViewerDisplayComponent } from './features/viewer/viewer-display/viewer-
 export const routes: Routes = [
   { path: '', component: HomeComponent },
   { path: 'manager', component: ManagerDashboardComponent },
+  { path: 'manager/:roomId', component: ManagerDashboardComponent },
   { path: 'player', component: PlayerGameComponent },
   { path: 'viewer/:roomId', component: ViewerDisplayComponent },
   { path: 'viewer', component: ViewerDisplayComponent },

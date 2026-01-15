@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, computed, effect, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import Swal from 'sweetalert2';
 import { CARDS, MARKERS } from '../../../core/constants/game-data';
 import {
@@ -33,6 +33,7 @@ import { TablaComponent } from '../../../shared/components/tabla/tabla.component
 })
 export class ManagerDashboardComponent {
   private router = inject(Router);
+  private route = inject(ActivatedRoute);
   private authService = inject(AuthService);
   private roomService = inject(RoomService);
   private gameUtils = inject(GameUtilsService);
@@ -125,6 +126,20 @@ export class ManagerDashboardComponent {
   readonly isRoomWaiting = isRoomWaiting;
 
   constructor() {
+    // Effect para cargar sala desde la URL
+    effect(
+      () => {
+        const user = this.currentUser();
+        const roomId = this.route.snapshot.paramMap.get('roomId');
+        
+        if (user && roomId) {
+          // Si hay roomId en la URL, cargar esa sala directamente
+          this.loadRoomFromUrl(roomId);
+        }
+      },
+      { allowSignalWrites: true }
+    );
+
     // Effect para detectar cambios en la autenticación
     effect(
       () => {
@@ -136,7 +151,11 @@ export class ManagerDashboardComponent {
 
         // Cuando el usuario se autentica, verificar si tiene una sala activa
         if (user) {
-          this.restoreActiveRoom();
+          const roomId = this.route.snapshot.paramMap.get('roomId');
+          if (!roomId) {
+            // Solo restaurar sala activa si no hay roomId en URL
+            this.restoreActiveRoom();
+          }
           this.loadManagerRooms();
         } else {
           this.managerRooms.set([]);
@@ -330,6 +349,34 @@ export class ManagerDashboardComponent {
     this.router.navigate(['/viewer', currentRoom.id]);
   }
 
+  async copyViewerLink() {
+    const currentRoom = this.room();
+    if (!currentRoom) return;
+
+    const viewerLink = `${this.origin}/viewer/${currentRoom.id}`;
+    
+    try {
+      await navigator.clipboard.writeText(viewerLink);
+      await Swal.fire({
+        icon: 'success',
+        title: '¡Link copiado!',
+        text: 'El link para visitantes ha sido copiado al portapapeles',
+        timer: 2000,
+        showConfirmButton: false,
+        position: 'top-end',
+        toast: true,
+      });
+    } catch (error) {
+      console.error('Error copying viewer link:', error);
+      await Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'No se pudo copiar el link',
+        confirmButtonColor: '#6366f1',
+      });
+    }
+  }
+
   reviewParticipant(p: Participant) {
     this.reviewingParticipant.set(p);
   }
@@ -403,10 +450,15 @@ export class ManagerDashboardComponent {
   }
 
   goHome() {
-    // Limpiar la sala activa al salir
-    localStorage.removeItem('activeManagerRoom');
-    this.room.set(null);
-    this.router.navigate(['/']);
+    // Si hay una sala activa, regresar al dashboard del manager
+    // Si no hay sala (está en el dashboard), regresar al home
+    if (this.room()) {
+      localStorage.removeItem('activeManagerRoom');
+      this.room.set(null);
+      this.router.navigate(['/manager']);
+    } else {
+      this.router.navigate(['/']);
+    }
   }
 
   async copyInviteLink() {
@@ -538,11 +590,28 @@ export class ManagerDashboardComponent {
   }
 
   selectRoom(room: Room) {
+    // Navegar a la ruta con el roomId
+    this.router.navigate(['/manager', room.id]);
+    
     // Guardar la sala seleccionada como activa
     localStorage.setItem('activeManagerRoom', room.id);
 
     // Observar la sala
     this.roomService.observeRoom(room.id).subscribe((r) => {
+      this.room.set(r);
+      if (r && r.currentIndex >= 0) {
+        const cardId = r.deck[r.currentIndex];
+        this.currentCard.set(CARDS.find((c) => c.id === cardId));
+      }
+    });
+  }
+
+  private loadRoomFromUrl(roomId: string) {
+    // Guardar como sala activa
+    localStorage.setItem('activeManagerRoom', roomId);
+
+    // Observar la sala
+    this.roomService.observeRoom(roomId).subscribe((r) => {
       this.room.set(r);
       if (r && r.currentIndex >= 0) {
         const cardId = r.deck[r.currentIndex];
