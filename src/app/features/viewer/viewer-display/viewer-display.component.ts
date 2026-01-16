@@ -1,16 +1,16 @@
 import { CommonModule } from '@angular/common';
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
-import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CARDS } from '../../../core/constants/game-data';
 import { Participant, Room } from '../../../core/models/game.model';
 import { RoomService } from '../../../core/services/room.service';
-import { CardComponent } from '../../../shared/components/card/card.component';
+import { ViewerJoinFormComponent } from '../viewer-join-form/viewer-join-form.component';
+import { ViewerGameDisplayComponent } from '../viewer-game-display/viewer-game-display.component';
 
 @Component({
   selector: 'app-viewer-display',
   standalone: true,
-  imports: [CommonModule, FormsModule, CardComponent],
+  imports: [CommonModule, ViewerJoinFormComponent, ViewerGameDisplayComponent],
   templateUrl: './viewer-display.component.html',
   styleUrl: './viewer-display.component.css',
 })
