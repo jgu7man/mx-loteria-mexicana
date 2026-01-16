@@ -1,8 +1,16 @@
 import { CommonModule } from '@angular/common';
-import { Component, computed, effect, inject, signal } from '@angular/core';
+import {
+  Component,
+  computed,
+  effect,
+  inject,
+  OnDestroy,
+  signal,
+} from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { QRCodeModule } from 'angularx-qrcode';
+import { Subscription } from 'rxjs';
 import Swal from 'sweetalert2';
 import { CARDS, MARKERS } from '../../../core/constants/game-data';
 import {
@@ -45,7 +53,7 @@ import { ManagerRoomListComponent } from './components/manager-room-list/manager
   templateUrl: './manager-dashboard.component.html',
   styleUrl: './manager-dashboard.component.css',
 })
-export class ManagerDashboardComponent {
+export class ManagerDashboardComponent implements OnDestroy {
   private router = inject(Router);
   private route = inject(ActivatedRoute);
   private authService = inject(AuthService);
@@ -53,6 +61,8 @@ export class ManagerDashboardComponent {
   private gameUtils = inject(GameUtilsService);
 
   readonly origin = window.location.origin;
+
+  private roomSubscription?: Subscription;
 
   // Signals
   currentUser = this.authService.currentUser;
@@ -141,7 +151,7 @@ export class ManagerDashboardComponent {
   readonly isRoomWaiting = isRoomWaiting;
 
   constructor() {
-    // Effect para cargar sala desde la URL
+    // Effect para cargar sala desde la URL (reactivo)
     effect(
       () => {
         const user = this.currentUser();
@@ -150,6 +160,9 @@ export class ManagerDashboardComponent {
         if (user && roomId) {
           // Si hay roomId en la URL, cargar esa sala directamente
           this.loadRoomFromUrl(roomId);
+        } else if (user && !roomId) {
+          // Si no hay roomId en URL, restaurar sala activa
+          this.restoreActiveRoom();
         }
       },
       { allowSignalWrites: true }
@@ -160,13 +173,8 @@ export class ManagerDashboardComponent {
       () => {
         const user = this.currentUser();
 
-        // Cuando el usuario se autentica, verificar si tiene una sala activa
+        // Cargar lista de salas del manager cuando se autentica
         if (user) {
-          const roomId = this.route.snapshot.paramMap.get('roomId');
-          if (!roomId) {
-            // Solo restaurar sala activa si no hay roomId en URL
-            this.restoreActiveRoom();
-          }
           this.loadManagerRooms();
         } else {
           this.managerRooms.set([]);
@@ -220,13 +228,18 @@ export class ManagerDashboardComponent {
         // Verificar que la sala existe y que el usuario es el manager
         if (room && room.managerId === this.currentUser()?.uid) {
           // Observar la sala
-          this.roomService.observeRoom(storedRoomId).subscribe((r) => {
-            this.room.set(r);
-            if (r && r.currentIndex >= 0) {
-              const cardId = r.deck[r.currentIndex];
-              this.currentCard.set(CARDS.find((c) => c.id === cardId));
-            }
-          });
+          this.roomSubscription?.unsubscribe();
+          this.roomSubscription = this.roomService
+            .observeRoom(storedRoomId)
+            .subscribe((r) => {
+              this.room.set(r);
+              if (r && r.currentIndex >= 0) {
+                const cardId = r.deck[r.currentIndex];
+                this.currentCard.set(CARDS.find((c) => c.id === cardId));
+              } else {
+                this.currentCard.set(null);
+              }
+            });
         } else {
           // La sala no existe o no es el manager, limpiar
           localStorage.removeItem('activeManagerRoom');
@@ -290,17 +303,13 @@ export class ManagerDashboardComponent {
         config
       );
 
+      // Navegar a la nueva sala
+      await this.router.navigate(['/manager', roomId]);
+
       // Guardar el ID de la sala en localStorage
       localStorage.setItem('activeManagerRoom', roomId);
 
-      // Observar la sala
-      this.roomService.observeRoom(roomId).subscribe((room) => {
-        this.room.set(room);
-        if (room && room.currentIndex >= 0) {
-          const cardId = room.deck[room.currentIndex];
-          this.currentCard.set(CARDS.find((c) => c.id === cardId));
-        }
-      });
+      // La suscripción a la sala se hará automáticamente por el effect que observa la URL
 
       this.loadManagerRooms(); // Recargar la lista de salas
       Swal.fire({
@@ -348,7 +357,16 @@ export class ManagerDashboardComponent {
     if (!currentRoom) return;
 
     try {
-      await this.roomService.nextCard(currentRoom.id);
+      const hasMoreCards = await this.roomService.nextCard(currentRoom.id);
+
+      if (!hasMoreCards) {
+        Swal.fire({
+          icon: 'info',
+          title: '¡Se acabaron las cartas!',
+          text: 'El mazo ha terminado. Finaliza la ronda para continuar.',
+          confirmButtonColor: '#6366f1',
+        });
+      }
     } catch (error) {
       console.error('Error advancing card:', error);
       Swal.fire({
@@ -646,13 +664,18 @@ export class ManagerDashboardComponent {
     localStorage.setItem('activeManagerRoom', room.id);
 
     // Observar la sala
-    this.roomService.observeRoom(room.id).subscribe((r) => {
-      this.room.set(r);
-      if (r && r.currentIndex >= 0) {
-        const cardId = r.deck[r.currentIndex];
-        this.currentCard.set(CARDS.find((c) => c.id === cardId));
-      }
-    });
+    this.roomSubscription?.unsubscribe();
+    this.roomSubscription = this.roomService
+      .observeRoom(room.id)
+      .subscribe((r) => {
+        this.room.set(r);
+        if (r && r.currentIndex >= 0) {
+          const cardId = r.deck[r.currentIndex];
+          this.currentCard.set(CARDS.find((c) => c.id === cardId));
+        } else {
+          this.currentCard.set(null);
+        }
+      });
   }
 
   private loadRoomFromUrl(roomId: string) {
@@ -660,12 +683,21 @@ export class ManagerDashboardComponent {
     localStorage.setItem('activeManagerRoom', roomId);
 
     // Observar la sala
-    this.roomService.observeRoom(roomId).subscribe((r) => {
-      this.room.set(r);
-      if (r && r.currentIndex >= 0) {
-        const cardId = r.deck[r.currentIndex];
-        this.currentCard.set(CARDS.find((c) => c.id === cardId));
-      }
-    });
+    this.roomSubscription?.unsubscribe();
+    this.roomSubscription = this.roomService
+      .observeRoom(roomId)
+      .subscribe((r) => {
+        this.room.set(r);
+        if (r && r.currentIndex >= 0) {
+          const cardId = r.deck[r.currentIndex];
+          this.currentCard.set(CARDS.find((c) => c.id === cardId));
+        } else {
+          this.currentCard.set(null);
+        }
+      });
+  }
+
+  ngOnDestroy(): void {
+    this.roomSubscription?.unsubscribe();
   }
 }

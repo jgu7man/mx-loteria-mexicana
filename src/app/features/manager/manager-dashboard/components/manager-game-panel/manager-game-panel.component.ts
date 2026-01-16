@@ -7,7 +7,7 @@ import {
   isRoomActive,
   isRoomWaiting,
 } from '../../../../../core/constants/room-states';
-import { Card, Participant, Room } from '../../../../../core/models/game.model';
+import { Card, Participant, Room, RoundWinner } from '../../../../../core/models/game.model';
 import { CardComponent } from '../../../../../shared/components/card/card.component';
 
 @Component({
@@ -25,6 +25,7 @@ export class ManagerGamePanelComponent {
   @Input() participants: Participant[] = [];
   @Input() players: Participant[] = [];
   @Input() pendingWinners: Participant[] = [];
+  @Input() currentRoundWinners: RoundWinner[] = [];
 
   @Output() startRound = new EventEmitter<void>();
   @Output() nextCard = new EventEmitter<void>();

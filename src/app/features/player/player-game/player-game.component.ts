@@ -151,7 +151,15 @@ export class PlayerGameComponent implements OnInit {
     });
 
     // Generate some tablas
-    this.availableTablas.set(this.gameUtils.generateMultipleTablas(10));
+    this.refreshAvailableTablas();
+  }
+
+  refreshAvailableTablas() {
+    // Generar 3 tablas aleatorias para que el jugador elija
+    this.availableTablas.set(this.gameUtils.generateMultipleTablas(3));
+
+    // Desplazar la vista al inicio del contenedor si es necesario
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
   private async restorePlayerSession() {

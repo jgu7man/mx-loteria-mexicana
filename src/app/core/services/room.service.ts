@@ -52,7 +52,7 @@ export class RoomService {
         name: roomName,
         managerId,
         managerName,
-        state: ROOM_STATES.WAITING,
+        state: 'waiting',
         config,
         deck: [],
         currentIndex: -1,
@@ -155,6 +155,18 @@ export class RoomService {
 
       if (!room) throw new Error('Room not found');
 
+      // Si la sala está en un estado corrupto (verifying sin jugadores activos), resetear
+      if (room.state === ROOM_STATES.VERIFYING && room.currentRound === 0) {
+        await updateDoc(roomRef, {
+          state: ROOM_STATES.WAITING,
+          currentRoundWinners: [],
+          currentRoundVerifiedWinners: [],
+        });
+        throw new Error(
+          'La sala estaba en un estado inválido y fue reseteada. Intenta nuevamente.'
+        );
+      }
+
       const newDeck = this.gameUtils.generateNewDeck();
       const newRound = room.currentRound + 1;
 
@@ -181,20 +193,23 @@ export class RoomService {
 
   /**
    * Avanzar a la siguiente carta
+   * @returns true si avanzó exitosamente, false si ya no hay más cartas
    */
-  async nextCard(roomId: string): Promise<void> {
+  async nextCard(roomId: string): Promise<boolean> {
     try {
       const roomRef = doc(this.firestore, 'salas', roomId);
       const room = await this.getRoom(roomId);
 
       if (!room) throw new Error('Room not found');
       if (room.currentIndex >= room.deck.length - 1) {
-        throw new Error('No more cards in deck');
+        return false; // No more cards
       }
 
       await updateDoc(roomRef, {
         currentIndex: room.currentIndex + 1,
       });
+
+      return true;
     } catch (error) {
       console.error('Error advancing card:', error);
       throw error;
@@ -374,6 +389,14 @@ export class RoomService {
         `salas/${roomId}/participantes`,
         uid
       );
+
+      // Verificar que el participante existe antes de actualizar
+      const participantSnap = await getDoc(participantRef);
+      if (!participantSnap.exists()) {
+        console.warn('Cannot update participant that does not exist:', uid);
+        return;
+      }
+
       await updateDoc(participantRef, updates);
     } catch (error) {
       console.error('Error updating participant:', error);
