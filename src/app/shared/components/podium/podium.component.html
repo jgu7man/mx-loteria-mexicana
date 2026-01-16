@@ -1,7 +1,21 @@
-<div class="fixed inset-0 bg-gradient-to-br from-yellow-400 via-amber-500 to-orange-600 z-50 flex items-center justify-center p-4 overflow-y-auto">
+<div class="fixed inset-0 bg-gradient-to-br from-yellow-400 via-amber-500 to-orange-600 z-50 flex  justify-center p-4 overflow-y-auto">
   <div class="max-w-4xl w-full">
+    <!-- Projected Content (Buttons) - At the top -->
+    <div class="flex justify-evenly mb-6">
+      <ng-content></ng-content>
+    </div>
+
+        <!-- Continue message -->
+    <div *ngIf="!isLastRound" class="text-center">
+      <div class="bg-white/90 backdrop-blur-sm rounded-2xl p-4 inline-block shadow-lg mb-4">
+        <p class="text-gray-700 font-semibold">
+          ⏳ Esperando que el gritón inicie la siguiente ronda...
+        </p>
+      </div>
+    </div>
+
     <!-- Confetti effect -->
-    <div class="text-center mb-8 animate-bounce">
+    <div class="text-center mb-8 animate-bounce-brief">
       <div class="text-6xl md:text-8xl mb-4">🎉</div>
       <h1 class="text-4xl md:text-6xl font-bold text-white mb-2 drop-shadow-lg">
         ¡LOTERÍA!
@@ -44,11 +58,23 @@
 
           <!-- Winner info -->
           <div class="flex-1 min-w-0">
-            <div class="text-xl font-bold text-gray-800 truncate">
+            <div class="text-xl font-bold text-gray-800 truncate mb-3">
               {{ winner.displayName }}
             </div>
-            <div class="text-sm text-gray-600">
-              Tabla #{{ getTablaNumber(winner.tablaId) }} • {{ winner.marks.length }} cartas marcadas
+            <!-- Winner tabla -->
+            <div class="w-full max-w-sm">
+              <app-tabla
+                *ngIf="winner.tablaCards && winner.tablaCards.length > 0"
+                [tablaCards]="winner.tablaCards"
+                [marks]="winner.marks"
+                [markerEmoji]="'🔥'"
+                [isInteractive]="false"
+                [size]="'small'">
+              </app-tabla>
+              <div *ngIf="!winner.tablaCards || winner.tablaCards.length === 0" 
+                   class="text-sm text-gray-500 italic">
+                Tabla no disponible
+              </div>
             </div>
           </div>
 
@@ -67,13 +93,5 @@
       </div>
     </div>
 
-    <!-- Continue message -->
-    <div *ngIf="!isLastRound" class="text-center">
-      <div class="bg-white/90 backdrop-blur-sm rounded-2xl p-4 inline-block shadow-lg">
-        <p class="text-gray-700 font-semibold">
-          ⏳ Esperando que el gritón inicie la siguiente ronda...
-        </p>
-      </div>
-    </div>
   </div>
 </div>

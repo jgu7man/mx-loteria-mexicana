@@ -93,6 +93,7 @@ export interface RoundWinner {
   uid: string;
   displayName: string;
   tablaId: number;
+  tablaCards?: number[]; // Cartas de la tabla para visualización
   marks: number[];
   verifiedAt: Date;
 }

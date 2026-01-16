@@ -89,6 +89,12 @@ export class ManagerDashboardComponent {
     return participants.filter((p) => winnerIds.has(p.uid));
   });
 
+  playedCards = computed(() => {
+    const r = this.room();
+    if (!r || !r.deck) return [];
+    return r.deck.slice(0, r.currentIndex + 1);
+  });
+
   showPodium = computed(() => {
     const r = this.room();
     if (!r) return false;
@@ -99,7 +105,7 @@ export class ManagerDashboardComponent {
         r.currentRound > 0 &&
         r.roundHistory.length > 0 &&
         r.roundHistory[r.roundHistory.length - 1]?.roundNumber ===
-          r.currentRound - 1)
+          r.currentRound)
     );
   });
 
@@ -115,7 +121,7 @@ export class ManagerDashboardComponent {
     // If waiting for next round, show winners from previous round
     if (r.state === ROOM_STATES.WAITING && r.roundHistory.length > 0) {
       const lastRound = r.roundHistory[r.roundHistory.length - 1];
-      if (lastRound?.roundNumber === r.currentRound - 1) {
+      if (lastRound?.roundNumber === r.currentRound) {
         return lastRound.winners || [];
       }
     }
@@ -153,10 +159,6 @@ export class ManagerDashboardComponent {
     effect(
       () => {
         const user = this.currentUser();
-        console.log(
-          'Usuario autenticado:',
-          user ? user.displayName : 'No autenticado'
-        );
 
         // Cuando el usuario se autentica, verificar si tiene una sala activa
         if (user) {
@@ -201,7 +203,6 @@ export class ManagerDashboardComponent {
       const rooms = await this.roomService.getRoomsByManager(
         this.currentUser()!.uid
       );
-      console.log(`🤖 ~ manager-dashboard.component.ts:66 ~ rooms:`, rooms);
       this.managerRooms.set(rooms);
     } catch (error) {
       console.error('Error loading manager rooms:', error);
@@ -226,7 +227,6 @@ export class ManagerDashboardComponent {
               this.currentCard.set(CARDS.find((c) => c.id === cardId));
             }
           });
-          console.log('Sala activa restaurada:', storedRoomId);
         } else {
           // La sala no existe o no es el manager, limpiar
           localStorage.removeItem('activeManagerRoom');
@@ -382,12 +382,16 @@ export class ManagerDashboardComponent {
   async approveWinner() {
     const currentRoom = this.room();
     const p = this.reviewingParticipant();
-    if (!currentRoom || !p) return;
+
+    if (!currentRoom || !p) {
+      return;
+    }
 
     const winner: RoundWinner = {
       uid: p.uid,
       displayName: p.displayName,
       tablaId: p.tablaId ?? -1,
+      tablaCards: p.tablaCards || [],
       marks: p.marks || [],
       verifiedAt: new Date(),
     };
@@ -395,10 +399,21 @@ export class ManagerDashboardComponent {
     try {
       await this.roomService.approveWinner(currentRoom.id, winner);
       this.clearReview();
+
+      // Verificar si hay más ganadores pendientes de revisión
+      const remainingWinners = (currentRoom.currentRoundWinners || []).filter(
+        (uid) => uid !== p.uid
+      );
+
+      let message = 'La ronda continúa';
+      if (remainingWinners.length > 0) {
+        message = `Quedan ${remainingWinners.length} jugadores por verificar.`;
+      }
+
       Swal.fire({
         icon: 'success',
         title: '¡Ganador registrado!',
-        text: 'La ronda continúa',
+        text: message,
         timer: 2000,
         showConfirmButton: false,
       });
@@ -407,6 +422,31 @@ export class ManagerDashboardComponent {
       Swal.fire({
         icon: 'error',
         title: 'Error al aprobar el ganador',
+        confirmButtonColor: '#6366f1',
+      });
+    }
+  }
+
+  async rejectWinner() {
+    const currentRoom = this.room();
+    const p = this.reviewingParticipant();
+    if (!currentRoom || !p) return;
+
+    try {
+      await this.roomService.rejectWinner(currentRoom.id, p.uid);
+      this.clearReview();
+      Swal.fire({
+        icon: 'info',
+        title: 'Gane rechazado',
+        text: 'El jugador ha sido removido de la lista de verificación',
+        timer: 2000,
+        showConfirmButton: false,
+      });
+    } catch (error) {
+      console.error('Error rejecting winner:', error);
+      Swal.fire({
+        icon: 'error',
+        title: 'Error al rechazar el gane',
         confirmButtonColor: '#6366f1',
       });
     }
@@ -501,12 +541,14 @@ export class ManagerDashboardComponent {
       didOpen: () => {
         // Use qrcode library to generate QR
         import('qrcode').then((QRCode) => {
-          const canvas = document.getElementById('qr-canvas') as HTMLCanvasElement;
+          const canvas = document.getElementById(
+            'qr-canvas'
+          ) as HTMLCanvasElement;
           if (canvas) {
             QRCode.toCanvas(canvas, joinLink, {
               width: 256,
               margin: 2,
-              errorCorrectionLevel: 'M'
+              errorCorrectionLevel: 'M',
             });
           }
         });

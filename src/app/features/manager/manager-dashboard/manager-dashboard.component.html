@@ -1,13 +1,4 @@
 <div class="manager-container min-h-screen bg-gray-50 p-8">
-  <!-- Podium overlay -->
-  <app-podium
-    *ngIf="showPodium()"
-    [winners]="currentRoundWinners()"
-    [roundNumber]="room()?.currentRound || 0"
-    [maxRounds]="room()?.config?.maxRounds || 0"
-    [isLastRound]="room()?.state === 'finished'">
-  </app-podium>
-
   <!-- Header -->
   <header class="flex justify-between items-center mb-2 p-2">
     <h1 class="text-2xl font-bold text-gray-800 flex items-center gap-3">
@@ -69,7 +60,9 @@
 <!-- Modal de revisión de tabla -->
 <app-manager-review-modal
   [reviewingParticipant]="reviewingParticipant()"
+  [playedCards]="playedCards()"
   [isOpen]="isReviewModalOpen()"
   (approveWinner)="approveWinner()"
+  (rejectWinner)="rejectWinner()"
   (closeModal)="clearReview()">
 </app-manager-review-modal>
