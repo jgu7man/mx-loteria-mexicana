@@ -1,11 +1,12 @@
 import { CommonModule } from '@angular/common';
 import { Component, Input } from '@angular/core';
 import { RoundWinner } from '../../../core/models/game.model';
+import { TablaComponent } from '../tabla/tabla.component';
 
 @Component({
   selector: 'app-podium',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, TablaComponent],
   templateUrl: './podium.component.html',
   styleUrl: './podium.component.css',
 })

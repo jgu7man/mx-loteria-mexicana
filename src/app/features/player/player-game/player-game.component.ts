@@ -13,18 +13,16 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import Swal from 'sweetalert2';
 import { CARDS, MARKERS } from '../../../core/constants/game-data';
-import {
-  ROOM_STATES,
-} from '../../../core/constants/room-states';
+import { ROOM_STATES } from '../../../core/constants/room-states';
 import { Marker, Participant, Room } from '../../../core/models/game.model';
 import { AuthService } from '../../../core/services/auth.service';
 import { GameUtilsService } from '../../../core/services/game-utils.service';
 import { RoomService } from '../../../core/services/room.service';
 import { MarkerComponent } from '../../../shared/components/marker/marker.component';
 import { PodiumComponent } from '../../../shared/components/podium/podium.component';
+import { PlayerGameBoardComponent } from './components/player-game-board/player-game-board.component';
 import { PlayerJoinFormComponent } from './components/player-join-form/player-join-form.component';
 import { PlayerTablaSelectorComponent } from './components/player-tabla-selector/player-tabla-selector.component';
-import { PlayerGameBoardComponent } from './components/player-game-board/player-game-board.component';
 
 @Component({
   selector: 'app-player-game',
@@ -66,7 +64,7 @@ export class PlayerGameComponent implements OnInit {
         r.currentRound > 0 &&
         r.roundHistory.length > 0 &&
         r.roundHistory[r.roundHistory.length - 1]?.roundNumber ===
-          r.currentRound - 1)
+          r.currentRound)
     );
   });
 
@@ -82,7 +80,7 @@ export class PlayerGameComponent implements OnInit {
     // If waiting for next round, show winners from previous round
     if (r.state === ROOM_STATES.WAITING && r.roundHistory.length > 0) {
       const lastRound = r.roundHistory[r.roundHistory.length - 1];
-      if (lastRound?.roundNumber === r.currentRound - 1) {
+      if (lastRound?.roundNumber === r.currentRound) {
         return lastRound.winners || [];
       }
     }
@@ -115,6 +113,7 @@ export class PlayerGameComponent implements OnInit {
   roomId = '';
   displayName = '';
   showJoinForm = signal(true);
+  isRoomDeleted = signal(false);
   showMarkerSelector = signal(false);
   showTablaSelector = signal(false);
   selectedMarker = signal<Marker | null>(null);
@@ -134,7 +133,6 @@ export class PlayerGameComponent implements OnInit {
       () => {
         const user = this.currentUser();
         if (user) {
-          console.log('Jugador autenticado:', user.displayName);
           this.restorePlayerSession();
         }
       },
@@ -188,9 +186,15 @@ export class PlayerGameComponent implements OnInit {
         // Observar la sala
         this.roomService.observeRoom(roomIdCandidate).subscribe((r) => {
           this.room.set(r);
-          if (r && r.currentIndex >= 0) {
-            const cardId = r.deck[r.currentIndex];
-            this.currentCard.set(CARDS.find((c) => c.id === cardId));
+          if (!r) {
+            // Si r es null y ya habíamos validado que existía, significa que fue eliminada
+            this.isRoomDeleted.set(true);
+          } else {
+            this.isRoomDeleted.set(false);
+            if (r.currentIndex >= 0) {
+              const cardId = r.deck[r.currentIndex];
+              this.currentCard.set(CARDS.find((c) => c.id === cardId));
+            }
           }
         });
 
@@ -256,8 +260,6 @@ export class PlayerGameComponent implements OnInit {
           tabla: restoredTabla,
           marks: this.myMarks(),
         });
-
-        console.log('Sesión de jugador restaurada');
       } catch (error) {
         console.error('Error restoring player session:', error);
         this.clearPlayerSession(user.uid, roomIdCandidate);

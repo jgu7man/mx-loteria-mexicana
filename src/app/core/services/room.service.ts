@@ -285,6 +285,22 @@ export class RoomService {
         (uid) => uid !== winner.uid
       );
 
+      // Incrementar victorias del participante
+      const participantRef = doc(
+        this.firestore,
+        `salas/${roomId}/participantes`,
+        winner.uid
+      );
+      const participantSnap = await getDoc(participantRef);
+
+      if (participantSnap.exists()) {
+        const participant = participantSnap.data() as Participant;
+        const currentVictories = participant.victories || 0;
+        await updateDoc(participantRef, {
+          victories: currentVictories + 1,
+        });
+      }
+
       await updateDoc(roomRef, {
         currentRoundVerifiedWinners: this.serializeRoundWinners(verified),
         currentRoundWinners: pending,
@@ -292,6 +308,30 @@ export class RoomService {
       });
     } catch (error) {
       console.error('Error approving winner:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Rechazar un ganador (quitar de la lista de pendientes)
+   */
+  async rejectWinner(roomId: string, winnerId: string): Promise<void> {
+    try {
+      const roomRef = doc(this.firestore, 'salas', roomId);
+      const room = await this.getRoom(roomId);
+      if (!room) throw new Error('Room not found');
+
+      // Quitar de la lista de pendientes
+      const pending = (room.currentRoundWinners || []).filter(
+        (uid) => uid !== winnerId
+      );
+
+      await updateDoc(roomRef, {
+        currentRoundWinners: pending,
+        state: pending.length > 0 ? ROOM_STATES.VERIFYING : ROOM_STATES.PLAYING,
+      });
+    } catch (error) {
+      console.error('Error rejecting winner:', error);
       throw error;
     }
   }

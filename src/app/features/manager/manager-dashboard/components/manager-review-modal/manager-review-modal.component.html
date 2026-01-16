@@ -13,6 +13,34 @@
       <button (click)="closeModal.emit()" class="text-gray-400 hover:text-gray-600">✕</button>
     </div>
 
+    <!-- Panel de Validación -->
+    <div *ngIf="validation" class="mt-4 p-4 rounded-lg border flex items-center justify-between"
+         [ngClass]="{
+           'bg-green-50 border-green-200': validation.status === 'GANADOR',
+           'bg-blue-50 border-blue-200': validation.status === 'INCOMPLETO',
+           'bg-red-50 border-red-200': validation.status === 'ERROR EN MARCAS'
+         }">
+      <div class="flex items-center gap-3">
+        <div class="text-3xl">
+          {{ validation.status === 'GANADOR' ? '✅' : (validation.status === 'INCOMPLETO' ? '⚠️' : '❌') }}
+        </div>
+        <div>
+          <h4 class="font-bold text-lg" [class]="validation.statusColor">
+            {{ validation.status }}
+          </h4>
+          <p class="text-gray-700 font-medium">
+            {{ validation.message }}
+          </p>
+        </div>
+      </div>
+      
+      <div class="text-right text-sm text-gray-600 ml-4">
+        <div>Faltantes: <span class="font-bold">{{ validation.missingCount }}</span></div>
+        <div *ngIf="validation.invalidMarksCount > 0" class="text-red-600">Marcas inválidas: <span class="font-bold">{{ validation.invalidMarksCount }}</span></div>
+        <div *ngIf="validation.missedMarksCount > 0" class="text-yellow-600">Se le pasaron: <span class="font-bold">{{ validation.missedMarksCount }}</span></div>
+      </div>
+    </div>
+
     <div class="mt-6 flex-1 min-h-0 overflow-auto">
       <div *ngIf="!(reviewingParticipant?.tablaCards?.length)" class="text-gray-600">
         Este jugador todavía no tiene tabla registrada.
@@ -36,9 +64,14 @@
         Cerrar
       </button>
       <button
-        (click)="approveWinner.emit()"
+        (click)="onRejectWinner()"
+        class="bg-red-600 text-white px-5 py-3 rounded-lg font-semibold hover:bg-red-700 transition">
+        ❌ No ganó
+      </button>
+      <button
+        (click)="onApproveWinner()"
         class="bg-green-600 text-white px-5 py-3 rounded-lg font-semibold hover:bg-green-700 transition">
-        Dar el gane
+        ✅ Dar el gane
       </button>
     </div>
   </div>

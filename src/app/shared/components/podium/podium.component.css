@@ -7,3 +7,20 @@
     transform: translateY(100vh) rotate(360deg);
   }
 }
+
+.animate-bounce-brief {
+  animation: bounce 1s infinite;
+  animation-iteration-count: 3; /* Bounce 3 times then stop */
+}
+
+@keyframes bounce {
+  0%,
+  100% {
+    transform: translateY(-25%);
+    animation-timing-function: cubic-bezier(0.8, 0, 1, 1);
+  }
+  50% {
+    transform: translateY(0);
+    animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
+  }
+}

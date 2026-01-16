@@ -1,5 +1,5 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
 @Component({
@@ -7,16 +7,17 @@ import { FormsModule } from '@angular/forms';
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './player-join-form.component.html',
-  styleUrl: './player-join-form.component.css'
+  styleUrl: './player-join-form.component.css',
 })
 export class PlayerJoinFormComponent {
   @Input() displayName = '';
   @Input() roomId = '';
-  
+
   @Output() displayNameChange = new EventEmitter<string>();
   @Output() roomIdChange = new EventEmitter<string>();
   @Output() signInAnonymously = new EventEmitter<void>();
   @Output() signInWithGoogle = new EventEmitter<void>();
+  @Output() goHome = new EventEmitter<void>();
 
   onDisplayNameChange(value: string) {
     this.displayName = value;
