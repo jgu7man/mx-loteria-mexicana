@@ -69,7 +69,8 @@
     [availableTablas]="availableTablas()"
     [showCancelButton]="myTabla().length > 0"
     (tablaSelected)="selectTabla($event)"
-    (cancel)="cancelTablaSelection()">
+    (cancel)="cancelTablaSelection()"
+    (requestMore)="refreshAvailableTablas()">
   </app-player-tabla-selector>
 
   <!-- Game view -->

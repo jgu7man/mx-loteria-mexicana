@@ -1,5 +1,5 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CARDS } from '../../../../../core/constants/game-data';
 
 @Component({
@@ -7,14 +7,15 @@ import { CARDS } from '../../../../../core/constants/game-data';
   standalone: true,
   imports: [CommonModule],
   templateUrl: './player-tabla-selector.component.html',
-  styleUrl: './player-tabla-selector.component.css'
+  styleUrl: './player-tabla-selector.component.css',
 })
 export class PlayerTablaSelectorComponent {
   @Input() availableTablas: number[][] = [];
   @Input() showCancelButton = false;
-  
+
   @Output() tablaSelected = new EventEmitter<number[]>();
   @Output() cancel = new EventEmitter<void>();
+  @Output() requestMore = new EventEmitter<void>();
 
   selectTabla(tabla: number[]) {
     this.tablaSelected.emit(tabla);
@@ -22,6 +23,10 @@ export class PlayerTablaSelectorComponent {
 
   onCancel() {
     this.cancel.emit();
+  }
+
+  onRequestMore() {
+    this.requestMore.emit();
   }
 
   getCardsByIds(cardIds: number[]): any[] {
