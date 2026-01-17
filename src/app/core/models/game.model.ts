@@ -7,6 +7,7 @@ export interface Card {
   emoji: string;
   verso: string;
   color: string;
+  image?: string; // Ruta de la imagen (opcional, emoji es fallback)
 }
 
 /**

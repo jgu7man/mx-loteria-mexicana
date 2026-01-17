@@ -2,6 +2,12 @@
   display: block;
 }
 
+@media screen and (min-width: 1200px) {
+  :host ::ng-deep .card-container[_ngcontent-ng-c3975284818] {
+      width: 10vw;
+  }
+}
+
 .tabla-container {
   display: block;
   width: 100%;

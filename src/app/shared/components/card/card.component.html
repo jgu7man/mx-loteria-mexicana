@@ -3,19 +3,35 @@
   [class.card-small]="size === 'small'"
   [class.card-medium]="size === 'medium'"
   [class.card-large]="size === 'large'"
-  [style.background-color]="backgroundColor">
+  [class.has-image]="card.image && !imageError"
+  [style.background-color]="!card.image || imageError ? backgroundColor : 'transparent'">
   
   <!-- Card content -->
-  <div class="card-content flex flex-col items-center justify-center h-full p-4 relative">
-    <!-- Emoji -->
-    <div class="card-emoji text-center">
-      {{ card.emoji }}
-    </div>
+  <div class="card-content flex flex-col items-center justify-center h-full relative"
+       [class.p-0]="card.image && !imageError"
+       [class.p-4]="!card.image || imageError">
     
-    <!-- Name -->
-    <div class="card-name text-white font-bold text-center mt-2 drop-shadow-lg">
-      {{ card.name }}
-    </div>
+    <!-- Image only (when available) -->
+    <img 
+      *ngIf="card.image && !imageError" 
+      [src]="card.image" 
+      [alt]="card.name"
+      class="card-image object-contain block w-full h-full"
+      (error)="onImageError($event)" />
+    
+    <!-- Fallback: Emoji + Name (when no image or error) -->
+    <ng-container *ngIf="!card.image || imageError">
+      <div class="card-visual text-center w-full flex-1 flex items-center justify-center">
+        <div class="card-emoji">
+          {{ card.emoji }}
+        </div>
+      </div>
+      
+      <!-- Name -->
+      <div class="card-name text-white font-bold text-center mt-2 drop-shadow-lg">
+        {{ card.name }}
+      </div>
+    </ng-container>
     
     <!-- Marker overlay (when marked) -->
     <div *ngIf="isMarked && markerEmoji" 

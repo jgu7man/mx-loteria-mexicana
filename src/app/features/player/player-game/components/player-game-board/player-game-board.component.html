@@ -43,7 +43,7 @@
     </div>
     <!-- Center: Tabla -->
     <div class="xl:col-span-6">
-      <div class=" rounded-2xl py-0 px-[3.5rem]">
+      <div id="tabla-desktop" class="rounded-2xl py-0 px-[3.5rem]">
         <app-tabla [tablaCards]="myTabla" [marks]="myMarks"
                    [markerEmoji]="selectedMarker" [isInteractive]="true"
                    [size]="'large'" (cardClicked)="onCardClicked($event)">
