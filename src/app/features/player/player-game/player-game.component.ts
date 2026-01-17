@@ -11,11 +11,12 @@ import {
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import Swal from 'sweetalert2';
+
 import { CARDS, MARKERS } from '../../../core/constants/game-data';
 import { ROOM_STATES } from '../../../core/constants/room-states';
 import { Marker, Participant, Room } from '../../../core/models/game.model';
 import { AuthService } from '../../../core/services/auth.service';
+import { AlertService } from '../../../core/services/alert.service';
 import { GameUtilsService } from '../../../core/services/game-utils.service';
 import { RoomService } from '../../../core/services/room.service';
 import { MarkerComponent } from '../../../shared/components/marker/marker.component';
@@ -45,6 +46,7 @@ export class PlayerGameComponent implements OnInit {
   private authService = inject(AuthService);
   private roomService = inject(RoomService);
   private gameUtils = inject(GameUtilsService);
+  private alertService = inject(AlertService);
   private destroyRef = inject(DestroyRef);
 
   // Signals
@@ -380,7 +382,7 @@ export class PlayerGameComponent implements OnInit {
 
   async signInAnonymously() {
     if (!this.displayName.trim() || !this.roomId.trim()) {
-      Swal.fire({
+      this.alertService.fire({
         icon: 'warning',
         title: 'Campos incompletos',
         text: 'Por favor completa todos los campos',
@@ -400,14 +402,14 @@ export class PlayerGameComponent implements OnInit {
       console.error('Error joining room:', error);
 
       if (error.code === 'auth/admin-restricted-operation') {
-        Swal.fire({
+        this.alertService.fire({
           icon: 'error',
           title: 'Autenticación deshabilitada',
           text: 'La autenticación anónima no está habilitada. Por favor, usa "Entrar con Google"',
           confirmButtonColor: '#10b981',
         });
       } else {
-        Swal.fire({
+        this.alertService.fire({
           icon: 'error',
           title: 'Error al unirse',
           text: error.message || 'No se pudo unirse a la sala',
@@ -419,7 +421,7 @@ export class PlayerGameComponent implements OnInit {
 
   async signInWithGoogle() {
     if (!this.roomId.trim()) {
-      Swal.fire({
+      this.alertService.fire({
         icon: 'warning',
         title: 'Código requerido',
         text: 'Por favor ingresa el código de la sala',
@@ -436,7 +438,7 @@ export class PlayerGameComponent implements OnInit {
       await this.joinRoom();
     } catch (error: any) {
       console.error('Error joining room:', error);
-      Swal.fire({
+      this.alertService.fire({
         icon: 'error',
         title: 'Error al unirse',
         text: error.message || 'No se pudo unirse a la sala',
@@ -449,7 +451,7 @@ export class PlayerGameComponent implements OnInit {
     // Check if room exists
     const room = await this.roomService.getRoom(this.roomId);
     if (!room) {
-      Swal.fire({
+      this.alertService.fire({
         icon: 'error',
         title: 'Sala no encontrada',
         text: 'Verifica el código e inténtalo nuevamente',
@@ -573,7 +575,7 @@ export class PlayerGameComponent implements OnInit {
       }
 
       await this.roomService.addWinner(this.roomId, this.currentUser()!.uid);
-      Swal.fire({
+      this.alertService.fire({
         icon: 'success',
         title: '¡Solicitud enviada!',
         text: 'El gritón verificará tu tabla',
@@ -581,7 +583,7 @@ export class PlayerGameComponent implements OnInit {
       });
     } catch (error: any) {
       console.error('Error shouting lotería:', error);
-      Swal.fire({
+      this.alertService.fire({
         icon: 'error',
         title: 'No se pudo enviar',
         text: error.message || 'Intenta nuevamente',

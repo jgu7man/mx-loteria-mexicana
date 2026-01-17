@@ -11,7 +11,7 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { QRCodeModule } from 'angularx-qrcode';
 import { Subscription } from 'rxjs';
-import Swal from 'sweetalert2';
+
 import { CARDS, MARKERS } from '../../../core/constants/game-data';
 import {
   getRoomStateColors,
@@ -27,6 +27,7 @@ import {
   RoundWinner,
 } from '../../../core/models/game.model';
 import { AuthService } from '../../../core/services/auth.service';
+import { AlertService } from '../../../core/services/alert.service';
 import { GameUtilsService } from '../../../core/services/game-utils.service';
 import { RoomService } from '../../../core/services/room.service';
 import { CardComponent } from '../../../shared/components/card/card.component';
@@ -61,6 +62,7 @@ export class ManagerDashboardComponent implements OnDestroy {
   private roomService = inject(RoomService);
   private gameState = inject(ManagerGameStateService);
   private gameUtils = inject(GameUtilsService);
+  private alertService = inject(AlertService);
 
   readonly origin = window.location.origin;
 
@@ -267,7 +269,7 @@ export class ManagerDashboardComponent implements OnDestroy {
       await this.authService.signInWithGoogle();
     } catch (error) {
       console.error('Error signing in:', error);
-      Swal.fire({
+      this.alertService.fire({
         icon: 'error',
         title: 'Error al iniciar sesión',
         text: 'No se pudo iniciar sesión con Google',
@@ -290,7 +292,7 @@ export class ManagerDashboardComponent implements OnDestroy {
     difficulty: 'easy' | 'medium' | 'hard',
   ) {
     if (!this.currentUser()?.uid || !roomName.trim()) {
-      Swal.fire({
+      this.alertService.fire({
         icon: 'warning',
         title: 'Campos incompletos',
         text: 'Por favor completa todos los campos',
@@ -323,7 +325,7 @@ export class ManagerDashboardComponent implements OnDestroy {
       // La suscripción a la sala se hará automáticamente por el effect que observa la URL
 
       this.loadManagerRooms(); // Recargar la lista de salas
-      Swal.fire({
+      this.alertService.fire({
         icon: 'success',
         title: '¡Sala creada!',
         html: `<p class="text-gray-600">ID de la sala:</p><p class="text-2xl font-bold text-indigo-600">${roomId}</p>`,
@@ -331,7 +333,7 @@ export class ManagerDashboardComponent implements OnDestroy {
       });
     } catch (error) {
       console.error('Error creating room:', error);
-      Swal.fire({
+      this.alertService.fire({
         icon: 'error',
         title: 'Error al crear la sala',
         text: 'No se pudo crear la sala. Intenta nuevamente.',
@@ -346,7 +348,7 @@ export class ManagerDashboardComponent implements OnDestroy {
 
     try {
       await this.roomService.startNewRound(currentRoom.id);
-      Swal.fire({
+      this.alertService.fire({
         icon: 'success',
         title: '¡Ronda iniciada!',
         text: 'Las cartas han sido barajadas',
@@ -355,7 +357,7 @@ export class ManagerDashboardComponent implements OnDestroy {
       });
     } catch (error) {
       console.error('Error starting round:', error);
-      Swal.fire({
+      this.alertService.fire({
         icon: 'error',
         title: 'Error al iniciar la ronda',
         confirmButtonColor: '#6366f1',
@@ -371,7 +373,7 @@ export class ManagerDashboardComponent implements OnDestroy {
       const hasMoreCards = await this.roomService.nextCard(currentRoom.id);
 
       if (!hasMoreCards) {
-        Swal.fire({
+        this.alertService.fire({
           icon: 'info',
           title: '¡Se acabaron las cartas!',
           text: 'El mazo ha terminado. Finaliza la ronda para continuar.',
@@ -380,7 +382,7 @@ export class ManagerDashboardComponent implements OnDestroy {
       }
     } catch (error) {
       console.error('Error advancing card:', error);
-      Swal.fire({
+      this.alertService.fire({
         icon: 'error',
         title: 'Error al avanzar carta',
         confirmButtonColor: '#6366f1',
@@ -439,7 +441,7 @@ export class ManagerDashboardComponent implements OnDestroy {
         message = `Quedan ${remainingWinners.length} jugadores por verificar.`;
       }
 
-      Swal.fire({
+      this.alertService.fire({
         icon: 'success',
         title: '¡Ganador registrado!',
         text: message,
@@ -448,7 +450,7 @@ export class ManagerDashboardComponent implements OnDestroy {
       });
     } catch (error) {
       console.error('Error approving winner:', error);
-      Swal.fire({
+      this.alertService.fire({
         icon: 'error',
         title: 'Error al aprobar el ganador',
         confirmButtonColor: '#6366f1',
@@ -464,7 +466,7 @@ export class ManagerDashboardComponent implements OnDestroy {
     try {
       await this.roomService.rejectWinner(currentRoom.id, p.uid);
       this.clearReview();
-      Swal.fire({
+      this.alertService.fire({
         icon: 'info',
         title: 'Gane rechazado',
         text: 'El jugador ha sido removido de la lista de verificación',
@@ -473,7 +475,7 @@ export class ManagerDashboardComponent implements OnDestroy {
       });
     } catch (error) {
       console.error('Error rejecting winner:', error);
-      Swal.fire({
+      this.alertService.fire({
         icon: 'error',
         title: 'Error al rechazar el gane',
         confirmButtonColor: '#6366f1',
@@ -496,7 +498,7 @@ export class ManagerDashboardComponent implements OnDestroy {
         currentRoom.currentRoundVerifiedWinners || [],
       );
       this.clearReview();
-      Swal.fire({
+      this.alertService.fire({
         icon: 'success',
         title: '¡Ronda finalizada!',
         text: 'Los ganadores han sido registrados',
@@ -504,7 +506,7 @@ export class ManagerDashboardComponent implements OnDestroy {
       });
     } catch (error) {
       console.error('Error finishing round:', error);
-      Swal.fire({
+      this.alertService.fire({
         icon: 'error',
         title: 'Error al finalizar la ronda',
         confirmButtonColor: '#6366f1',
@@ -530,7 +532,7 @@ export class ManagerDashboardComponent implements OnDestroy {
 
     try {
       await navigator.clipboard.writeText(currentRoom.inviteLink);
-      Swal.fire({
+      this.alertService.fire({
         icon: 'success',
         title: '¡Link copiado!',
         text: 'El link de invitación ha sido copiado al portapapeles',
@@ -539,7 +541,7 @@ export class ManagerDashboardComponent implements OnDestroy {
       });
     } catch (error) {
       console.error('Error copying link:', error);
-      Swal.fire({
+      this.alertService.fire({
         icon: 'error',
         title: 'Error al copiar',
         text: 'No se pudo copiar el link. Inténtalo nuevamente.',
@@ -555,7 +557,7 @@ export class ManagerDashboardComponent implements OnDestroy {
     const joinLink = `${this.origin}/join/${currentRoom.id}`;
 
     // Use canvas API directly to generate QR code
-    Swal.fire({
+    this.alertService.fire({
       title: 'Código QR',
       html: `
         <div class="text-center">
@@ -595,7 +597,7 @@ export class ManagerDashboardComponent implements OnDestroy {
       .filter((c): c is (typeof CARDS)[number] => c != null);
 
     if (historyCards.length === 0) {
-      Swal.fire({
+      this.alertService.fire({
         icon: 'info',
         title: 'Sin historial',
         text: 'Aún no se han cantado cartas en esta ronda',
@@ -615,7 +617,7 @@ export class ManagerDashboardComponent implements OnDestroy {
       )
       .join('');
 
-    Swal.fire({
+    this.alertService.fire({
       title: `Historial de Cartas (${historyCards.length})`,
       html: `
         <div class="max-h-96 overflow-y-auto">
@@ -632,7 +634,7 @@ export class ManagerDashboardComponent implements OnDestroy {
     const currentRoom = this.room();
     if (!currentRoom) return;
 
-    const result = await Swal.fire({
+    const result = await this.alertService.fire({
       icon: 'warning',
       title: '¿Eliminar sala?',
       text: 'Esta acción no se puede deshacer',
@@ -649,7 +651,7 @@ export class ManagerDashboardComponent implements OnDestroy {
         localStorage.removeItem('activeManagerRoom');
         this.room.set(null);
         this.loadManagerRooms(); // Recargar la lista de salas
-        Swal.fire({
+        this.alertService.fire({
           icon: 'success',
           title: 'Sala eliminada',
           text: 'La sala ha sido eliminada correctamente',
@@ -658,7 +660,7 @@ export class ManagerDashboardComponent implements OnDestroy {
         });
       } catch (error) {
         console.error('Error deleting room:', error);
-        Swal.fire({
+        this.alertService.fire({
           icon: 'error',
           title: 'Error al eliminar la sala',
           confirmButtonColor: '#6366f1',

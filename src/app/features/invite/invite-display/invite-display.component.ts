@@ -2,12 +2,12 @@ import { CommonModule } from '@angular/common';
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { QRCodeModule } from 'angularx-qrcode';
-import Swal from 'sweetalert2';
 import {
   getRoomStateColors,
   getRoomStateLabel,
 } from '../../../core/constants/room-states';
 import { Participant, Room } from '../../../core/models/game.model';
+import { AlertService } from '../../../core/services/alert.service';
 import { RoomService } from '../../../core/services/room.service';
 
 @Component({
@@ -21,6 +21,7 @@ export class InviteDisplayComponent implements OnInit {
   private router = inject(Router);
   private route = inject(ActivatedRoute);
   private roomService = inject(RoomService);
+  private alertService = inject(AlertService);
 
   readonly origin = window.location.origin;
 
@@ -99,7 +100,7 @@ export class InviteDisplayComponent implements OnInit {
 
     try {
       await navigator.clipboard.writeText(viewerLink);
-      await Swal.fire({
+      await this.alertService.fire({
         icon: 'success',
         title: '¡Link copiado!',
         text: 'El link para visitantes ha sido copiado al portapapeles',
@@ -110,7 +111,7 @@ export class InviteDisplayComponent implements OnInit {
       });
     } catch (error) {
       console.error('Error copying viewer link:', error);
-      await Swal.fire({
+      await this.alertService.fire({
         icon: 'error',
         title: 'Error',
         text: 'No se pudo copiar el link',
