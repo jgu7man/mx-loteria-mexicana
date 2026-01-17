@@ -4,9 +4,10 @@
     <h1 class="text-2xl font-bold text-gray-800 flex items-center gap-3">
       🎙️ Panel del Gritón
     </h1>
-    <button 
+    <button
       (click)="goHome()"
-      class="bg-gray-100 text-gray-700 px-6 py-2 rounded-xl font-semibold hover:bg-gray-200 transition">
+      class="bg-gray-100 text-gray-700 px-6 py-2 rounded-xl font-semibold hover:bg-gray-200 transition"
+    >
       ← Volver
     </button>
   </header>
@@ -14,10 +15,13 @@
   <!-- Not authenticated -->
   <div *ngIf="!isAuthenticated()" class="text-center">
     <div class="bg-white rounded-lg p-6 max-w-md mx-auto">
-      <h2 class="text-2xl font-bold text-gray-800 mb-6">Inicia sesión para crear salas</h2>
-      <button 
+      <h2 class="text-2xl font-bold text-gray-800 mb-6">
+        Inicia sesión para crear salas
+      </h2>
+      <button
         (click)="signInWithGoogle()"
-        class="bg-indigo-600 text-white px-8 py-3 rounded-2xl font-semibold hover:bg-indigo-700 transition shadow-lg">
+        class="bg-indigo-600 text-white px-8 py-3 rounded-2xl font-semibold hover:bg-indigo-700 transition shadow-lg"
+      >
         🔐 Iniciar sesión con Google
       </button>
     </div>
@@ -30,7 +34,8 @@
       [loadingRooms]="loadingRooms()"
       [currentUser]="currentUser()"
       (roomSelected)="selectRoom($event)"
-      (createRoom)="handleCreateRoom($event)">
+      (createRoom)="handleCreateRoom($event)"
+    >
     </app-manager-room-list>
   </div>
 
@@ -38,12 +43,7 @@
   <div *ngIf="room()">
     <app-manager-game-panel
       [room]="room()!"
-      [currentCard]="currentCard()"
-      [nextCardPreview]="nextCardPreview()"
-      [nextVersoSuggestion]="nextVersoSuggestion()"
       [participants]="participants()"
-      [players]="players()"
-      [pendingWinners]="pendingWinners()"
       [currentRoundWinners]="currentRoundWinners()"
       (startRound)="startRound()"
       (nextCard)="nextCard()"
@@ -53,7 +53,8 @@
       (showCardHistory)="showCardHistory()"
       (finishRound)="finishRound()"
       (deleteRoom)="deleteRoom()"
-      (reviewParticipant)="reviewParticipant($event)">
+      (reviewParticipant)="reviewParticipant($event)"
+    >
     </app-manager-game-panel>
   </div>
 </div>
@@ -65,5 +66,6 @@
   [isOpen]="isReviewModalOpen()"
   (approveWinner)="approveWinner()"
   (rejectWinner)="rejectWinner()"
-  (closeModal)="clearReview()">
+  (closeModal)="clearReview()"
+>
 </app-manager-review-modal>

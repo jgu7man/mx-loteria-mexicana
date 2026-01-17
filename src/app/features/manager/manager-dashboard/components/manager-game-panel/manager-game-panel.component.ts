@@ -1,5 +1,13 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import {
+  Component,
+  EventEmitter,
+  Input,
+  OnInit,
+  Output,
+  effect,
+  inject,
+} from '@angular/core';
 import { MARKERS } from '../../../../../core/constants/game-data';
 import {
   getRoomStateColors,
@@ -7,24 +15,43 @@ import {
   isRoomActive,
   isRoomWaiting,
 } from '../../../../../core/constants/room-states';
-import { Card, Participant, Room, RoundWinner } from '../../../../../core/models/game.model';
+import {
+  Participant,
+  Room,
+  RoundWinner,
+} from '../../../../../core/models/game.model';
 import { CardComponent } from '../../../../../shared/components/card/card.component';
+import { NextCardPreviewComponent } from '../../../../../shared/components/next-card-preview/next-card-preview.component';
+import { PlayerListComponent } from '../../../../../shared/components/player-list/player-list.component';
+import { ManagerGameStateService } from '../../services/manager-game-state.service';
+import { ActiveCardDisplayComponent } from './components/active-card-display/active-card-display.component';
+import { GameControlsComponent } from './components/game-controls/game-controls.component';
+import { GameFinishedBannerComponent } from './components/game-finished-banner/game-finished-banner.component';
+import { GameStatsComponent } from './components/game-stats/game-stats.component';
+import { VerificationListComponent } from './components/verification-list/verification-list.component';
 
 @Component({
   selector: 'app-manager-game-panel',
   standalone: true,
-  imports: [CommonModule, CardComponent],
+  imports: [
+    CommonModule,
+    CardComponent,
+    NextCardPreviewComponent,
+    PlayerListComponent,
+    GameStatsComponent,
+    GameControlsComponent,
+    ActiveCardDisplayComponent,
+    VerificationListComponent,
+    GameFinishedBannerComponent,
+  ],
   templateUrl: './manager-game-panel.component.html',
   styleUrl: './manager-game-panel.component.css',
 })
-export class ManagerGamePanelComponent {
+export class ManagerGamePanelComponent implements OnInit {
+  private gameState = inject(ManagerGameStateService);
+
   @Input() room!: Room;
-  @Input() currentCard: Card | null = null;
-  @Input() nextCardPreview: Card | null = null;
-  @Input() nextVersoSuggestion = '';
   @Input() participants: Participant[] = [];
-  @Input() players: Participant[] = [];
-  @Input() pendingWinners: Participant[] = [];
   @Input() currentRoundWinners: RoundWinner[] = [];
 
   @Output() startRound = new EventEmitter<void>();
@@ -33,9 +60,29 @@ export class ManagerGamePanelComponent {
   @Output() showQRCode = new EventEmitter<void>();
   @Output() openInvitePage = new EventEmitter<void>();
   @Output() showCardHistory = new EventEmitter<void>();
+  @Output() changeDifficulty = new EventEmitter<void>();
   @Output() finishRound = new EventEmitter<void>();
   @Output() deleteRoom = new EventEmitter<void>();
   @Output() reviewParticipant = new EventEmitter<Participant>();
+
+  nextCardPreview = this.gameState.nextCardPreview;
+  players = this.gameState.players;
+
+  ngOnInit() {
+    // Sync inputs to service
+    this.gameState.setRoom(this.room);
+    this.gameState.setParticipants(this.participants);
+    this.gameState.setCurrentRoundWinners(this.currentRoundWinners);
+  }
+
+  constructor() {
+    // Keep service in sync with inputs
+    effect(() => {
+      if (this.room) {
+        this.gameState.setRoom(this.room);
+      }
+    });
+  }
 
   readonly getRoomStateLabel = getRoomStateLabel;
   readonly getRoomStateColors = getRoomStateColors;

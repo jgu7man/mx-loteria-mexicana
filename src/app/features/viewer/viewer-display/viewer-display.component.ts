@@ -4,8 +4,8 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { CARDS } from '../../../core/constants/game-data';
 import { Participant, Room } from '../../../core/models/game.model';
 import { RoomService } from '../../../core/services/room.service';
-import { ViewerJoinFormComponent } from '../viewer-join-form/viewer-join-form.component';
 import { ViewerGameDisplayComponent } from '../viewer-game-display/viewer-game-display.component';
+import { ViewerJoinFormComponent } from '../viewer-join-form/viewer-join-form.component';
 
 @Component({
   selector: 'app-viewer-display',
@@ -21,10 +21,19 @@ export class ViewerDisplayComponent implements OnInit {
 
   room = signal<Room | null>(null);
   currentCard = signal<any>(null);
+  nextCardPreview = computed(() => {
+    const r = this.room();
+    if (!r) return null;
+    const nextIndex = r.currentIndex + 1;
+    if (!Array.isArray(r.deck) || nextIndex < 0 || nextIndex >= r.deck.length)
+      return null;
+    const nextId = r.deck[nextIndex];
+    return CARDS.find((c) => c.id === nextId) ?? null;
+  });
   recentCards = signal<any[]>([]);
   participants = signal<Participant[]>([]);
   players = computed(() =>
-    this.participants().filter((p) => p.role === 'player')
+    this.participants().filter((p) => p.role === 'player'),
   );
   roomId = '';
   showJoinForm = signal(true);
@@ -75,12 +84,12 @@ export class ViewerDisplayComponent implements OnInit {
 
           const recentCardIds = r.deck.slice(
             Math.max(0, r.currentIndex - limit + 1),
-            r.currentIndex + 1
+            r.currentIndex + 1,
           );
           this.recentCards.set(
             recentCardIds
               .map((id) => CARDS.find((c) => c.id === id))
-              .filter((c) => c)
+              .filter((c) => c),
           );
         }
       });

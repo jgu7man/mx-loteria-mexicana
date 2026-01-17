@@ -1,0 +1,35 @@
+<div
+  class="next-card-container bg-gray-800 text-white p-5 rounded-2xl shadow-lg mb-3"
+>
+  <!-- Title - cambia si es privado o público -->
+  <p class="text-gray-400 text-[10px] uppercase font-bold mb-3 tracking-wider">
+    {{ title }}
+    <span *ngIf="mode === 'private'" class="text-red-400">
+      (SÓLO TÚ LA VES)</span
+    >
+  </p>
+
+  <div class="flex items-center gap-4">
+    <!-- Card preview -->
+    <div
+      class="w-16 h-20 bg-gray-700 rounded-lg flex items-center justify-center text-3xl shadow-md overflow-hidden"
+    >
+      <img
+        *ngIf="card?.image"
+        [src]="card?.image"
+        [alt]="card?.name"
+        class="w-full h-full object-cover"
+      />
+      <span *ngIf="!card?.image && card?.emoji">{{ card?.emoji }}</span>
+      <span *ngIf="!card">?</span>
+    </div>
+
+    <!-- Card info -->
+    <div class="flex-1">
+      <p class="font-bold text-white text-base mb-1 truncate">
+        {{ card?.name || "???" }}
+      </p>
+      <p class="text-[10px] text-gray-500">{{ subtitle }}</p>
+    </div>
+  </div>
+</div>

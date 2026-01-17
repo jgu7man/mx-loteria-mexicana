@@ -1,0 +1,58 @@
+<div
+  class="bg-white rounded-lg shadow-md p-6 h-full flex flex-col justify-between"
+>
+  <!-- Area de Carta -->
+  <div
+    id="current-card"
+    class="flex justify-center flex-1 items-center mb-6 min-h-[250px]"
+  >
+    <app-card
+      *ngIf="currentCard()"
+      [card]="currentCard()!"
+      [size]="'large'"
+      [showVerso]="true"
+    ></app-card>
+
+    <div
+      *ngIf="!currentCard()"
+      class="w-56 h-72 bg-gradient-to-br from-gray-50 to-gray-100 rounded-3xl border-4 border-gray-200 flex flex-col items-center justify-center shadow-inner"
+    >
+      <div class="text-6xl text-gray-800 font-bold mb-2">?</div>
+      <div class="text-gray-400 font-semibold tracking-widest text-sm">
+        ESPERANDO…
+      </div>
+    </div>
+  </div>
+
+  <!-- Sugerencia -->
+  <div class="bg-indigo-50 rounded-lg p-4 mb-6">
+    <p
+      class="text-[10px] uppercase font-bold text-indigo-400 mb-1 text-center tracking-widest"
+    >
+      Sugerencia
+    </p>
+    <p
+      class="text-indigo-700 italic font-semibold text-center text-lg min-h-[1.75rem]"
+    >
+      {{ nextVersoSuggestion() || "..." }}
+    </p>
+  </div>
+
+  <!-- Botones Principales -->
+  <div class="flex justify-center pb-2">
+    <button
+      *ngIf="isRoomWaiting(room()?.state || 'waiting')"
+      (click)="startRound.emit()"
+      class="bg-indigo-600 text-white px-8 py-4 rounded-xl font-bold hover:bg-indigo-700 transition text-lg shadow-lg w-full max-w-sm"
+    >
+      ▶️ Iniciar Ronda
+    </button>
+    <button
+      *ngIf="isRoomActive(room()?.state || 'waiting')"
+      (click)="nextCard.emit()"
+      class="bg-indigo-600 text-white px-8 py-4 rounded-xl font-bold hover:bg-indigo-700 transition text-lg shadow-lg w-full max-w-sm"
+    >
+      ➡️ Siguiente Carta
+    </button>
+  </div>
+</div>

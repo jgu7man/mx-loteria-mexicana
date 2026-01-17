@@ -1,0 +1,80 @@
+<div class="grid grid-cols-3 xl:grid-cols-1 gap-3">
+  <button
+    (click)="copyInviteLink.emit()"
+    class="btn-control bg-green-600 hover:bg-green-700"
+  >
+    <span class="xl:inline hidden">🔗 Compartir Link</span>
+    <span class="xl:hidden flex flex-col items-center gap-1">
+      <span class="text-2xl">🔗</span>
+      <span class="text-[10px]">Compartir</span>
+    </span>
+  </button>
+
+  <button
+    (click)="showQRCode.emit()"
+    class="btn-control bg-blue-600 hover:bg-blue-700"
+  >
+    <span class="xl:inline hidden">📱 Compartir QR</span>
+    <span class="xl:hidden flex flex-col items-center gap-1">
+      <span class="text-2xl">📱</span>
+      <span class="text-[10px]">QR</span>
+    </span>
+  </button>
+
+  <button
+    (click)="openInvitePage.emit()"
+    class="btn-control bg-indigo-600 hover:bg-indigo-700"
+  >
+    <span class="xl:inline hidden">🎉 Página de Invitación</span>
+    <span class="xl:hidden flex flex-col items-center gap-1">
+      <span class="text-2xl">🎉</span>
+      <span class="text-[10px]">Invitación</span>
+    </span>
+  </button>
+
+  <button
+    (click)="showCardHistory.emit()"
+    class="btn-control bg-purple-600 hover:bg-purple-700"
+  >
+    <span class="xl:inline hidden">📜 Historial</span>
+    <span class="xl:hidden flex flex-col items-center gap-1">
+      <span class="text-2xl">📜</span>
+      <span class="text-[10px]">Historial</span>
+    </span>
+  </button>
+
+  <button
+    *ngIf="isRoomWaiting(room()?.state || 'waiting')"
+    (click)="changeDifficulty.emit()"
+    class="btn-control bg-orange-600 hover:bg-orange-700"
+  >
+    <span class="xl:inline hidden">⚙️ Dificultad</span>
+    <span class="xl:hidden flex flex-col items-center gap-1">
+      <span class="text-2xl">⚙️</span>
+      <span class="text-[10px]">Dificultad</span>
+    </span>
+  </button>
+
+  <button
+    *ngIf="isRoomActive(room()?.state || 'waiting')"
+    (click)="finishRound.emit()"
+    class="btn-control bg-white text-red-600 border-2 border-red-500 hover:bg-red-50"
+  >
+    <span class="xl:inline hidden text-red-600">⏹️ Finalizar Ronda</span>
+    <span class="xl:hidden flex flex-col items-center gap-1">
+      <span class="text-2xl">⏹️</span>
+      <span class="text-[10px] text-red-600">Finalizar</span>
+    </span>
+  </button>
+
+  <button
+    (click)="deleteRoom.emit()"
+    class="btn-control bg-red-600 hover:bg-red-700"
+  >
+    <span class="xl:inline hidden">🗑️ Eliminar Sala</span>
+    <span class="xl:hidden flex flex-col items-center gap-1">
+      <span class="text-xl">🗑️</span>
+      <span class="text-[10px]">Eliminar</span>
+    </span>
+  </button>
+</div>

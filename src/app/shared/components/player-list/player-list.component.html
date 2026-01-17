@@ -1,0 +1,143 @@
+<div class="bg-white rounded-2xl shadow-lg overflow-hidden">
+  <div class="p-5">
+    <!-- Header -->
+    <h4
+      class="font-bold mb-3 text-gray-700 text-sm flex items-center justify-between"
+      [ngClass]="{
+        'text-sm': variant === 'compact',
+        'text-xl': variant === 'detailed' || variant === 'grid',
+      }"
+    >
+      <span class="flex items-center gap-2">
+        <span>👥</span>
+        <span>Jugadores</span>
+      </span>
+      <span
+        class="text-gray-400 font-normal"
+        [ngClass]="{
+          'text-xs': variant === 'compact',
+          'text-sm': variant === 'detailed' || variant === 'grid',
+        }"
+      >
+        {{ players.length > 0 ? "(" + players.length + ")" : players.length }}
+      </span>
+    </h4>
+
+    <!-- Empty state -->
+    <div
+      *ngIf="players.length === 0"
+      class="text-gray-400 italic text-center py-8"
+      [ngClass]="{
+        'text-xs': variant === 'compact',
+        'text-sm': variant === 'detailed',
+        'text-base': variant === 'grid',
+      }"
+    >
+      <ng-container *ngIf="variant === 'compact'">Sin jugadores</ng-container>
+      <ng-container *ngIf="variant !== 'compact'"
+        >No hay jugadores aún</ng-container
+      >
+    </div>
+
+    <!-- Compact variant (Manager style) -->
+    <div
+      *ngIf="variant === 'compact' && players.length > 0"
+      class="space-y-0 overflow-y-auto"
+      [ngClass]="maxHeight"
+    >
+      <div
+        *ngFor="let player of players"
+        class="py-2 border-b last:border-0 border-gray-100"
+      >
+        <div class="font-semibold text-gray-800 text-sm truncate">
+          {{ player.displayName }}
+        </div>
+        <div class="text-xs text-gray-500 flex items-center gap-1">
+          <span>🏆</span>
+          <span>{{ player.victories }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Detailed variant (Viewer desktop style) -->
+    <div
+      *ngIf="variant === 'detailed' && players.length > 0"
+      class="space-y-3 overflow-y-auto"
+      [ngClass]="maxHeight"
+    >
+      <div
+        *ngFor="let player of players"
+        class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition"
+      >
+        <div
+          *ngIf="showPhotos && player.photoURL"
+          class="w-10 h-10 rounded-full overflow-hidden bg-gray-200 flex-shrink-0"
+        >
+          <img
+            [src]="player.photoURL"
+            [alt]="player.displayName"
+            class="w-full h-full object-cover"
+          />
+        </div>
+        <div
+          *ngIf="showPhotos && !player.photoURL"
+          class="w-10 h-10 rounded-full bg-yellow-500 text-white flex items-center justify-center font-bold flex-shrink-0"
+        >
+          {{ player.displayName.charAt(0).toUpperCase() }}
+        </div>
+        <div class="flex-1 min-w-0">
+          <div class="font-semibold text-gray-800 truncate">
+            {{ player.displayName }}
+          </div>
+          <div class="text-xs text-gray-500">
+            <span *ngIf="player.victories > 0" class="text-yellow-600"
+              >🏆 {{ player.victories }}</span
+            >
+            <span *ngIf="player.victories === 0" class="text-gray-400"
+              >Sin victorias</span
+            >
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Grid variant (Viewer mobile/tablet style) -->
+    <div
+      *ngIf="variant === 'grid' && players.length > 0"
+      class="grid grid-cols-2 md:grid-cols-3 gap-3"
+    >
+      <div
+        *ngFor="let player of players"
+        class="flex flex-col items-center gap-2 p-3 bg-gray-50 rounded-lg"
+      >
+        <div
+          *ngIf="showPhotos && player.photoURL"
+          class="w-12 h-12 rounded-full overflow-hidden bg-gray-200"
+        >
+          <img
+            [src]="player.photoURL"
+            [alt]="player.displayName"
+            class="w-full h-full object-cover"
+          />
+        </div>
+        <div
+          *ngIf="showPhotos && !player.photoURL"
+          class="w-12 h-12 rounded-full bg-yellow-500 text-white flex items-center justify-center font-bold text-lg"
+        >
+          {{ player.displayName.charAt(0).toUpperCase() }}
+        </div>
+        <div class="text-center w-full">
+          <div class="font-semibold text-gray-800 text-sm truncate">
+            {{ player.displayName }}
+          </div>
+          <div class="text-xs text-gray-500">
+            <span *ngIf="player.victories > 0" class="text-yellow-600"
+              >🏆 {{ player.victories }}</span
+            >
+            <span *ngIf="player.victories === 0" class="text-gray-400">-</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

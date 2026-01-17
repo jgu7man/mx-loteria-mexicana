@@ -35,6 +35,7 @@ import { TablaComponent } from '../../../shared/components/tabla/tabla.component
 import { ManagerGamePanelComponent } from './components/manager-game-panel/manager-game-panel.component';
 import { ManagerReviewModalComponent } from './components/manager-review-modal/manager-review-modal.component';
 import { ManagerRoomListComponent } from './components/manager-room-list/manager-room-list.component';
+import { ManagerGameStateService } from './services/manager-game-state.service';
 
 @Component({
   selector: 'app-manager-dashboard',
@@ -58,6 +59,7 @@ export class ManagerDashboardComponent implements OnDestroy {
   private route = inject(ActivatedRoute);
   private authService = inject(AuthService);
   private roomService = inject(RoomService);
+  private gameState = inject(ManagerGameStateService);
   private gameUtils = inject(GameUtilsService);
 
   readonly origin = window.location.origin;
@@ -87,7 +89,7 @@ export class ManagerDashboardComponent implements OnDestroy {
 
   participants = signal<Participant[]>([]);
   players = computed(() =>
-    this.participants().filter((p) => p.role === 'player')
+    this.participants().filter((p) => p.role === 'player'),
   );
   reviewingParticipant = signal<Participant | null>(null);
   isReviewModalOpen = computed(() => this.reviewingParticipant() !== null);
@@ -165,7 +167,7 @@ export class ManagerDashboardComponent implements OnDestroy {
           this.restoreActiveRoom();
         }
       },
-      { allowSignalWrites: true }
+      { allowSignalWrites: true },
     );
 
     // Effect para detectar cambios en la autenticación
@@ -180,7 +182,7 @@ export class ManagerDashboardComponent implements OnDestroy {
           this.managerRooms.set([]);
         }
       },
-      { allowSignalWrites: true }
+      { allowSignalWrites: true },
     );
 
     // Mantener lista de participantes en tiempo real para la sala activa
@@ -190,16 +192,22 @@ export class ManagerDashboardComponent implements OnDestroy {
         if (!roomId) {
           this.participants.set([]);
           this.reviewingParticipant.set(null);
+          // Clear game state service
+          this.gameState.reset();
           return;
         }
 
         const sub = this.roomService.observeParticipants(roomId).subscribe({
-          next: (list) => this.participants.set(list),
+          next: (list) => {
+            this.participants.set(list);
+            // Sync to game state service
+            this.gameState.setParticipants(list);
+          },
           error: (err) => console.error('Error observing participants:', err),
         });
         onCleanup(() => sub.unsubscribe());
       },
-      { allowSignalWrites: true }
+      { allowSignalWrites: true },
     );
   }
 
@@ -209,7 +217,7 @@ export class ManagerDashboardComponent implements OnDestroy {
     this.loadingRooms.set(true);
     try {
       const rooms = await this.roomService.getRoomsByManager(
-        this.currentUser()!.uid
+        this.currentUser()!.uid,
       );
       this.managerRooms.set(rooms);
     } catch (error) {
@@ -233,6 +241,9 @@ export class ManagerDashboardComponent implements OnDestroy {
             .observeRoom(storedRoomId)
             .subscribe((r) => {
               this.room.set(r);
+              // Sync to game state service
+              this.gameState.setRoom(r);
+              this.gameState.setCurrentRoundWinners(this.currentRoundWinners());
               if (r && r.currentIndex >= 0) {
                 const cardId = r.deck[r.currentIndex];
                 this.currentCard.set(CARDS.find((c) => c.id === cardId));
@@ -276,7 +287,7 @@ export class ManagerDashboardComponent implements OnDestroy {
   async createRoom(
     roomName: string,
     maxRounds: number,
-    difficulty: 'easy' | 'medium' | 'hard'
+    difficulty: 'easy' | 'medium' | 'hard',
   ) {
     if (!this.currentUser()?.uid || !roomName.trim()) {
       Swal.fire({
@@ -300,7 +311,7 @@ export class ManagerDashboardComponent implements OnDestroy {
         this.currentUser()!.uid,
         this.currentUser()!.displayName,
         roomName,
-        config
+        config,
       );
 
       // Navegar a la nueva sala
@@ -420,7 +431,7 @@ export class ManagerDashboardComponent implements OnDestroy {
 
       // Verificar si hay más ganadores pendientes de revisión
       const remainingWinners = (currentRoom.currentRoundWinners || []).filter(
-        (uid) => uid !== p.uid
+        (uid) => uid !== p.uid,
       );
 
       let message = 'La ronda continúa';
@@ -482,7 +493,7 @@ export class ManagerDashboardComponent implements OnDestroy {
     try {
       await this.roomService.finishRound(
         currentRoom.id,
-        currentRoom.currentRoundVerifiedWinners || []
+        currentRoom.currentRoundVerifiedWinners || [],
       );
       this.clearReview();
       Swal.fire({
@@ -560,7 +571,7 @@ export class ManagerDashboardComponent implements OnDestroy {
         // Use qrcode library to generate QR
         import('qrcode').then((QRCode) => {
           const canvas = document.getElementById(
-            'qr-canvas'
+            'qr-canvas',
           ) as HTMLCanvasElement;
           if (canvas) {
             QRCode.toCanvas(canvas, joinLink, {
@@ -600,7 +611,7 @@ export class ManagerDashboardComponent implements OnDestroy {
           <div class="text-4xl mb-1">${card.emoji}</div>
           <div class="text-sm font-bold text-gray-800">${card.name}</div>
         </div>
-      `
+      `,
       )
       .join('');
 
