@@ -30,9 +30,6 @@ import { AlertService } from '../../../core/services/alert.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { GameUtilsService } from '../../../core/services/game-utils.service';
 import { RoomService } from '../../../core/services/room.service';
-import { CardComponent } from '../../../shared/components/card/card.component';
-import { PodiumComponent } from '../../../shared/components/podium/podium.component';
-import { TablaComponent } from '../../../shared/components/tabla/tabla.component';
 import { ManagerGamePanelComponent } from './components/manager-game-panel/manager-game-panel.component';
 import { ManagerReviewModalComponent } from './components/manager-review-modal/manager-review-modal.component';
 import { ManagerRoomListComponent } from './components/manager-room-list/manager-room-list.component';
@@ -45,9 +42,6 @@ import { ManagerGameStateService } from './services/manager-game-state.service';
     CommonModule,
     FormsModule,
     QRCodeModule,
-    CardComponent,
-    TablaComponent,
-    PodiumComponent,
     ManagerRoomListComponent,
     ManagerGamePanelComponent,
     ManagerReviewModalComponent,

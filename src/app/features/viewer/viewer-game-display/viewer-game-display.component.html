@@ -2,24 +2,10 @@
 <div class="hidden xl:grid xl:grid-cols-12 gap-6">
   <!-- Left column: Room info + Participants list -->
   <div class="xl:col-span-3 space-y-4">
-    <!-- Room info -->
-    <div class="bg-white rounded-2xl shadow-2xl p-6">
-      <h2 class="text-2xl font-bold text-gray-800 mb-4">{{ room?.name }}</h2>
-      <div class="flex justify-center gap-4">
-        <div class="bg-yellow-100 p-3 rounded-lg flex-1 text-center">
-          <div class="text-xl font-bold text-yellow-600">
-            {{ room?.currentRound }}
-          </div>
-          <div class="text-xs text-gray-600">Ronda</div>
-        </div>
-        <div class="bg-orange-100 p-3 rounded-lg flex-1 text-center">
-          <div class="text-xl font-bold text-orange-600">
-            {{ (room?.currentIndex ?? -1) + 1 }}/54
-          </div>
-          <div class="text-xs text-gray-600">Cartas</div>
-        </div>
-      </div>
-    </div>
+    <app-viewer-room-header
+      [room]="room"
+      [variant]="'desktop'"
+    ></app-viewer-room-header>
 
     <!-- Participants list -->
     <div class="sticky top-6">
@@ -35,102 +21,44 @@
 
   <!-- Center column: Current card -->
   <div class="xl:col-span-6">
-    <div
-      *ngIf="currentCard"
-      class="bg-white rounded-2xl shadow-2xl p-8 text-center"
-    >
-      <h3 class="text-2xl font-bold text-gray-800 mb-6">Carta Actual</h3>
-      <div id="current-card" class="flex justify-center">
-        <app-card
-          [card]="currentCard!"
-          [size]="'large'"
-          [showVerso]="true"
-        ></app-card>
-      </div>
-    </div>
-    <div
-      *ngIf="!currentCard"
-      class="bg-white rounded-2xl shadow-2xl p-8 text-center text-gray-500"
-    >
-      <p class="text-xl">Esperando que comience el juego...</p>
-    </div>
+    <app-viewer-current-card
+      [currentCard]="currentCard"
+      [size]="'large'"
+      [showVerso]="true"
+    ></app-viewer-current-card>
   </div>
 
-  <!-- Right column: Next card & Recent cards -->
+  <!-- Right column: Recent cards -->
   <div class="xl:col-span-3 space-y-4">
-    <!-- Recent cards -->
-    <div class="bg-white rounded-2xl shadow-2xl p-6">
-      <h3 class="text-xl font-bold text-gray-800 mb-4">Cartas Recientes</h3>
-      <div class="space-y-3 max-h-[calc(100vh-500px)] overflow-y-auto">
-        <div *ngFor="let card of recentCards" class="flex justify-center">
-          <app-card [card]="card!" [size]="'medium'"></app-card>
-        </div>
-        <div
-          *ngIf="recentCards.length === 0"
-          class="text-center text-gray-500 py-8"
-        >
-          No hay cartas recientes
-        </div>
-      </div>
-    </div>
+    <app-viewer-recent-cards
+      [recentCards]="recentCards"
+      [variant]="'desktop'"
+    ></app-viewer-recent-cards>
   </div>
 </div>
 
 <!-- MOBILE & TABLET LAYOUT (< xl) - Stacked -->
 <div class="xl:hidden space-y-6">
-  <!-- Room info -->
-  <div class="bg-white rounded-2xl shadow-2xl p-6 text-center">
-    <h2 class="text-2xl font-bold text-gray-800 mb-4">{{ room?.name }}</h2>
-    <div class="flex justify-center gap-6">
-      <div class="bg-yellow-100 p-4 rounded-lg">
-        <div class="text-2xl font-bold text-yellow-600">
-          {{ room?.currentRound }}
-        </div>
-        <div class="text-sm text-gray-600">Ronda</div>
-      </div>
-      <div class="bg-orange-100 p-4 rounded-lg">
-        <div class="text-2xl font-bold text-orange-600">
-          {{ (room?.currentIndex ?? -1) + 1 }}/54
-        </div>
-        <div class="text-sm text-gray-600">Cartas</div>
-      </div>
-    </div>
-  </div>
+  <app-viewer-room-header
+    [room]="room"
+    [variant]="'mobile'"
+  ></app-viewer-room-header>
 
   <!-- Participants -->
   <app-player-list [players]="players" [variant]="'grid'" [showPhotos]="true">
   </app-player-list>
 
   <!-- Current card -->
-  <div
-    *ngIf="currentCard"
-    class="bg-white rounded-2xl shadow-2xl p-6 text-center"
-  >
-    <h3 class="text-2xl font-bold text-gray-800 mb-4">Carta Actual</h3>
-    <div class="flex justify-center">
-      <app-card
-        [card]="currentCard!"
-        [size]="'large'"
-        [showVerso]="true"
-      ></app-card>
-    </div>
-  </div>
+  <app-viewer-current-card
+    [currentCard]="currentCard"
+    [size]="'large'"
+    [showVerso]="true"
+  ></app-viewer-current-card>
 
   <!-- Recent cards -->
-  <div
+  <app-viewer-recent-cards
     *ngIf="recentCards.length > 0"
-    class="bg-white rounded-2xl shadow-2xl p-6"
-  >
-    <h3 class="text-xl font-bold text-gray-800 mb-4 text-center">
-      Cartas Recientes
-    </h3>
-    <div class="flex justify-center gap-3 flex-wrap">
-      <app-card
-        *ngFor="let card of recentCards"
-        [card]="card!"
-        [size]="'small'"
-      >
-      </app-card>
-    </div>
-  </div>
+    [recentCards]="recentCards"
+    [variant]="'mobile'"
+  ></app-viewer-recent-cards>
 </div>

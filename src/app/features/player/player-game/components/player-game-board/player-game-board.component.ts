@@ -1,7 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { Room } from '../../../../../core/models/game.model';
-import { CardComponent } from '../../../../../shared/components/card/card.component';
 import { TablaComponent } from '../../../../../shared/components/tabla/tabla.component';
 import { PlayerActionButtonsComponent } from './components/player-action-buttons/player-action-buttons.component';
 import { PlayerCardHistoryComponent } from './components/player-card-history/player-card-history.component';
@@ -13,7 +12,6 @@ import { PlayerRoomHeaderComponent } from './components/player-room-header/playe
   standalone: true,
   imports: [
     CommonModule,
-    CardComponent,
     TablaComponent,
     PlayerRoomHeaderComponent,
     PlayerCurrentCardComponent,

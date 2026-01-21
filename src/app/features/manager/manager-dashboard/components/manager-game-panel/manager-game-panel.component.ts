@@ -20,7 +20,6 @@ import {
   Room,
   RoundWinner,
 } from '../../../../../core/models/game.model';
-import { CardComponent } from '../../../../../shared/components/card/card.component';
 import { NextCardPreviewComponent } from '../../../../../shared/components/next-card-preview/next-card-preview.component';
 import { PlayerListComponent } from '../../../../../shared/components/player-list/player-list.component';
 import { ManagerGameStateService } from '../../services/manager-game-state.service';
@@ -35,7 +34,6 @@ import { VerificationListComponent } from './components/verification-list/verifi
   standalone: true,
   imports: [
     CommonModule,
-    CardComponent,
     NextCardPreviewComponent,
     PlayerListComponent,
     GameStatsComponent,

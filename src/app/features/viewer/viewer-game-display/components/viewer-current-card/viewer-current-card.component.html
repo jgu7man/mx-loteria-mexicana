@@ -1,0 +1,20 @@
+<div
+  *ngIf="currentCard"
+  class="bg-white rounded-2xl shadow-2xl p-8 text-center"
+>
+  <h3 class="text-2xl font-bold text-gray-800 mb-6">Carta Actual</h3>
+  <div class="flex justify-center">
+    <app-card
+      [card]="currentCard!"
+      [size]="size"
+      [showVerso]="showVerso"
+    ></app-card>
+  </div>
+</div>
+
+<div
+  *ngIf="!currentCard"
+  class="bg-white rounded-2xl shadow-2xl p-8 text-center text-gray-500"
+>
+  <p class="text-xl">Esperando que comience el juego...</p>
+</div>
