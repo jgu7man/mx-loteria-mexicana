@@ -1,8 +1,11 @@
 <!-- Modal de revisión de tabla -->
 <div
   *ngIf="isOpen"
-  class="fixed inset-0 bg-gray-900/80 backdrop-blur-sm z-50 flex items-start justify-center p-4 overflow-y-auto">
-  <div class="bg-white w-full max-w-3xl rounded-3xl p-6 shadow-md flex flex-col max-h-[90vh]">
+  class="fixed inset-0 bg-gray-900/80 backdrop-blur-sm z-50 flex items-start justify-center p-4 overflow-y-auto"
+>
+  <div
+    class="bg-white w-full max-w-3xl rounded-3xl p-6 shadow-md flex flex-col max-h-[90vh]"
+  >
     <div class="flex justify-between items-start gap-4">
       <div>
         <h3 class="text-xl font-bold text-gray-900">
@@ -10,19 +13,33 @@
         </h3>
         <p class="text-sm text-gray-500">Revisa marcas y tabla del jugador</p>
       </div>
-      <button (click)="closeModal.emit()" class="text-gray-400 hover:text-gray-600">✕</button>
+      <button
+        (click)="closeModal.emit()"
+        class="text-gray-400 hover:text-gray-600"
+      >
+        ✕
+      </button>
     </div>
 
     <!-- Panel de Validación -->
-    <div *ngIf="validation" class="mt-4 p-4 rounded-3xl border flex items-center justify-between"
-         [ngClass]="{
-           'bg-green-50 border-green-200': validation.status === 'GANADOR',
-           'bg-blue-50 border-blue-200': validation.status === 'INCOMPLETO',
-           'bg-red-50 border-red-200': validation.status === 'ERROR EN MARCAS'
-         }">
+    <div
+      *ngIf="validation"
+      class="mt-4 p-4 rounded-3xl border flex items-center justify-between"
+      [ngClass]="{
+        'bg-green-50 border-green-200': validation.status === 'GANADOR',
+        'bg-blue-50 border-blue-200': validation.status === 'INCOMPLETO',
+        'bg-red-50 border-red-200': validation.status === 'ERROR EN MARCAS',
+      }"
+    >
       <div class="flex items-center gap-3">
         <div class="text-3xl">
-          {{ validation.status === 'GANADOR' ? '✅' : (validation.status === 'INCOMPLETO' ? '⚠️' : '❌') }}
+          {{
+            validation.status === "GANADOR"
+              ? "✅"
+              : validation.status === "INCOMPLETO"
+                ? "⚠️"
+                : "❌"
+          }}
         </div>
         <div>
           <h4 class="font-bold text-lg" [class]="validation.statusColor">
@@ -33,26 +50,42 @@
           </p>
         </div>
       </div>
-      
+
       <div class="text-right text-sm text-gray-600 ml-4">
-        <div>Faltantes: <span class="font-bold">{{ validation.missingCount }}</span></div>
-        <div *ngIf="validation.invalidMarksCount > 0" class="text-red-600">Marcas inválidas: <span class="font-bold">{{ validation.invalidMarksCount }}</span></div>
-        <div *ngIf="validation.missedMarksCount > 0" class="text-yellow-600">Se le pasaron: <span class="font-bold">{{ validation.missedMarksCount }}</span></div>
+        <div>
+          Faltantes:
+          <span class="font-bold">{{ validation.missingCount }}</span>
+        </div>
+        <div *ngIf="validation.invalidMarksCount > 0" class="text-red-600">
+          Marcas inválidas:
+          <span class="font-bold">{{ validation.invalidMarksCount }}</span>
+        </div>
+        <div *ngIf="validation.missedMarksCount > 0" class="text-yellow-600">
+          Se le pasaron:
+          <span class="font-bold">{{ validation.missedMarksCount }}</span>
+        </div>
       </div>
     </div>
 
     <div class="mt-6 flex-1 min-h-0 overflow-auto">
-      <div *ngIf="!(reviewingParticipant?.tablaCards?.length)" class="text-gray-600">
+      <div
+        *ngIf="!reviewingParticipant?.tablaCards?.length"
+        class="text-gray-600"
+      >
         Este jugador todavía no tiene tabla registrada.
       </div>
 
-      <div *ngIf="reviewingParticipant?.tablaCards?.length" class="bg-gray-50 p-4 rounded-3xl border border-gray-200 overflow-auto">
+      <div
+        *ngIf="reviewingParticipant?.tablaCards?.length"
+        class="bg-gray-50 p-4 rounded-3xl border border-gray-200 overflow-auto"
+      >
         <app-tabla
           [tablaCards]="reviewingParticipant?.tablaCards || []"
           [marks]="reviewingParticipant?.marks || []"
           [markerEmoji]="getMarkerEmoji(reviewingParticipant?.marker)"
           [isInteractive]="false"
-          [size]="'medium'">
+          [size]="'medium'"
+        >
         </app-tabla>
       </div>
     </div>
@@ -60,17 +93,20 @@
     <div class="mt-6 flex gap-3 justify-end">
       <button
         (click)="closeModal.emit()"
-        class="bg-gray-200 text-gray-800 px-5 py-3 rounded-3xl font-semibold hover:bg-gray-300 transition">
+        class="bg-gray-200 text-gray-800 px-5 py-3 rounded-3xl font-semibold hover:bg-gray-300 transition"
+      >
         Cerrar
       </button>
       <button
         (click)="onRejectWinner()"
-        class="bg-red-600 text-white px-5 py-3 rounded-3xl font-semibold hover:bg-red-700 transition">
+        class="bg-red-600 text-white px-5 py-3 rounded-3xl font-semibold hover:bg-red-700 transition"
+      >
         ❌ No ganó
       </button>
       <button
         (click)="onApproveWinner()"
-        class="bg-green-600 text-white px-5 py-3 rounded-3xl font-semibold hover:bg-green-700 transition">
+        class="bg-green-600 text-white px-5 py-3 rounded-3xl font-semibold hover:bg-green-700 transition"
+      >
         ✅ Dar el gane
       </button>
     </div>
