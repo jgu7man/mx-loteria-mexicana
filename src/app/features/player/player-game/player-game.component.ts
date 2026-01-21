@@ -51,6 +51,9 @@ export class PlayerGameComponent implements OnInit {
 
   // Signals
   currentUser = this.authService.currentUser;
+  authLoading = this.authService.authLoading;
+  roomLoading = signal<boolean>(false);
+  isLoading = computed(() => this.authLoading() || this.roomLoading());
   room = signal<Room | null>(null);
   participant = signal<Participant | null>(null);
   currentCard = signal<any>(null);
@@ -172,6 +175,8 @@ export class PlayerGameComponent implements OnInit {
       this.roomId || localStorage.getItem(this.legacyRoomKey) || '';
     if (!roomIdCandidate) return;
 
+    this.roomLoading.set(true);
+
     const session = this.loadPlayerSession(user.uid, roomIdCandidate);
     const legacyMarker = localStorage.getItem(this.legacyMarkerKey);
     const legacyTabla = localStorage.getItem(this.legacyTablaKey);
@@ -188,6 +193,7 @@ export class PlayerGameComponent implements OnInit {
         if (!room) {
           // La sala no existe, limpiar
           this.clearPlayerSession(user.uid, roomIdCandidate);
+          this.roomLoading.set(false);
           return;
         }
 
@@ -196,6 +202,7 @@ export class PlayerGameComponent implements OnInit {
         // Observar la sala
         this.roomService.observeRoom(roomIdCandidate).subscribe((r) => {
           this.room.set(r);
+          this.roomLoading.set(false);
           if (!r) {
             // Si r es null y ya habíamos validado que existía, significa que fue eliminada
             this.isRoomDeleted.set(true);
@@ -448,57 +455,67 @@ export class PlayerGameComponent implements OnInit {
   }
 
   private async joinRoom() {
-    // Check if room exists
-    const room = await this.roomService.getRoom(this.roomId);
-    if (!room) {
-      this.alertService.fire({
-        icon: 'error',
-        title: 'Sala no encontrada',
-        text: 'Verifica el código e inténtalo nuevamente',
-        confirmButtonColor: '#10b981',
-      });
-      return;
-    }
+    this.roomLoading.set(true);
 
-    // Join room
-    const participant: Omit<Participant, 'joinedAt'> = {
-      uid: this.currentUser()!.uid,
-      displayName: this.displayName || this.currentUser()!.displayName,
-      role: 'player',
-      marks: [],
-      victories: 0,
-      isActive: true,
-    };
-
-    await this.roomService.joinRoom(this.roomId, participant);
-
-    // Guardar en localStorage (nuevo + legacy)
-    this.savePlayerSession(this.currentUser()!.uid, this.roomId, {
-      markerId: this.selectedMarker()?.id ?? null,
-      tabla: this.myTabla().length ? this.myTabla() : null,
-      marks: this.myMarks(),
-    });
-
-    // Mantener el participante (incl. marcas) en tiempo real
-    this.roomService
-      .observeParticipant(this.roomId, this.currentUser()!.uid)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe((p) => {
-        this.participant.set(p);
-        if (p?.marks) this.myMarks.set(p.marks);
-      });
-
-    // Observe room
-    this.roomService.observeRoom(this.roomId).subscribe((r) => {
-      this.room.set(r);
-      if (r && r.currentIndex >= 0) {
-        const cardId = r.deck[r.currentIndex];
-        this.currentCard.set(CARDS.find((c) => c.id === cardId));
+    try {
+      // Check if room exists
+      const room = await this.roomService.getRoom(this.roomId);
+      if (!room) {
+        this.roomLoading.set(false);
+        this.alertService.fire({
+          icon: 'error',
+          title: 'Sala no encontrada',
+          text: 'Verifica el código e inténtalo nuevamente',
+          confirmButtonColor: '#10b981',
+        });
+        return;
       }
-    });
 
-    this.showJoinForm.set(false);
-    this.showMarkerSelector.set(true);
+      // Join room
+      const participant: Omit<Participant, 'joinedAt'> = {
+        uid: this.currentUser()!.uid,
+        displayName: this.displayName || this.currentUser()!.displayName,
+        role: 'player',
+        marks: [],
+        victories: 0,
+        isActive: true,
+      };
+
+      await this.roomService.joinRoom(this.roomId, participant);
+
+      // Guardar en localStorage (nuevo + legacy)
+      this.savePlayerSession(this.currentUser()!.uid, this.roomId, {
+        markerId: this.selectedMarker()?.id ?? null,
+        tabla: this.myTabla().length ? this.myTabla() : null,
+        marks: this.myMarks(),
+      });
+
+      // Mantener el participante (incl. marcas) en tiempo real
+      this.roomService
+        .observeParticipant(this.roomId, this.currentUser()!.uid)
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe((p) => {
+          this.participant.set(p);
+          if (p?.marks) this.myMarks.set(p.marks);
+        });
+
+      // Observe room
+      this.roomService.observeRoom(this.roomId).subscribe((r) => {
+        this.room.set(r);
+        this.roomLoading.set(false);
+        if (r && r.currentIndex >= 0) {
+          const cardId = r.deck[r.currentIndex];
+          this.currentCard.set(CARDS.find((c) => c.id === cardId));
+        }
+      });
+
+      this.showJoinForm.set(false);
+      this.showMarkerSelector.set(true);
+    } catch (error) {
+      console.error('Error joining room:', error);
+      this.roomLoading.set(false);
+      throw error;
+    }
   }
 
   onMarkerSelected(marker: Marker) {

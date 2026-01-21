@@ -64,6 +64,9 @@ export class ManagerDashboardComponent implements OnDestroy {
 
   // Signals
   currentUser = this.authService.currentUser;
+  authLoading = this.authService.authLoading;
+  roomLoading = signal<boolean>(false);
+  isLoading = computed(() => this.authLoading() || this.roomLoading());
   isAuthenticated = computed(() => this.currentUser() !== null);
   room = signal<Room | null>(null);
   currentCard = signal<any>(null);
@@ -227,6 +230,7 @@ export class ManagerDashboardComponent implements OnDestroy {
   private async restoreActiveRoom() {
     const storedRoomId = localStorage.getItem('activeManagerRoom');
     if (storedRoomId) {
+      this.roomLoading.set(true);
       try {
         const room = await this.roomService.getRoom(storedRoomId);
 
@@ -255,6 +259,8 @@ export class ManagerDashboardComponent implements OnDestroy {
       } catch (error) {
         console.error('Error restoring room:', error);
         localStorage.removeItem('activeManagerRoom');
+      } finally {
+        this.roomLoading.set(false);
       }
     }
   }
@@ -688,12 +694,14 @@ export class ManagerDashboardComponent implements OnDestroy {
     // Guardar la sala seleccionada como activa
     localStorage.setItem('activeManagerRoom', room.id);
 
+    this.roomLoading.set(true);
     // Observar la sala
     this.roomSubscription?.unsubscribe();
     this.roomSubscription = this.roomService
       .observeRoom(room.id)
       .subscribe((r) => {
         this.room.set(r);
+        this.roomLoading.set(false);
         if (r && r.currentIndex >= 0) {
           const cardId = r.deck[r.currentIndex];
           this.currentCard.set(CARDS.find((c) => c.id === cardId));
@@ -707,12 +715,14 @@ export class ManagerDashboardComponent implements OnDestroy {
     // Guardar como sala activa
     localStorage.setItem('activeManagerRoom', roomId);
 
+    this.roomLoading.set(true);
     // Observar la sala
     this.roomSubscription?.unsubscribe();
     this.roomSubscription = this.roomService
       .observeRoom(roomId)
       .subscribe((r) => {
         this.room.set(r);
+        this.roomLoading.set(false);
         if (r && r.currentIndex >= 0) {
           const cardId = r.deck[r.currentIndex];
           this.currentCard.set(CARDS.find((c) => c.id === cardId));

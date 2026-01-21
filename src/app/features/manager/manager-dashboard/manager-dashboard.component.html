@@ -16,8 +16,25 @@
     </button>
   </header>
 
+  <!-- Loading -->
+  <div *ngIf="isLoading()" class="text-center py-20">
+    <div
+      class="bg-white/90 backdrop-blur-sm rounded-3xl p-12 max-w-md mx-auto shadow-2xl"
+    >
+      <div class="flex flex-col items-center gap-6">
+        <div class="relative">
+          <div class="w-20 h-20 border-8 border-gray-200 rounded-full"></div>
+          <div
+            class="w-20 h-20 border-8 border-indigo-600 border-t-transparent rounded-full animate-spin absolute top-0"
+          ></div>
+        </div>
+        <p class="text-xl font-semibold text-gray-700">Cargando...</p>
+      </div>
+    </div>
+  </div>
+
   <!-- Not authenticated -->
-  <div *ngIf="!isAuthenticated()" class="text-center">
+  <div *ngIf="!isLoading() && !isAuthenticated()" class="text-center">
     <div class="bg-white rounded-3xl p-6 max-w-md mx-auto">
       <h2 class="text-2xl font-bold text-gray-800 mb-6">
         Inicia sesión para crear salas
@@ -32,7 +49,7 @@
   </div>
 
   <!-- Authenticated - No room -->
-  <div *ngIf="isAuthenticated() && !room()">
+  <div *ngIf="!isLoading() && isAuthenticated() && !room()">
     <app-manager-room-list
       [managerRooms]="managerRooms()"
       [loadingRooms]="loadingRooms()"
@@ -44,7 +61,7 @@
   </div>
 
   <!-- Room active -->
-  <div *ngIf="room()">
+  <div *ngIf="!isLoading() && room()">
     <app-manager-game-panel
       [room]="room()!"
       [participants]="participants()"
@@ -87,9 +104,7 @@
       <h3 class="text-2xl font-bold text-gray-900 mb-2">
         Todas las verificaciones completas
       </h3>
-      <p class="text-gray-600 text-lg">
-        ¿Quieres terminar esta ronda?
-      </p>
+      <p class="text-gray-600 text-lg">¿Quieres terminar esta ronda?</p>
     </div>
 
     <div class="flex gap-4">

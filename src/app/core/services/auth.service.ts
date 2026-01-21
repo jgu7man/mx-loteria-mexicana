@@ -1,4 +1,4 @@
-import { Injectable, inject, signal } from '@angular/core';
+import { inject, Injectable, signal } from '@angular/core';
 import {
   Auth,
   GoogleAuthProvider,
@@ -6,20 +6,23 @@ import {
   signInWithPopup,
   signOut,
   user,
-  User
+  User,
 } from '@angular/fire/auth';
 import { Observable } from 'rxjs';
 import { AppUser, AuthProvider } from '../models/game.model';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class AuthService {
   private auth = inject(Auth);
-  
+
   // Signal para el usuario actual
   currentUser = signal<AppUser | null>(null);
-  
+
+  // Signal para indicar si se está verificando la autenticación
+  authLoading = signal<boolean>(true);
+
   // Observable del estado de autenticación de Firebase
   user$: Observable<User | null> = user(this.auth);
 
@@ -31,6 +34,8 @@ export class AuthService {
       } else {
         this.currentUser.set(null);
       }
+      // Una vez que Firebase responde, ya no estamos cargando
+      this.authLoading.set(false);
     });
   }
 
@@ -41,9 +46,9 @@ export class AuthService {
     try {
       const provider = new GoogleAuthProvider();
       provider.setCustomParameters({
-        prompt: 'select_account'
+        prompt: 'select_account',
       });
-      
+
       const result = await signInWithPopup(this.auth, provider);
       const appUser = this.mapFirebaseUser(result.user);
       this.currentUser.set(appUser);
@@ -100,9 +105,12 @@ export class AuthService {
   /**
    * Mapear usuario de Firebase a AppUser
    */
-  private mapFirebaseUser(firebaseUser: User, customDisplayName?: string): AppUser {
+  private mapFirebaseUser(
+    firebaseUser: User,
+    customDisplayName?: string,
+  ): AppUser {
     let provider: AuthProvider = 'anonymous';
-    
+
     if (!firebaseUser.isAnonymous && firebaseUser.providerData.length > 0) {
       const providerId = firebaseUser.providerData[0].providerId;
       if (providerId === 'google.com') {
@@ -113,10 +121,11 @@ export class AuthService {
     return {
       uid: firebaseUser.uid,
       email: firebaseUser.email || undefined,
-      displayName: customDisplayName || firebaseUser.displayName || 'Jugador Anónimo',
+      displayName:
+        customDisplayName || firebaseUser.displayName || 'Jugador Anónimo',
       photoURL: firebaseUser.photoURL || undefined,
       isAnonymous: firebaseUser.isAnonymous,
-      provider
+      provider,
     };
   }
 }
