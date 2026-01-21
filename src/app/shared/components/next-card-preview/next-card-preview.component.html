@@ -3,7 +3,7 @@
 >
   <!-- Title - cambia si es privado o público -->
   <p class="text-gray-400 text-[10px] uppercase font-bold mb-3 tracking-wider">
-    {{ title }}
+    SIGUIENTE
     <span *ngIf="mode === 'private'" class="text-red-400">
       (SÓLO TÚ LA VES)</span
     >
@@ -29,7 +29,10 @@
       <p class="font-bold text-white text-base mb-1 truncate">
         {{ card?.name || "???" }}
       </p>
-      <p class="text-[10px] text-gray-500">{{ subtitle }}</p>
+      <p class="text-[10px] text-gray-500">SUGERENCIA</p>
+      <p class="italic font-semibold text-white text-sm">
+        {{ card?.verso || "..." }}
+      </p>
     </div>
   </div>
 </div>

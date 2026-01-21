@@ -89,6 +89,7 @@ export class ManagerDashboardComponent implements OnDestroy {
   );
   reviewingParticipant = signal<Participant | null>(null);
   isReviewModalOpen = computed(() => this.reviewingParticipant() !== null);
+  showFinishRoundModal = signal<boolean>(false);
   pendingWinners = computed(() => {
     const r = this.room();
     const participants = this.players();
@@ -430,18 +431,19 @@ export class ManagerDashboardComponent implements OnDestroy {
         (uid) => uid !== p.uid,
       );
 
-      let message = 'La ronda continúa';
-      if (remainingWinners.length > 0) {
-        message = `Quedan ${remainingWinners.length} jugadores por verificar.`;
+      if (remainingWinners.length === 0) {
+        // No hay más revisiones pendientes, mostrar modal para confirmar finalizar ronda
+        this.showFinishRoundModal.set(true);
+      } else {
+        // Aún hay revisiones pendientes
+        this.alertService.fire({
+          icon: 'success',
+          title: '¡Ganador registrado!',
+          text: `Quedan ${remainingWinners.length} jugadores por verificar.`,
+          timer: 2000,
+          showConfirmButton: false,
+        });
       }
-
-      this.alertService.fire({
-        icon: 'success',
-        title: '¡Ganador registrado!',
-        text: message,
-        timer: 2000,
-        showConfirmButton: false,
-      });
     } catch (error) {
       console.error('Error approving winner:', error);
       this.alertService.fire({
@@ -480,6 +482,22 @@ export class ManagerDashboardComponent implements OnDestroy {
   getMarkerEmoji(markerId?: string): string {
     if (!markerId) return '🫘';
     return MARKERS.find((m) => m.id === markerId)?.emoji ?? '🫘';
+  }
+
+  confirmFinishRound() {
+    this.showFinishRoundModal.set(false);
+    this.finishRound();
+  }
+
+  cancelFinishRound() {
+    this.showFinishRoundModal.set(false);
+    this.alertService.fire({
+      icon: 'success',
+      title: '¡Ganador registrado!',
+      text: 'La ronda continúa',
+      timer: 2000,
+      showConfirmButton: false,
+    });
   }
 
   async finishRound() {

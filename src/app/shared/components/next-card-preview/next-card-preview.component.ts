@@ -12,6 +12,4 @@ import { Card } from '../../../core/models/game.model';
 export class NextCardPreviewComponent {
   @Input() card: Card | null = null;
   @Input() mode: 'private' | 'public' = 'public';
-  @Input() title: string = 'SIGUIENTE';
-  @Input() subtitle: string = 'LISTA PARA CANTAR';
 }

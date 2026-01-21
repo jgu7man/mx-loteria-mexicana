@@ -41,7 +41,7 @@ export const CARDS: Card[] = [
     id: 5,
     name: 'El Paraguas',
     emoji: '☂️',
-    verso: 'Con sol fuerte o con aguacero, el paraguas es sincero',
+    verso: 'En tiempos de sol o tiempos de aguas, siempre te protege',
     color: '#FF6B81',
     image: '/images/cards/el_paraguas.jpg',
   },

@@ -73,3 +73,38 @@
   (closeModal)="clearReview()"
 >
 </app-manager-review-modal>
+
+<!-- Modal de confirmación para finalizar ronda -->
+<div
+  *ngIf="showFinishRoundModal()"
+  class="fixed inset-0 bg-gray-900/80 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+>
+  <div
+    class="bg-white w-full max-w-md rounded-3xl p-8 shadow-2xl animate-scale-in"
+  >
+    <div class="text-center mb-6">
+      <div class="text-6xl mb-4">🎉</div>
+      <h3 class="text-2xl font-bold text-gray-900 mb-2">
+        Todas las verificaciones completas
+      </h3>
+      <p class="text-gray-600 text-lg">
+        ¿Quieres terminar esta ronda?
+      </p>
+    </div>
+
+    <div class="flex gap-4">
+      <button
+        (click)="cancelFinishRound()"
+        class="flex-1 bg-gray-200 text-gray-800 px-6 py-4 rounded-3xl font-bold text-lg hover:bg-gray-300 transition shadow-md"
+      >
+        No
+      </button>
+      <button
+        (click)="confirmFinishRound()"
+        class="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 text-white px-6 py-4 rounded-3xl font-bold text-lg hover:from-green-600 hover:to-emerald-700 transition shadow-lg"
+      >
+        ✓ Sí, finalizar
+      </button>
+    </div>
+  </div>
+</div>
