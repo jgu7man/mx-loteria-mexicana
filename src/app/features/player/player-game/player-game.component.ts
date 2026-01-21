@@ -15,8 +15,8 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { CARDS, MARKERS } from '../../../core/constants/game-data';
 import { ROOM_STATES } from '../../../core/constants/room-states';
 import { Marker, Participant, Room } from '../../../core/models/game.model';
-import { AuthService } from '../../../core/services/auth.service';
 import { AlertService } from '../../../core/services/alert.service';
+import { AuthService } from '../../../core/services/auth.service';
 import { GameUtilsService } from '../../../core/services/game-utils.service';
 import { RoomService } from '../../../core/services/room.service';
 import { MarkerComponent } from '../../../shared/components/marker/marker.component';
@@ -138,7 +138,7 @@ export class PlayerGameComponent implements OnInit {
           this.restorePlayerSession();
         }
       },
-      { allowSignalWrites: true }
+      { allowSignalWrites: true },
     );
   }
 
@@ -210,7 +210,7 @@ export class PlayerGameComponent implements OnInit {
 
         // Restaurar marcador por id
         const restoredMarker = markerId
-          ? MARKERS.find((m) => m.id === markerId) ?? null
+          ? (MARKERS.find((m) => m.id === markerId) ?? null)
           : null;
         this.selectedMarker.set(restoredMarker);
 
@@ -283,7 +283,7 @@ export class PlayerGameComponent implements OnInit {
 
   private loadPlayerSession(
     uid: string,
-    roomId: string
+    roomId: string,
   ): {
     markerId: string | null;
     tabla: number[] | null;
@@ -316,11 +316,11 @@ export class PlayerGameComponent implements OnInit {
   private savePlayerSession(
     uid: string,
     roomId: string,
-    data: { markerId: string | null; tabla: number[] | null; marks?: number[] }
+    data: { markerId: string | null; tabla: number[] | null; marks?: number[] },
   ) {
     localStorage.setItem(
       this.getPlayerSessionKey(uid, roomId),
-      JSON.stringify(data)
+      JSON.stringify(data),
     );
     // Keep legacy keys in sync (best effort)
     if (data.markerId) {
@@ -570,7 +570,7 @@ export class PlayerGameComponent implements OnInit {
         await this.roomService.updateParticipant(
           this.roomId,
           this.currentUser()!.uid,
-          syncUpdates
+          syncUpdates,
         );
       }
 
@@ -599,7 +599,7 @@ export class PlayerGameComponent implements OnInit {
       await this.roomService.unmarkCard(
         this.roomId,
         this.currentUser()!.uid,
-        cardId
+        cardId,
       );
       const updated = marks.filter((id) => id !== cardId);
       this.myMarks.set(updated);
@@ -613,7 +613,7 @@ export class PlayerGameComponent implements OnInit {
       await this.roomService.markCard(
         this.roomId,
         this.currentUser()!.uid,
-        cardId
+        cardId,
       );
       const updated = [...marks, cardId];
       this.myMarks.set(updated);

@@ -1,0 +1,25 @@
+<div class="bg-white/90 backdrop-blur-sm shadow-lg p-3 rounded-lg mb-3">
+  <div class="space-y-2">
+    <div>
+      <div class="text-xs text-gray-600 font-semibold">Sala: {{ roomId }}</div>
+      <div class="text-sm font-bold text-gray-800">
+        Ronda {{ room?.currentRound || 0 }} / {{ room?.config?.maxRounds || 0 }}
+      </div>
+    </div>
+    <!-- Estado de la ronda -->
+    <div class="flex items-center gap-2">
+      <span
+        class="px-2 py-1 rounded-full text-xs font-semibold"
+        [ngClass]="getRoomStateColors()"
+      >
+        {{ getRoomStateLabel() }}
+      </span>
+    </div>
+    <button
+      (click)="goHome.emit()"
+      class="w-full bg-red-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-red-700 transition text-sm"
+    >
+      ABANDONAR
+    </button>
+  </div>
+</div>

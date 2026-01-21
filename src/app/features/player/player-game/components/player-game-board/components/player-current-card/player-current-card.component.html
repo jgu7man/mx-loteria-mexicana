@@ -1,0 +1,17 @@
+<div *ngIf="currentCard" class="rounded-2xl">
+  <h3
+    *ngIf="showTitle"
+    class="text-center text-gray-800 font-bold mb-2 uppercase"
+    [ngClass]="{
+      'text-sm': size === 'large',
+      'text-xs leading-tight': size === 'medium',
+      'text-[10px] leading-tight': size === 'small',
+    }"
+  >
+    <ng-container *ngIf="size === 'small'">Carta<br />Actual</ng-container>
+    <ng-container *ngIf="size !== 'small'">Carta Actual</ng-container>
+  </h3>
+  <div class="flex justify-start">
+    <app-card [card]="currentCard" [size]="size" [showVerso]="false"></app-card>
+  </div>
+</div>

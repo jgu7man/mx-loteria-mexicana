@@ -1,11 +1,12 @@
 import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CARDS } from '../../../../../core/constants/game-data';
+import { CardComponent } from '../../../../../shared/components/card/card.component';
 
 @Component({
   selector: 'app-player-tabla-selector',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, CardComponent],
   templateUrl: './player-tabla-selector.component.html',
   styleUrl: './player-tabla-selector.component.css',
 })
@@ -33,5 +34,9 @@ export class PlayerTablaSelectorComponent {
     return cardIds
       .map((id) => CARDS.find((c) => c.id === id))
       .filter((c) => c !== undefined);
+  }
+
+  getCard(cardId: number): any {
+    return CARDS.find((c) => c.id === cardId);
   }
 }

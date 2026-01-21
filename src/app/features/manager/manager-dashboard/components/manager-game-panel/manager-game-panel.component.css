@@ -1,1 +1,5 @@
 /* Component-specific styles for manager-game-panel */
+
+:host ::ng-deep .card-container {
+  width: 50vw !important;
+}

@@ -28,7 +28,7 @@ export class InviteDisplayComponent implements OnInit {
   room = signal<Room | null>(null);
   participants = signal<Participant[]>([]);
   players = computed(() =>
-    this.participants().filter((p) => p.role === 'player')
+    this.participants().filter((p) => p.role === 'player'),
   );
   roomId = signal('');
   joinLink = computed(() => {

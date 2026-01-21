@@ -1,0 +1,12 @@
+<div
+  *ngFor="let card of historyCards.slice(0, maxCards)"
+  class="overflow-hidden"
+>
+  <app-card [card]="card" [size]="'small'" [showVerso]="false"></app-card>
+</div>
+
+<!-- Placeholders si hay menos cartas que el máximo -->
+<div
+  *ngFor="let _ of [].constructor(Math.max(0, maxCards - historyCards.length))"
+  class="rounded-xl aspect-[4/5] flex items-center justify-center text-gray-400 text-xs"
+></div>

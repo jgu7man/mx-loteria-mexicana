@@ -1,0 +1,58 @@
+<div class="space-y-3">
+  <button
+    (click)="shoutLoteria.emit()"
+    class="w-full bg-green-500 text-white px-6 rounded-lg font-bold hover:bg-green-600 transition"
+    [ngClass]="{
+      'py-4 text-xl': size === 'large',
+      'py-3 text-lg': size === 'medium' || size === 'small',
+    }"
+  >
+    ¡LOTERÍA!
+  </button>
+
+  <div *ngIf="layout === 'vertical'" class="space-y-3">
+    <button
+      (click)="changeMarker.emit()"
+      class="w-full bg-green-400 text-white px-6 py-4 rounded-lg font-semibold hover:bg-green-500 transition"
+    >
+      @if (compact) {
+        MARCADOR
+      } @else {
+        CAMBIAR MARCADOR
+      }
+    </button>
+    <button
+      (click)="changeTabla.emit()"
+      class="w-full bg-green-400 text-white px-6 py-4 rounded-lg font-semibold hover:bg-green-500 transition"
+    >
+      @if (compact) {
+        TABLAS
+      } @else {
+        CAMBIAR TABLA
+      }
+    </button>
+  </div>
+
+  <div *ngIf="layout === 'horizontal'" class="flex gap-3">
+    <button
+      (click)="changeMarker.emit()"
+      class="flex-1 bg-green-400 text-white px-4 py-3 rounded-lg font-semibold hover:bg-green-500 transition"
+    >
+      @if (compact) {
+        MARCADOR
+      } @else {
+        CAMBIAR MARCADOR
+      }
+    </button>
+    <button
+      (click)="changeTabla.emit()"
+      class="flex-1 bg-green-400 text-white px-4 py-3 rounded-lg font-semibold hover:bg-green-500 transition"
+    >
+      @if (compact) {
+        TABLAS
+      } @else {
+        CAMBIAR TABLA
+      }
+    </button>
+  </div>
+</div>

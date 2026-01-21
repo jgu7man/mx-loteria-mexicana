@@ -1,192 +1,158 @@
 <div class="relative">
   <!-- DESKTOP LAYOUT (xl) -->
   <div class="hidden xl:grid xl:grid-cols-12 gap-6 pt-0">
-    <!-- Left column: Header + Carta Actual + placeholders -->
+    <!-- Left column: Header + Carta Actual + historial -->
     <div class="xl:col-span-3 space-y-4">
-      <!-- Header con info de la sala -->
-      <div class="bg-white/90 backdrop-blur-sm shadow-lg p-3 rounded-lg">
-        <div class="space-y-2">
-          <div>
-            <div class="text-xs text-gray-600 font-semibold">Sala: {{ roomId }}</div>
-            <div class="text-sm font-bold text-gray-800">Ronda {{ room?.currentRound || 0 }} / {{ room?.config?.maxRounds || 0 }}</div>
-          </div>
-          <!-- Estado de la ronda -->
-          <div class="flex items-center gap-2">
-            <span class="px-2 py-1 rounded-full text-xs font-semibold"
-              [ngClass]="getRoomStateColors()">
-              {{ getRoomStateLabel() }}
-            </span>
-          </div>
-          <button (click)="onGoHome()"
-                  class="w-full bg-red-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-red-700 transition text-sm">
-            ABANDONAR
-          </button>
-        </div>
-      </div>
-      <div *ngIf="currentCard" class="rounded-2xl">
-        <h3 class="text-left text-gray-800 font-bold mb-2 text-sm uppercase">Carta Actual</h3>
-        <div class="flex justify-start">
-          <app-card [card]="currentCard" [size]="'large'" [showVerso]="false"></app-card>
-        </div>
-      </div>
+      <app-player-room-header
+        [room]="room"
+        [roomId]="roomId"
+        (goHome)="goHome.emit()"
+      ></app-player-room-header>
+
+      <app-player-current-card
+        [currentCard]="currentCard"
+        [size]="'large'"
+      ></app-player-current-card>
+
       <!-- Historial de cartas -->
       <div class="flex gap-3">
-        <div *ngFor="let card of historyCards.slice(0, 2); let i = index"
-             class="bg-blue-100 rounded-xl border-2 border-blue-200 overflow-hidden">
-          <app-card [card]="card" [size]="'small'" [showVerso]="false"></app-card>
-        </div>
-        <!-- Placeholders si hay menos de 2 cartas -->
-        <div *ngFor="let _ of [].constructor(Math.max(0, 2 - historyCards.length)); let i = index"
-             class="bg-blue-200/50 rounded-xl aspect-[4/5] flex items-center justify-center text-gray-400 text-xs">
-        </div>
+        <app-player-card-history
+          [historyCards]="historyCards"
+          [maxCards]="2"
+        ></app-player-card-history>
       </div>
     </div>
+
     <!-- Center: Tabla -->
     <div class="xl:col-span-6">
       <div id="tabla-desktop" class="rounded-2xl py-0 px-[3.5rem]">
-        <app-tabla [tablaCards]="myTabla" [marks]="myMarks"
-                   [markerEmoji]="selectedMarker" [isInteractive]="true"
-                   [size]="'large'" (cardClicked)="onCardClicked($event)">
+        <app-tabla
+          [tablaCards]="myTabla"
+          [marks]="myMarks"
+          [markerEmoji]="selectedMarker"
+          [isInteractive]="true"
+          [size]="'large'"
+          (cardClicked)="cardClicked.emit($event)"
+        >
         </app-tabla>
       </div>
     </div>
+
     <!-- Right column: Botones de acción -->
     <div class="xl:col-span-3 space-y-4">
-      <button (click)="onShoutLoteria()"
-              class="w-full bg-green-500 text-white px-6 py-4 rounded-lg font-bold hover:bg-green-600 transition text-xl">
-        ¡LOTERÍA! </button>
-      <button (click)="onChangeMarker()"
-              class="w-full bg-green-400 text-white px-6 py-4 rounded-lg font-semibold hover:bg-green-500 transition">
-        CAMBIAR MARCADOR </button>
-      <button (click)="onChangeTabla()"
-              class="w-full bg-green-400 text-white px-6 py-4 rounded-lg font-semibold hover:bg-green-500 transition">
-        CAMBIAR TABLA </button>
+      <app-player-action-buttons
+        [layout]="'vertical'"
+        [size]="'large'"
+        (shoutLoteria)="shoutLoteria.emit()"
+        (changeMarker)="changeMarker.emit()"
+        (changeTabla)="changeTabla.emit()"
+      >
+      </app-player-action-buttons>
     </div>
   </div>
+
   <!-- TABLET LAYOUT (md) -->
   <div class="hidden md:block xl:hidden">
-    <!-- Header con info de la sala -->
-    <div class="bg-white/90 backdrop-blur-sm shadow-lg p-3 mb-3 rounded-lg">
-      <div class="flex justify-between items-center">
-        <div class="flex-1">
-          <div class="text-xs text-gray-600 font-semibold">Sala: {{ roomId }}</div>
-          <div class="text-sm font-bold text-gray-800">Ronda {{ room?.currentRound || 0 }} / {{ room?.config?.maxRounds || 0 }}</div>
-          <span class="px-2 py-1 rounded-full text-xs font-semibold inline-block mt-1"
-            [ngClass]="getRoomStateColors()">
-            {{ getRoomStateLabel() }}
-          </span>
-        </div>
-        <button (click)="onGoHome()"
-                class="bg-red-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-red-700 transition text-sm">
-          ABANDONAR
-        </button>
-      </div>
-    </div>
-    
+    <app-player-room-header
+      class="mb-3"
+      [room]="room"
+      [roomId]="roomId"
+      (goHome)="goHome.emit()"
+    ></app-player-room-header>
+
     <div class="space-y-4">
       <div class="grid grid-cols-4 gap-4">
-        <!-- Tabla (izquierda, 2 columnas) -->
+        <!-- Tabla (izquierda, 3 columnas) -->
         <div class="col-span-3 bg rounded-2xl">
-          <app-tabla [tablaCards]="myTabla" [marks]="myMarks"
-                     [markerEmoji]="selectedMarker" [isInteractive]="true"
-                     [size]="'large'" (cardClicked)="onCardClicked($event)">
+          <app-tabla
+            [tablaCards]="myTabla"
+            [marks]="myMarks"
+            [markerEmoji]="selectedMarker"
+            [isInteractive]="true"
+            [size]="'large'"
+            (cardClicked)="cardClicked.emit($event)"
+          >
           </app-tabla>
         </div>
-        <!-- Right side: Carta Actual + historial placeholders -->
+
+        <!-- Right side: Carta Actual + historial -->
         <div class="col-span-1 space-y-3 overflow-y-hidden h-[84vw]">
-          <div *ngIf="currentCard" class="bg-blue-100 rounded-2xl p-3 border-4 border-blue-300">
-            <h3
-                class="text-center text-gray-800 font-bold mb-1.5 text-xs uppercase leading-tight">
-              Carta<br>Actual</h3>
-            <div class="flex justify-center">
-              <app-card [card]="currentCard" [size]="'medium'" [showVerso]="false"></app-card>
-            </div>
+          <div class="bg-blue-100 rounded-2xl p-3 border-4 border-blue-300">
+            <app-player-current-card
+              [currentCard]="currentCard"
+              [size]="'medium'"
+            ></app-player-current-card>
           </div>
+
           <!-- Historial de cartas -->
           <div class="space-y-2">
-            <div *ngFor="let card of historyCards.slice(0, 3)"
-                 class="overflow-hidden">
-              <app-card [card]="card" [size]="'small'" [showVerso]="false"></app-card>
-            </div>
+            <app-player-card-history
+              [historyCards]="historyCards"
+              [maxCards]="3"
+            ></app-player-card-history>
           </div>
         </div>
       </div>
+
       <!-- Botones -->
-      <div class="space-y-3">
-        <button (click)="onShoutLoteria()"
-                class="w-full bg-green-500 text-white px-5 py-3 rounded-lg font-bold hover:bg-green-600 transition text-lg">
-          ¡LOTERÍA! </button>
-        <div class="grid grid-cols-2 gap-3">
-          <button (click)="onChangeMarker()"
-                  class="bg-green-300 text-gray-800 px-4 py-3 rounded-lg font-semibold hover:bg-green-400 transition border-2 border-green-600 text-sm">
-            MARCADOR </button>
-          <button (click)="onChangeTabla()"
-                  class="bg-green-300 text-gray-800 px-4 py-3 rounded-lg font-semibold hover:bg-green-400 transition border-2 border-green-600 text-sm">
-            TABLAS </button>
-        </div>
-      </div>
+      <app-player-action-buttons
+        [layout]="'horizontal'"
+        [compact]="true"
+        (shoutLoteria)="shoutLoteria.emit()"
+        (changeMarker)="changeMarker.emit()"
+        (changeTabla)="changeTabla.emit()"
+      >
+      </app-player-action-buttons>
     </div>
   </div>
+
   <!-- MOBILE LAYOUT (< md) -->
   <div class="md:hidden space-y-4">
-    <!-- Header con info de la sala -->
-    <div class="bg-white/90 backdrop-blur-sm shadow-lg p-3 rounded-lg">
-      <div class="space-y-2">
-        <div class="flex justify-between items-start">
-          <div class="flex-1">
-            <div class="text-xs text-gray-600 font-semibold">Sala: {{ roomId }}</div>
-            <div class="text-sm font-bold text-gray-800">Ronda {{ room?.currentRound || 0 }} / {{ room?.config?.maxRounds || 0 }}</div>
-          </div>
-          <span class="px-2 py-1 rounded-full text-xs font-semibold"
-            [ngClass]="getRoomStateColors()">
-            {{ getRoomStateLabel() }}
-          </span>
-        </div>
-        <button (click)="onGoHome()"
-                class="w-full bg-red-600 text-white px-3 py-2 rounded-lg font-semibold hover:bg-red-700 transition text-xs">
-          ABANDONAR
-        </button>
-      </div>
-    </div>
-    
+    <app-player-room-header
+      [room]="room"
+      [roomId]="roomId"
+      (goHome)="goHome.emit()"
+    ></app-player-room-header>
+
     <!-- Top: Carta Actual + historial placeholders (horizontal) -->
     <div class="grid grid-cols-4 gap-2">
-      <div *ngIf="currentCard"
-           class="col-span-1 bg-blue-100 rounded-xl p-2 border-4 border-blue-300">
-        <h3 class="text-center text-gray-800 font-bold mb-1 text-[10px] uppercase leading-tight">
-          Carta<br>Actual</h3>
-        <div class="flex justify-center">
-          <app-card [card]="currentCard" [size]="'small'" [showVerso]="false"></app-card>
-        </div>
+      <div class="col-span-1">
+        <app-player-current-card
+          [currentCard]="currentCard"
+          [size]="'small'"
+        ></app-player-current-card>
       </div>
+
       <!-- Historial de cartas -->
       <div class="col-span-3 flex gap-3 overflow-x-auto pb-2">
-        <div *ngFor="let card of historyCards.slice(0, 3)"
-             class=" overflow-hidden">
-          <app-card [card]="card" [size]="'small'" [showVerso]="false"></app-card>
-        </div>
+        <app-player-card-history
+          [historyCards]="historyCards"
+          [maxCards]="3"
+        ></app-player-card-history>
       </div>
     </div>
+
     <!-- Tabla -->
     <div class="rounded-2xl">
-      <app-tabla [tablaCards]="myTabla" [marks]="myMarks"
-                 [markerEmoji]="selectedMarker" [isInteractive]="true"
-                 [size]="'large'" (cardClicked)="onCardClicked($event)">
+      <app-tabla
+        [tablaCards]="myTabla"
+        [marks]="myMarks"
+        [markerEmoji]="selectedMarker"
+        [isInteractive]="true"
+        [size]="'large'"
+        (cardClicked)="cardClicked.emit($event)"
+      >
       </app-tabla>
     </div>
+
     <!-- Botones -->
-    <div class="space-y-3">
-      <button (click)="onShoutLoteria()"
-              class="w-full bg-green-500 text-white px-6 py-3 rounded-lg font-bold hover:bg-green-600 transition text-lg">
-        ¡LOTERÍA! </button>
-      <div class="grid grid-cols-2 gap-3">
-        <button (click)="onChangeMarker()"
-                class="bg-green-300 text-gray-800 px-4 py-3 rounded-lg font-semibold hover:bg-green-400 transition border-2 border-green-600 text-sm">
-          MARCADOR </button>
-        <button (click)="onChangeTabla()"
-                class="bg-green-300 text-gray-800 px-4 py-3 rounded-lg font-semibold hover:bg-green-400 transition border-2 border-green-600 text-sm">
-          TABLAS </button>
-      </div>
-    </div>
+    <app-player-action-buttons
+      [layout]="'horizontal'"
+      [compact]="true"
+      (shoutLoteria)="shoutLoteria.emit()"
+      (changeMarker)="changeMarker.emit()"
+      (changeTabla)="changeTabla.emit()"
+    >
+    </app-player-action-buttons>
   </div>
 </div>

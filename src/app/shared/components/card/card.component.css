@@ -49,7 +49,7 @@
 /* Container-driven scaling (so emoji/text react to card size) */
 .card-container {
   container-type: inline-size;
-  width: 38vw;
+  width: 24vw;
 }
 
 .card-container.has-image {

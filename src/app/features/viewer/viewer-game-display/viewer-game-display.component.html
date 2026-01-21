@@ -58,17 +58,6 @@
 
   <!-- Right column: Next card & Recent cards -->
   <div class="xl:col-span-3 space-y-4">
-    <!-- Next Card Preview -->
-    <div class="sticky top-6">
-      <app-next-card-preview
-        [card]="nextCardPreview"
-        [mode]="'public'"
-        [title]="'SIGUIENTE CARTA'"
-        [subtitle]="'PRÓXIMA A CANTAR'"
-      >
-      </app-next-card-preview>
-    </div>
-
     <!-- Recent cards -->
     <div class="bg-white rounded-2xl shadow-2xl p-6">
       <h3 class="text-xl font-bold text-gray-800 mb-4">Cartas Recientes</h3>
@@ -126,16 +115,6 @@
       ></app-card>
     </div>
   </div>
-
-  <!-- Next Card Preview (mobile/tablet) -->
-  <app-next-card-preview
-    *ngIf="nextCardPreview"
-    [card]="nextCardPreview"
-    [mode]="'public'"
-    [title]="'SIGUIENTE CARTA'"
-    [subtitle]="'PRÓXIMA A CANTAR'"
-  >
-  </app-next-card-preview>
 
   <!-- Recent cards -->
   <div

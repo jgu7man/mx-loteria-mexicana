@@ -26,8 +26,8 @@ import {
   RoomConfig,
   RoundWinner,
 } from '../../../core/models/game.model';
-import { AuthService } from '../../../core/services/auth.service';
 import { AlertService } from '../../../core/services/alert.service';
+import { AuthService } from '../../../core/services/auth.service';
 import { GameUtilsService } from '../../../core/services/game-utils.service';
 import { RoomService } from '../../../core/services/room.service';
 import { CardComponent } from '../../../shared/components/card/card.component';

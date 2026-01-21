@@ -1,16 +1,27 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { Room } from '../../../../../core/models/game.model';
-import { getRoomStateLabel, getRoomStateColors } from '../../../../../core/constants/room-states';
 import { CardComponent } from '../../../../../shared/components/card/card.component';
 import { TablaComponent } from '../../../../../shared/components/tabla/tabla.component';
+import { PlayerActionButtonsComponent } from './components/player-action-buttons/player-action-buttons.component';
+import { PlayerCardHistoryComponent } from './components/player-card-history/player-card-history.component';
+import { PlayerCurrentCardComponent } from './components/player-current-card/player-current-card.component';
+import { PlayerRoomHeaderComponent } from './components/player-room-header/player-room-header.component';
 
 @Component({
   selector: 'app-player-game-board',
   standalone: true,
-  imports: [CommonModule, CardComponent, TablaComponent],
+  imports: [
+    CommonModule,
+    CardComponent,
+    TablaComponent,
+    PlayerRoomHeaderComponent,
+    PlayerCurrentCardComponent,
+    PlayerCardHistoryComponent,
+    PlayerActionButtonsComponent,
+  ],
   templateUrl: './player-game-board.component.html',
-  styleUrl: './player-game-board.component.css'
+  styleUrl: './player-game-board.component.css',
 })
 export class PlayerGameBoardComponent {
   @Input() room: Room | null = null;
@@ -20,7 +31,7 @@ export class PlayerGameBoardComponent {
   @Input() myMarks: number[] = [];
   @Input() selectedMarker: string = '🫘';
   @Input() roomId = '';
-  
+
   @Output() cardClicked = new EventEmitter<number>();
   @Output() shoutLoteria = new EventEmitter<void>();
   @Output() changeMarker = new EventEmitter<void>();
@@ -29,33 +40,31 @@ export class PlayerGameBoardComponent {
 
   Math = Math;
 
-  onCardClicked(cardId: number) {
-    this.cardClicked.emit(cardId);
-  }
-
-  onShoutLoteria() {
-    this.shoutLoteria.emit();
-  }
-
-  onChangeMarker() {
-    this.changeMarker.emit();
-  }
-
-  onChangeTabla() {
-    this.changeTabla.emit();
-  }
-
-  onGoHome() {
-    this.goHome.emit();
-  }
-
   getRoomStateLabel(): string {
-    return this.room?.state ? getRoomStateLabel(this.room.state) : 'Desconocido';
+    if (!this.room) return 'Sin estado';
+    switch (this.room.state) {
+      case 'waiting':
+        return 'Esperando';
+      case 'playing':
+        return 'Jugando';
+      case 'finished':
+        return 'Finalizada';
+      default:
+        return this.room.state;
+    }
   }
 
   getRoomStateColors(): string {
-    if (!this.room?.state) return 'bg-gray-100 text-gray-700';
-    const colors = getRoomStateColors(this.room.state);
-    return `${colors.bg} ${colors.text}`;
+    if (!this.room) return 'bg-gray-200 text-gray-700';
+    switch (this.room.state) {
+      case 'waiting':
+        return 'bg-yellow-200 text-yellow-800';
+      case 'playing':
+        return 'bg-green-200 text-green-800';
+      case 'finished':
+        return 'bg-blue-200 text-blue-800';
+      default:
+        return 'bg-gray-200 text-gray-700';
+    }
   }
 }
