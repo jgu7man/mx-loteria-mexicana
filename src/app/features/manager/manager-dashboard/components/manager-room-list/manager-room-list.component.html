@@ -9,7 +9,7 @@
         <button
           *ngFor="let managerRoom of managerRooms"
           (click)="roomSelected.emit(managerRoom)"
-          class="p-6 border-2 border-gray-200 rounded-2xl hover:border-indigo-400 hover:shadow-lg transition text-left bg-gray-50">
+          class="p-6 border-2 border-gray-200 rounded-3xl hover:border-indigo-400 hover:shadow-lg transition text-left bg-gray-50">
           <div class="flex justify-between items-start mb-2">
             <h4 class="text-lg font-bold text-gray-800">{{ managerRoom.name }}</h4>
             <span class="px-3 py-1 text-xs rounded-full font-semibold"
@@ -38,7 +38,7 @@
     <button 
       *ngIf="!showCreateForm"
       (click)="showCreateForm = true"
-      class="bg-indigo-600 text-white px-8 py-4 rounded-2xl font-semibold hover:bg-indigo-700 transition shadow-lg">
+      class="bg-indigo-600 text-white px-8 py-4 rounded-3xl font-semibold hover:bg-indigo-700 transition shadow-lg">
       ➕ Crear Nueva Sala
     </button>
 

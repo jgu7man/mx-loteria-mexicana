@@ -1,16 +1,59 @@
+/* Background Cards Animation */
+.background-cards-layer {
+  z-index: 0;
+}
+
+.background-card {
+  transition: all 0.3s ease;
+  filter: blur(1px);
+  animation: floatBackground 20s ease-in-out infinite;
+}
+
+.background-card:nth-child(odd) {
+  animation-delay: -5s;
+}
+
+.background-card:nth-child(even) {
+  animation-delay: -10s;
+}
+
+@keyframes floatBackground {
+  0%,
+  100% {
+    transform: translateY(0) rotate(var(--rotation, 0deg))
+      scale(var(--scale, 1));
+  }
+  50% {
+    transform: translateY(-20px) rotate(var(--rotation, 0deg))
+      scale(var(--scale, 1));
+  }
+}
+
+/* Content Layer */
+.content-layer {
+  z-index: 10;
+}
+
+/* Role Cards */
 .role-card {
   position: relative;
   overflow: hidden;
+  backdrop-filter: blur(10px);
 }
 
 .role-card::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: -100%;
   width: 100%;
   height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.3),
+    transparent
+  );
   transition: left 0.5s;
 }
 
@@ -23,10 +66,24 @@
 }
 
 @keyframes float {
-  0%, 100% {
+  0%,
+  100% {
     transform: translateY(0);
   }
   50% {
     transform: translateY(-10px);
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .background-card {
+    display: none;
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+  .background-card:nth-child(n + 10) {
+    display: none;
   }
 }

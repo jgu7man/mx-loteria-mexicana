@@ -11,7 +11,7 @@
 
   <div
     *ngIf="pendingWinners().length === 0"
-    class="text-gray-400 text-sm italic py-4 text-center border-2 border-dashed border-gray-100 rounded-xl"
+    class="text-gray-400 text-sm italic py-4 text-center border-2 border-dashed border-gray-100 rounded-3xl"
   >
     Sin solicitudes pendientes
   </div>
@@ -22,7 +22,7 @@
   >
     <div
       *ngFor="let p of pendingWinners()"
-      class="flex items-center justify-between p-3 bg-indigo-50 border border-indigo-100 rounded-2xl"
+      class="flex items-center justify-between p-3 bg-indigo-50 border border-indigo-100 rounded-3xl"
     >
       <div>
         <p class="font-bold text-sm text-gray-800">{{ p.displayName }}</p>
@@ -30,7 +30,7 @@
       </div>
       <button
         (click)="reviewParticipant.emit(p)"
-        class="bg-indigo-600 text-white px-4 py-2 rounded-xl text-xs font-bold hover:bg-indigo-700 shadow-sm transition"
+        class="bg-indigo-600 text-white px-4 py-2 rounded-3xl text-xs font-bold hover:bg-indigo-700 shadow-sm transition"
       >
         Revisar
       </button>
