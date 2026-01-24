@@ -7,7 +7,7 @@ import { Card } from '../../../core/models/game.model';
   standalone: true,
   imports: [CommonModule],
   templateUrl: './card.component.html',
-  styleUrl: './card.component.css'
+  styleUrl: './card.component.scss'
 })
 export class CardComponent {
   @Input() card!: Card;

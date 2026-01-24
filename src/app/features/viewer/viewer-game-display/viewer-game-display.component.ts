@@ -8,7 +8,7 @@ import { CardComponent } from '../../../shared/components/card/card.component';
   standalone: true,
   imports: [CommonModule, CardComponent],
   templateUrl: './viewer-game-display.component.html',
-  styleUrl: './viewer-game-display.component.css',
+  styleUrl: './viewer-game-display.component.scss',
 })
 export class ViewerGameDisplayComponent {
   @Input() room: Room | null = null;

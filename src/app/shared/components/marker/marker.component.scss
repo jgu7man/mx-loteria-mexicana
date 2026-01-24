@@ -1,0 +1,11 @@
+// Import shared abstracts
+@import 'styles/abstracts/index';
+
+.marker-option {
+  @include border-hover($color-white, $color-accent-green);
+}
+
+.selected-indicator {
+  @include bounce-animation;
+}
+

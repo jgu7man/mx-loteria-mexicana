@@ -1,0 +1,75 @@
+// Import shared abstracts
+@import 'styles/abstracts/index';
+
+// Ensure the component participates in layout predictably
+@include host-block;
+
+// Card sizes
+.card-small {
+  @include card-size(
+    $card-width-small,
+    clamp(1.5rem, 14cqw, 2rem),
+    clamp(0.55rem, 4.6cqw, 0.65rem)
+  );
+}
+
+.card-medium {
+  @include card-size(
+    $card-width-medium,
+    clamp(2.2rem, 14cqw, 3rem),
+    clamp(0.7rem, 4.6cqw, 0.85rem)
+  );
+}
+
+.card-large {
+  @include card-size(
+    $card-width-large,
+    clamp(1.5rem, 14cqw, 5rem),
+    clamp(0.5rem, 4.6cqw, 1.2rem)
+  );
+}
+
+// Container-driven scaling (so emoji/text react to card size)
+.card-container {
+  @include card-container($card-container-mobile);
+
+  @include respond-to(sm) {
+    width: $card-container-tablet;
+  }
+
+  @include respond-to(xl) {
+    width: $card-container-desktop;
+  }
+}
+
+.card-content {
+  @include card-padding;
+}
+
+.card-verso {
+  @include text-clamp(0.55rem, 3.2cqw, 0.8rem);
+}
+
+// Marker overlay
+.marker-emoji {
+  font-size: $marker-size-mobile;
+  @include drop-shadow;
+
+  @include respond-to(sm) {
+    font-size: $marker-size-desktop;
+  }
+}
+
+// Responsive adjustments for large cards
+@include respond-to(sm) {
+  .card-large {
+    .card-name {
+      @include text-clamp(0.5rem, 12cqw, 0.65rem);
+    }
+
+    .card-emoji {
+      @include text-clamp(1.5rem, 50cqw, 2rem);
+    }
+  }
+}
+

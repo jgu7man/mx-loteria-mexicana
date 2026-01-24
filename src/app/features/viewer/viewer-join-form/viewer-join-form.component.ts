@@ -6,7 +6,7 @@ import { FormsModule } from '@angular/forms';
   standalone: true,
   imports: [FormsModule],
   templateUrl: './viewer-join-form.component.html',
-  styleUrl: './viewer-join-form.component.css',
+  styleUrl: './viewer-join-form.component.scss',
 })
 export class ViewerJoinFormComponent {
   @Input() roomId = '';

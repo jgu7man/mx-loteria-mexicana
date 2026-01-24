@@ -37,7 +37,7 @@ import { PlayerTablaSelectorComponent } from './components/player-tabla-selector
     PlayerGameBoardComponent,
   ],
   templateUrl: './player-game.component.html',
-  styleUrl: './player-game.component.css',
+  styleUrl: './player-game.component.scss',
 })
 export class PlayerGameComponent implements OnInit {
   private router = inject(Router);

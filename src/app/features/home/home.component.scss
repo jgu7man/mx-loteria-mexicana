@@ -1,0 +1,11 @@
+// Import shared abstracts
+@import 'styles/abstracts/index';
+
+.role-card {
+  @include shine-effect;
+}
+
+.role-icon {
+  @include float-animation;
+}
+

@@ -15,7 +15,7 @@ import { CardComponent } from '../../../../../shared/components/card/card.compon
   standalone: true,
   imports: [CommonModule, CardComponent],
   templateUrl: './manager-game-panel.component.html',
-  styleUrl: './manager-game-panel.component.css',
+  styleUrl: './manager-game-panel.component.scss',
 })
 export class ManagerGamePanelComponent {
   @Input() room!: Room;

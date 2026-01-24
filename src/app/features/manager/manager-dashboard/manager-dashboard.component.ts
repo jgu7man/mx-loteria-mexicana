@@ -51,7 +51,7 @@ import { ManagerRoomListComponent } from './components/manager-room-list/manager
     ManagerReviewModalComponent,
   ],
   templateUrl: './manager-dashboard.component.html',
-  styleUrl: './manager-dashboard.component.css',
+  styleUrl: './manager-dashboard.component.scss',
 })
 export class ManagerDashboardComponent implements OnDestroy {
   private router = inject(Router);

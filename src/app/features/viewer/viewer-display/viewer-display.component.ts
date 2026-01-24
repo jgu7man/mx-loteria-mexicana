@@ -12,7 +12,7 @@ import { ViewerGameDisplayComponent } from '../viewer-game-display/viewer-game-d
   standalone: true,
   imports: [CommonModule, ViewerJoinFormComponent, ViewerGameDisplayComponent],
   templateUrl: './viewer-display.component.html',
-  styleUrl: './viewer-display.component.css',
+  styleUrl: './viewer-display.component.scss',
 })
 export class ViewerDisplayComponent implements OnInit {
   private router = inject(Router);

@@ -1,6 +1,7 @@
-:host {
-  display: block;
-}
+// Import shared abstracts
+@import 'styles/abstracts/index';
+
+@include host-block;
 
 .tabla-container {
   display: block;
@@ -8,10 +9,10 @@
 }
 
 .tabla-grid {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  container-type: inline-size;
+  @include gradient-background;
+  @include container-inline;
   width: 100%;
-  aspect-ratio: 4 / 5;
+  aspect-ratio: $card-aspect-ratio;
   padding: clamp(6px, 1.2cqw, 12px);
   border-radius: clamp(10px, 2cqw, 16px);
   gap: clamp(6px, 1.2cqw, 12px);
@@ -19,7 +20,6 @@
 }
 
 .tabla-cell {
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  @include flex-center;
 }
+

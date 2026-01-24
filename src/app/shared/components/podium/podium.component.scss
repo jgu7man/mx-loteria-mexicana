@@ -1,4 +1,7 @@
-/* Add animation for confetti effect */
+// Import shared abstracts
+@import 'styles/abstracts/index';
+
+// Confetti animation
 @keyframes confetti-fall {
   0% {
     transform: translateY(-100vh) rotate(0deg);
@@ -8,12 +11,13 @@
   }
 }
 
+// Brief bounce animation
 .animate-bounce-brief {
-  animation: bounce 1s infinite;
-  animation-iteration-count: 3; /* Bounce 3 times then stop */
+  animation: bounce-brief 1s;
+  animation-iteration-count: 3;
 }
 
-@keyframes bounce {
+@keyframes bounce-brief {
   0%,
   100% {
     transform: translateY(-25%);
@@ -24,3 +28,4 @@
     animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
   }
 }
+

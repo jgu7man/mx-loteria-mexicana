@@ -1,0 +1,38 @@
+// Import shared abstracts
+@import 'styles/abstracts/index';
+
+// Override card styles for viewer display
+#current-card {
+  ::ng-deep .card-container {
+    width: clamp(150px, 40vw, 300px);
+    @include text-clamp(0.8rem, 5cqw, 1.2rem);
+  }
+
+  ::ng-deep .card-large {
+    .card-emoji {
+      @include text-clamp(3rem, 14cqw, 5rem);
+    }
+
+    .card-name {
+      @include text-clamp(1rem, 14cqw, 1.2rem);
+    }
+  }
+
+  // Desktop adjustments
+  @include respond-to(xl) {
+    ::ng-deep .card-container {
+      width: clamp(200px, 25vw, 300px);
+    }
+
+    ::ng-deep .card-large {
+      .card-emoji {
+        @include text-clamp(4rem, 10cqw, 5rem);
+      }
+
+      .card-name {
+        @include text-clamp(1.2rem, 10cqw, 1.2rem);
+      }
+    }
+  }
+}
+

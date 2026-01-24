@@ -7,7 +7,7 @@ import { CARDS } from '../../../../../core/constants/game-data';
   standalone: true,
   imports: [CommonModule],
   templateUrl: './player-tabla-selector.component.html',
-  styleUrl: './player-tabla-selector.component.css',
+  styleUrl: './player-tabla-selector.component.scss',
 })
 export class PlayerTablaSelectorComponent {
   @Input() availableTablas: number[][] = [];
