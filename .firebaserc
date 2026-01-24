@@ -1,0 +1,14 @@
+{
+  "projects": {
+    "default": "mx-fire-games"
+  },
+  "targets": {
+    "mx-fire-games": {
+      "hosting": {
+        "mx-loteria-mexicana": [
+          "mx-loteria-mexicana"
+        ]
+      }
+    }
+  }
+}
