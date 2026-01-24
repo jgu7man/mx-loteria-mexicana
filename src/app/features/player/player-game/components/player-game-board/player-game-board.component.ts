@@ -19,7 +19,7 @@ import { PlayerRoomHeaderComponent } from './components/player-room-header/playe
     PlayerActionButtonsComponent,
   ],
   templateUrl: './player-game-board.component.html',
-  styleUrl: './player-game-board.component.css',
+  styleUrl: './player-game-board.component.scss',
 })
 export class PlayerGameBoardComponent {
   @Input() room: Room | null = null;

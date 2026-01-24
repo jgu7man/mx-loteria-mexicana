@@ -7,7 +7,7 @@ import { Participant } from '../../../core/models/game.model';
   standalone: true,
   imports: [CommonModule],
   templateUrl: './player-list.component.html',
-  styleUrl: './player-list.component.css',
+  styleUrl: './player-list.component.scss',
 })
 export class PlayerListComponent {
   @Input() players: Participant[] = [];

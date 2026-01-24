@@ -8,7 +8,7 @@ import { TablaComponent } from '../tabla/tabla.component';
   standalone: true,
   imports: [CommonModule, TablaComponent],
   templateUrl: './podium.component.html',
-  styleUrl: './podium.component.css',
+  styleUrl: './podium.component.scss',
 })
 export class PodiumComponent {
   @Input() winners: RoundWinner[] = [];

@@ -7,7 +7,7 @@ import { Card } from '../../../core/models/game.model';
   standalone: true,
   imports: [CommonModule],
   templateUrl: './next-card-preview.component.html',
-  styleUrl: './next-card-preview.component.css',
+  styleUrl: './next-card-preview.component.scss',
 })
 export class NextCardPreviewComponent {
   @Input() card: Card | null = null;

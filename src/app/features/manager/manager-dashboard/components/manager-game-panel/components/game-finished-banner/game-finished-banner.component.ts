@@ -7,7 +7,7 @@ import { ManagerGameStateService } from '../../../../services/manager-game-state
   standalone: true,
   imports: [CommonModule],
   templateUrl: './game-finished-banner.component.html',
-  styleUrl: './game-finished-banner.component.css',
+  styleUrl: './game-finished-banner.component.scss',
 })
 export class GameFinishedBannerComponent {
   private gameState = inject(ManagerGameStateService);

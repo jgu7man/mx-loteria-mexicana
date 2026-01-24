@@ -12,7 +12,7 @@ import { ViewerJoinFormComponent } from '../viewer-join-form/viewer-join-form.co
   standalone: true,
   imports: [CommonModule, ViewerJoinFormComponent, ViewerGameDisplayComponent],
   templateUrl: './viewer-display.component.html',
-  styleUrl: './viewer-display.component.css',
+  styleUrl: './viewer-display.component.scss',
 })
 export class ViewerDisplayComponent implements OnInit {
   private router = inject(Router);

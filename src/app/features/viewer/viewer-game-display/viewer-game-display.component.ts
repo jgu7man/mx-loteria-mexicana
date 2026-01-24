@@ -17,7 +17,7 @@ import { ViewerRoomHeaderComponent } from './components/viewer-room-header/viewe
     ViewerRecentCardsComponent,
   ],
   templateUrl: './viewer-game-display.component.html',
-  styleUrl: './viewer-game-display.component.css',
+  styleUrl: './viewer-game-display.component.scss',
 })
 export class ViewerGameDisplayComponent {
   @Input() room: Room | null = null;

@@ -19,7 +19,7 @@ interface BackgroundCard {
   standalone: true,
   imports: [CommonModule, CardComponent],
   templateUrl: './home.component.html',
-  styleUrl: './home.component.css',
+  styleUrl: './home.component.scss',
 })
 export class HomeComponent implements OnInit {
   private router = inject(Router);

@@ -15,7 +15,7 @@ import { RoomService } from '../../../core/services/room.service';
   standalone: true,
   imports: [CommonModule, QRCodeModule],
   templateUrl: './invite-display.component.html',
-  styleUrl: './invite-display.component.css',
+  styleUrl: './invite-display.component.scss',
 })
 export class InviteDisplayComponent implements OnInit {
   private router = inject(Router);

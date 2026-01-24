@@ -12,7 +12,7 @@ import { AppUser, Room } from '../../../../../core/models/game.model';
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './manager-room-list.component.html',
-  styleUrl: './manager-room-list.component.css',
+  styleUrl: './manager-room-list.component.scss',
 })
 export class ManagerRoomListComponent {
   @Input() managerRooms: Room[] = [];

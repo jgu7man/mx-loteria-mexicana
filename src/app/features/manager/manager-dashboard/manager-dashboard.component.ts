@@ -47,7 +47,7 @@ import { ManagerGameStateService } from './services/manager-game-state.service';
     ManagerReviewModalComponent,
   ],
   templateUrl: './manager-dashboard.component.html',
-  styleUrl: './manager-dashboard.component.css',
+  styleUrl: './manager-dashboard.component.scss',
 })
 export class ManagerDashboardComponent implements OnDestroy {
   private router = inject(Router);

@@ -11,7 +11,7 @@ import { Room } from '../../../../../../../core/models/game.model';
   standalone: true,
   imports: [CommonModule],
   templateUrl: './player-room-header.component.html',
-  styleUrl: './player-room-header.component.css',
+  styleUrl: './player-room-header.component.scss',
 })
 export class PlayerRoomHeaderComponent {
   @Input() room: Room | null = null;

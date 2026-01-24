@@ -1,0 +1,136 @@
+// ================================
+// CARD COMPONENT STYLES
+// ================================
+@use '../../../../styles/atoms/variables' as *;
+@use '../../../../styles/utilities/mixins' as *;
+
+// Host display
+:host {
+  display: block;
+}
+
+// Card sizes with nesting
+.card-small {
+  width: 100%;
+  max-width: $card-max-width-small;
+  aspect-ratio: $card-aspect-ratio;
+  
+  .card-emoji {
+    font-size: clamp(1.5rem, 14cqw, 2rem);
+  }
+  
+  .card-name {
+    font-size: clamp(0.55rem, 4.6cqw, 0.65rem);
+  }
+}
+
+.card-medium {
+  width: 100%;
+  max-width: $card-max-width-medium;
+  aspect-ratio: $card-aspect-ratio;
+  
+  .card-emoji {
+    font-size: clamp(2.2rem, 14cqw, 3rem);
+  }
+  
+  .card-name {
+    font-size: clamp(0.7rem, 4.6cqw, 0.85rem);
+  }
+}
+
+.card-large {
+  width: 100%;
+  max-width: $card-max-width-large;
+  aspect-ratio: $card-aspect-ratio;
+  
+  .card-emoji {
+    font-size: clamp(1.5rem, 14cqw, 5rem);
+  }
+  
+  .card-name {
+    font-size: clamp(0.5rem, 4.6cqw, 1.2rem);
+  }
+  
+  @media screen and (min-width: 500px) {
+    .card-name {
+      font-size: clamp(0.5rem, 12cqw, 0.65rem);
+    }
+    
+    .card-emoji {
+      font-size: clamp(1.5rem, 50cqw, 2rem);
+    }
+  }
+}
+
+// Container-driven scaling (so emoji/text react to card size)
+.card-container {
+  @include container-inline;
+  width: 24vw;
+  transition: transform $transition-base;
+  
+  &.has-image {
+    background: $color-white;
+  }
+  
+  &:hover {
+    transform: translateY(-4px);
+  }
+  
+  &:active {
+    transform: translateY(-2px);
+  }
+  
+  @media screen and (min-width: 500px) {
+    width: 20vw;
+  }
+  
+  @include responsive('xl') {
+    width: 15vw;
+  }
+}
+
+.card-content {
+  padding: clamp(0.35rem, 5cqw, 1rem);
+  position: relative;
+  
+  &.p-0 {
+    padding: 0;
+  }
+}
+
+.card-visual {
+  flex: 1;
+  @include flex-center;
+  min-height: 0; // Important for flex children
+}
+
+.card-image {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.card-verso {
+  font-size: clamp(0.55rem, 3.2cqw, 0.8rem);
+}
+
+// Marker overlay - must be above image
+.marker-overlay {
+  @include absolute-cover;
+  z-index: $z-dropdown;
+  pointer-events: none;
+  
+  .marker-emoji {
+    z-index: $z-dropdown + 1;
+  }
+}
+
+.marker-emoji {
+  font-size: 4rem;
+  filter: drop-shadow(0 0 10px rgba($color-black, 0.5));
+  
+  @media screen and (min-width: 500px) {
+    font-size: 3rem;
+  }
+}
+

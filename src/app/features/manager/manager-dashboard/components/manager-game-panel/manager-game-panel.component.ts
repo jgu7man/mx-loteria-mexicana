@@ -43,7 +43,7 @@ import { VerificationListComponent } from './components/verification-list/verifi
     GameFinishedBannerComponent,
   ],
   templateUrl: './manager-game-panel.component.html',
-  styleUrl: './manager-game-panel.component.css',
+  styleUrl: './manager-game-panel.component.scss',
 })
 export class ManagerGamePanelComponent implements OnInit {
   private gameState = inject(ManagerGameStateService);
