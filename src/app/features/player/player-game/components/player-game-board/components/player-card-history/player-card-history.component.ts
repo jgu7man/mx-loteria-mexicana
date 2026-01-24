@@ -7,7 +7,6 @@ import { CardComponent } from '../../../../../../../shared/components/card/card.
   standalone: true,
   imports: [CommonModule, CardComponent],
   templateUrl: './player-card-history.component.html',
-  styleUrl: './player-card-history.component.css',
 })
 export class PlayerCardHistoryComponent {
   @Input() historyCards: any[] = [];

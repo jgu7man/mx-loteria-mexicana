@@ -19,7 +19,21 @@ import { PlayerRoomHeaderComponent } from './components/player-room-header/playe
     PlayerActionButtonsComponent,
   ],
   templateUrl: './player-game-board.component.html',
-  styleUrl: './player-game-board.component.css',
+  styles: [`
+    @media screen and (min-width: 1200px) {
+      #tabla-desktop ::ng-deep .card-container {
+        width: 10vw;
+      }
+    }
+    
+    @media screen and (max-width: 767px) {
+      app-player-card-history {
+        display: flex;
+        overflow-x: scroll;
+        align-items: flex-end;
+      }
+    }
+  `],
 })
 export class PlayerGameBoardComponent {
   @Input() room: Room | null = null;

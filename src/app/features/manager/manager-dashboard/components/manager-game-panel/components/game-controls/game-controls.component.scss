@@ -1,0 +1,16 @@
+// ================================
+// GAME CONTROLS COMPONENT STYLES
+// ================================
+@use '../../../../../../../../styles/atoms/variables' as *;
+@use '../../../../../../../../styles/utilities/mixins' as *;
+
+.btn-control {
+  @include button-base;
+  width: 100%;
+  color: $color-white;
+  padding: $spacing-2 $spacing-3;
+  border-radius: $radius-lg;
+  font-size: $font-size-sm;
+  @include shadow('md');
+}
+

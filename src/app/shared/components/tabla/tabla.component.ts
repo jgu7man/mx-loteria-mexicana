@@ -9,7 +9,7 @@ import { CardComponent } from '../card/card.component';
   standalone: true,
   imports: [CommonModule, CardComponent],
   templateUrl: './tabla.component.html',
-  styleUrl: './tabla.component.css',
+  styleUrl: './tabla.component.scss',
 })
 export class TablaComponent {
   @Input() tablaCards: number[] = []; // IDs de las 16 cartas

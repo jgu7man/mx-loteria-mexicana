@@ -8,7 +8,7 @@ import { Marker } from '../../../core/models/game.model';
   standalone: true,
   imports: [CommonModule],
   templateUrl: './marker.component.html',
-  styleUrl: './marker.component.css'
+  styleUrl: './marker.component.scss'
 })
 export class MarkerComponent {
   markers = MARKERS;

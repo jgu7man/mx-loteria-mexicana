@@ -74,16 +74,3 @@
     transform: translateY(-10px);
   }
 }
-
-/* Responsive adjustments */
-@media (max-width: 768px) {
-  .background-card {
-    display: none;
-  }
-}
-
-@media (min-width: 769px) and (max-width: 1024px) {
-  .background-card:nth-child(n + 10) {
-    display: none;
-  }
-}

@@ -7,7 +7,6 @@ import { FormsModule } from '@angular/forms';
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './player-join-form.component.html',
-  styleUrl: './player-join-form.component.css',
 })
 export class PlayerJoinFormComponent {
   @Input() displayName = '';

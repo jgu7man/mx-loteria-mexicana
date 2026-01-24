@@ -43,7 +43,7 @@ import { VerificationListComponent } from './components/verification-list/verifi
     GameFinishedBannerComponent,
   ],
   templateUrl: './manager-game-panel.component.html',
-  styleUrl: './manager-game-panel.component.css',
+  styles: [':host ::ng-deep .card-container { width: 50vw !important; }'],
 })
 export class ManagerGamePanelComponent implements OnInit {
   private gameState = inject(ManagerGameStateService);

@@ -8,7 +8,6 @@ import { ManagerGameStateService } from '../../../../services/manager-game-state
   standalone: true,
   imports: [CommonModule, CardComponent],
   templateUrl: './active-card-display.component.html',
-  styleUrl: './active-card-display.component.css',
 })
 export class ActiveCardDisplayComponent {
   private gameState = inject(ManagerGameStateService);

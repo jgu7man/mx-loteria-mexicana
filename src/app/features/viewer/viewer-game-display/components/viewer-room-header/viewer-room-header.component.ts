@@ -7,7 +7,6 @@ import { Room } from '../../../../../core/models/game.model';
   standalone: true,
   imports: [CommonModule],
   templateUrl: './viewer-room-header.component.html',
-  styleUrl: './viewer-room-header.component.css',
 })
 export class ViewerRoomHeaderComponent {
   @Input() room: Room | null = null;

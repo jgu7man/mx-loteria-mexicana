@@ -1,4 +1,10 @@
-/* Add animation for confetti effect */
+// ================================
+// PODIUM COMPONENT STYLES
+// ================================
+@use '../../../../styles/atoms/variables' as *;
+@use '../../../../styles/utilities/mixins' as *;
+
+// Confetti animation
 @keyframes confetti-fall {
   0% {
     transform: translateY(-100vh) rotate(0deg);
@@ -8,14 +14,14 @@
   }
 }
 
+// Brief bounce animation
 .animate-bounce-brief {
-  animation: bounce 1s infinite;
-  animation-iteration-count: 3; /* Bounce 3 times then stop */
+  animation: bounce 1s;
+  animation-iteration-count: 3; // Bounce 3 times then stop
 }
 
 @keyframes bounce {
-  0%,
-  100% {
+  0%, 100% {
     transform: translateY(-25%);
     animation-timing-function: cubic-bezier(0.8, 0, 1, 1);
   }
@@ -24,3 +30,4 @@
     animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
   }
 }
+

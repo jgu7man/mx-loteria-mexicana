@@ -1,8 +1,0 @@
-/* QR Code styles */
-::ng-deep .qr-code {
-  border-radius: 0.5rem;
-}
-
-::ng-deep .qr-code canvas {
-  border-radius: 0.5rem;
-}

@@ -1,0 +1,16 @@
+// ================================
+// BUTTON MOLECULE - BUTTON PATTERNS
+// ================================
+
+@use '../atoms/variables' as *;
+@use '../utilities/mixins' as *;
+
+// Base button control
+.btn-control {
+  @include button-base;
+  width: 100%;
+  color: $color-white;
+  padding: $spacing-2 $spacing-3;
+  font-size: $font-size-sm;
+  @include shadow('md');
+}

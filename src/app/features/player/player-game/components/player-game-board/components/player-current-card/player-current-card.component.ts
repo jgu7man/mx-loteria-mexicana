@@ -7,7 +7,6 @@ import { CardComponent } from '../../../../../../../shared/components/card/card.
   standalone: true,
   imports: [CommonModule, CardComponent],
   templateUrl: './player-current-card.component.html',
-  styleUrl: './player-current-card.component.css',
 })
 export class PlayerCurrentCardComponent {
   @Input() currentCard: any = null;

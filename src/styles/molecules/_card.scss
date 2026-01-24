@@ -1,0 +1,118 @@
+// ================================
+// CARD MOLECULE - LOTERÍA CARD PATTERNS
+// ================================
+
+@use '../atoms/variables' as *;
+@use '../utilities/mixins' as *;
+
+// Base card styles
+.card-container {
+  @include card-base;
+  @include container-inline;
+  width: 24vw;
+  
+  &.has-image {
+    background: $color-white;
+  }
+  
+  @include responsive('sm') {
+    width: 20vw;
+  }
+  
+  @include responsive('lg') {
+    width: 15vw;
+  }
+}
+
+.card-content {
+  padding: clamp(0.35rem, 5cqw, 1rem);
+  position: relative;
+  
+  &.p-0 {
+    padding: 0;
+  }
+}
+
+.card-visual {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 0; // Important for flex children
+}
+
+.card-image {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+// Card sizes
+.card-small {
+  width: 100%;
+  max-width: $card-max-width-small;
+  aspect-ratio: $card-aspect-ratio;
+  
+  .card-emoji {
+    font-size: clamp(1.5rem, 14cqw, 2rem);
+  }
+  
+  .card-name {
+    font-size: clamp(0.55rem, 4.6cqw, 0.65rem);
+  }
+}
+
+.card-medium {
+  width: 100%;
+  max-width: $card-max-width-medium;
+  aspect-ratio: $card-aspect-ratio;
+  
+  .card-emoji {
+    font-size: clamp(2.2rem, 14cqw, 3rem);
+  }
+  
+  .card-name {
+    font-size: clamp(0.7rem, 4.6cqw, 0.85rem);
+  }
+}
+
+.card-large {
+  width: 100%;
+  max-width: $card-max-width-large;
+  aspect-ratio: $card-aspect-ratio;
+  
+  .card-emoji {
+    font-size: clamp(1.5rem, 14cqw, 5rem);
+  }
+  
+  .card-name {
+    font-size: clamp(0.5rem, 4.6cqw, 1.2rem);
+  }
+  
+  @media screen and (min-width: 500px) {
+    .card-name {
+      font-size: clamp(0.5rem, 12cqw, 0.65rem);
+    }
+    
+    .card-emoji {
+      font-size: clamp(1.5rem, 50cqw, 2rem);
+    }
+  }
+}
+
+// Marker overlay
+.marker-overlay {
+  @include absolute-cover;
+  z-index: $z-dropdown;
+  pointer-events: none;
+  
+  .marker-emoji {
+    font-size: 4rem;
+    filter: drop-shadow(0 0 10px rgba($color-black, 0.5));
+    z-index: $z-dropdown + 1;
+    
+    @media screen and (min-width: 500px) {
+      font-size: 3rem;
+    }
+  }
+}

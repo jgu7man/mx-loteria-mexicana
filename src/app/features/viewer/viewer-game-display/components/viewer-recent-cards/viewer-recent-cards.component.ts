@@ -7,7 +7,6 @@ import { CardComponent } from '../../../../../shared/components/card/card.compon
   standalone: true,
   imports: [CommonModule, CardComponent],
   templateUrl: './viewer-recent-cards.component.html',
-  styleUrl: './viewer-recent-cards.component.css',
 })
 export class ViewerRecentCardsComponent {
   @Input() recentCards: any[] = [];
