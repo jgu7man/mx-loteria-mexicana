@@ -139,6 +139,7 @@ src/app/
 ## ✅ Estado de Implementación
 
 ### Completado
+- ✅ **Migración CSS a SCSS** con design system completo
 - ✅ Estructura core (constants, models, services)
 - ✅ 54 cartas con emojis y colores únicos
 - ✅ Servicios de autenticación (Google + Anónimo)
