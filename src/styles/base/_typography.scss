@@ -1,0 +1,84 @@
+// ============================================
+// BASE TYPOGRAPHY
+// ============================================
+// Global typography styles
+// ============================================
+
+@import '../abstracts/index';
+
+body {
+  font-family: $font-family-base;
+  font-size: $font-size-base;
+  font-weight: $font-weight-normal;
+  line-height: $line-height-normal;
+  color: $color-gray-900;
+}
+
+// Headings
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-weight: $font-weight-bold;
+  line-height: $line-height-tight;
+}
+
+h1 {
+  font-size: $font-size-3xl;
+}
+
+h2 {
+  font-size: $font-size-2xl;
+}
+
+h3 {
+  font-size: $font-size-xl;
+}
+
+h4 {
+  font-size: $font-size-lg;
+}
+
+h5 {
+  font-size: $font-size-base;
+}
+
+h6 {
+  font-size: $font-size-sm;
+}
+
+// Links
+a {
+  color: $color-primary;
+  text-decoration: none;
+  transition: color $transition-base;
+
+  &:hover {
+    color: $color-primary-dark;
+  }
+
+  &:focus-visible {
+    outline: 2px solid $color-primary;
+    outline-offset: 2px;
+  }
+}
+
+// Strong & emphasis
+strong,
+b {
+  font-weight: $font-weight-bold;
+}
+
+em,
+i {
+  font-style: italic;
+}
+
+// Code
+code,
+pre {
+  font-family: 'Courier New', monospace;
+  font-size: 0.9em;
+}

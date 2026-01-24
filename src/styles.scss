@@ -1,0 +1,38 @@
+/* ============================================
+ * MX LOTERÍA MEXICANA - MAIN STYLES
+ * ============================================
+ * SCSS Architecture following Atomic Design principles
+ * ============================================
+ * Structure:
+ * 1. Abstracts - Variables, mixins, functions (no CSS output)
+ * 2. Base - Reset, typography, base HTML elements
+ * 3. Components - Reusable component styles
+ * 4. Layout - Layout-specific styles
+ * 5. Themes - Color schemes and themes
+ * 6. Utilities - Helper classes
+ * 7. External - Tailwind CSS
+ * ============================================
+ */
+
+// 1. Abstracts (variables, mixins, functions)
+@import './styles/abstracts/index';
+
+// 2. Base styles
+@import './styles/base/index';
+
+// 3. Component styles
+@import './styles/components/index';
+
+// 4. Layout styles (empty for now, can be added as needed)
+// @import './styles/layout/index';
+
+// 5. Theme styles (empty for now, can be added as needed)
+// @import './styles/themes/index';
+
+// 6. Utility classes
+@import './styles/utilities/index';
+
+// 7. Tailwind CSS (keep existing Tailwind integration)
+@tailwind base;
+@tailwind components;
+@tailwind utilities;

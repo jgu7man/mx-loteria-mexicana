@@ -1,0 +1,138 @@
+// ============================================
+// UTILITY CLASSES
+// ============================================
+// Helper classes for common patterns
+// ============================================
+
+@import '../abstracts/index';
+
+// Display utilities
+.d-none {
+  display: none;
+}
+
+.d-block {
+  display: block;
+}
+
+.d-flex {
+  display: flex;
+}
+
+.d-grid {
+  display: grid;
+}
+
+// Flexbox utilities
+.flex-center {
+  @include flex-center;
+}
+
+.flex-row {
+  flex-direction: row;
+}
+
+.flex-column {
+  flex-direction: column;
+}
+
+.justify-start {
+  justify-content: flex-start;
+}
+
+.justify-center {
+  justify-content: center;
+}
+
+.justify-end {
+  justify-content: flex-end;
+}
+
+.justify-between {
+  justify-content: space-between;
+}
+
+.align-start {
+  align-items: flex-start;
+}
+
+.align-center {
+  align-items: center;
+}
+
+.align-end {
+  align-items: flex-end;
+}
+
+// Text utilities
+.text-center {
+  text-align: center;
+}
+
+.text-left {
+  text-align: left;
+}
+
+.text-right {
+  text-align: right;
+}
+
+.text-truncate {
+  @include text-truncate;
+}
+
+// Animation utilities
+.float {
+  @include float-animation;
+}
+
+.bounce {
+  @include bounce-animation;
+}
+
+.shine-effect {
+  @include shine-effect;
+}
+
+// Spacing utilities
+@for $i from 0 through 16 {
+  .m-#{$i} {
+    margin: spacing(calc($i / 4));
+  }
+
+  .mt-#{$i} {
+    margin-top: spacing(calc($i / 4));
+  }
+
+  .mb-#{$i} {
+    margin-bottom: spacing(calc($i / 4));
+  }
+
+  .ml-#{$i} {
+    margin-left: spacing(calc($i / 4));
+  }
+
+  .mr-#{$i} {
+    margin-right: spacing(calc($i / 4));
+  }
+
+  .p-#{$i} {
+    padding: spacing(calc($i / 4));
+  }
+
+  .pt-#{$i} {
+    padding-top: spacing(calc($i / 4));
+  }
+
+  .pb-#{$i} {
+    padding-bottom: spacing(calc($i / 4));
+  }
+
+  .pl-#{$i} {
+    padding-left: spacing(calc($i / 4));
+  }
+
+  .pr-#{$i} {
+    padding-right: spacing(calc($i / 4));
+  }
+}

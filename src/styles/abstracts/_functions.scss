@@ -1,0 +1,67 @@
+// ============================================
+// SCSS FUNCTIONS
+// ============================================
+// Utility functions for calculations and conversions
+// ============================================
+
+@import './variables';
+
+// ============================================
+// COLOR FUNCTIONS
+// ============================================
+
+// Get color with opacity
+@function color-opacity($color, $opacity) {
+  @return rgba($color, $opacity);
+}
+
+// Lighten color by percentage
+@function lighten-color($color, $percentage) {
+  @return lighten($color, $percentage);
+}
+
+// Darken color by percentage
+@function darken-color($color, $percentage) {
+  @return darken($color, $percentage);
+}
+
+// ============================================
+// SPACING FUNCTIONS
+// ============================================
+
+// Calculate spacing multiplier
+@function spacing($multiplier) {
+  @return $spacing-4 * $multiplier;
+}
+
+// ============================================
+// SIZE FUNCTIONS
+// ============================================
+
+// Convert px to rem
+@function px-to-rem($px, $base: 16px) {
+  @return calc($px / $base) * 1rem;
+}
+
+// Convert rem to px
+@function rem-to-px($rem, $base: 16px) {
+  @return calc($rem * $base);
+}
+
+// ============================================
+// CONTAINER QUERY FUNCTIONS
+// ============================================
+
+// Calculate container query width
+@function cqw($percentage) {
+  @return #{$percentage}cqw;
+}
+
+// ============================================
+// ASPECT RATIO FUNCTION
+// ============================================
+
+// Calculate aspect ratio
+@function aspect-ratio($width, $height) {
+  @return calc($width / $height);
+}

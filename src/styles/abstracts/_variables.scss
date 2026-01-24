@@ -1,0 +1,164 @@
+// ============================================
+// DESIGN SYSTEM VARIABLES
+// ============================================
+// Color palette based on existing styles
+// ============================================
+
+// Primary Colors - Lotería Mexicana Theme
+$color-primary: #667eea;
+$color-primary-light: #7c8ff0;
+$color-primary-dark: #5568d3;
+$color-secondary: #764ba2;
+$color-secondary-light: #8a5fb8;
+$color-secondary-dark: #5f3982;
+
+// Accent Colors
+$color-accent-green: #10b981;
+$color-accent-green-light: rgba(16, 185, 129, 0.5);
+
+// Neutral Colors
+$color-white: #ffffff;
+$color-black: #000000;
+$color-gray-100: #f7fafc;
+$color-gray-200: #edf2f7;
+$color-gray-300: #e2e8f0;
+$color-gray-400: #cbd5e0;
+$color-gray-500: #a0aec0;
+$color-gray-600: #718096;
+$color-gray-700: #4a5568;
+$color-gray-800: #2d3748;
+$color-gray-900: #1a202c;
+
+// Gradients
+$gradient-primary: linear-gradient(135deg, $color-primary 0%, $color-secondary 100%);
+$gradient-shine: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+
+// ============================================
+// TYPOGRAPHY
+// ============================================
+
+// Font Families
+$font-family-base: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+
+// Font Sizes
+$font-size-xs: 0.55rem;
+$font-size-sm: 0.7rem;
+$font-size-base: 1rem;
+$font-size-lg: 1.2rem;
+$font-size-xl: 1.5rem;
+$font-size-2xl: 2rem;
+$font-size-3xl: 3rem;
+$font-size-4xl: 4rem;
+$font-size-5xl: 5rem;
+
+// Font Weights
+$font-weight-light: 300;
+$font-weight-normal: 400;
+$font-weight-medium: 500;
+$font-weight-semibold: 600;
+$font-weight-bold: 700;
+
+// Line Heights
+$line-height-tight: 1.2;
+$line-height-normal: 1.5;
+$line-height-relaxed: 1.75;
+
+// ============================================
+// SPACING
+// ============================================
+
+$spacing-1: 0.25rem;   // 4px
+$spacing-2: 0.5rem;    // 8px
+$spacing-3: 0.75rem;   // 12px
+$spacing-4: 1rem;      // 16px
+$spacing-5: 1.25rem;   // 20px
+$spacing-6: 1.5rem;    // 24px
+$spacing-8: 2rem;      // 32px
+$spacing-10: 2.5rem;   // 40px
+$spacing-12: 3rem;     // 48px
+$spacing-16: 4rem;     // 64px
+
+// ============================================
+// BREAKPOINTS
+// ============================================
+
+$breakpoint-xs: 320px;
+$breakpoint-sm: 500px;
+$breakpoint-md: 768px;
+$breakpoint-lg: 1024px;
+$breakpoint-xl: 1200px;
+$breakpoint-2xl: 1536px;
+
+// ============================================
+// BORDERS & SHADOWS
+// ============================================
+
+// Border Radius
+$border-radius-sm: 0.25rem;  // 4px
+$border-radius-base: 0.5rem; // 8px
+$border-radius-md: 0.75rem;  // 12px
+$border-radius-lg: 1rem;     // 16px
+$border-radius-xl: 1.5rem;   // 24px
+$border-radius-full: 9999px;
+
+// Border Width
+$border-width-thin: 1px;
+$border-width-base: 2px;
+$border-width-thick: 3px;
+
+// Box Shadows
+$shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+$shadow-base: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+$shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+$shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+$shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+$shadow-glow-green: 0 0 20px $color-accent-green-light;
+
+// ============================================
+// TRANSITIONS & ANIMATIONS
+// ============================================
+
+$transition-fast: 0.15s ease-in-out;
+$transition-base: 0.3s ease-in-out;
+$transition-slow: 0.5s ease-in-out;
+
+// Animation Durations
+$animation-duration-fast: 0.3s;
+$animation-duration-base: 0.5s;
+$animation-duration-slow: 1s;
+$animation-duration-float: 3s;
+
+// ============================================
+// Z-INDEX
+// ============================================
+
+$z-index-dropdown: 1000;
+$z-index-sticky: 1020;
+$z-index-fixed: 1030;
+$z-index-modal-backdrop: 1040;
+$z-index-modal: 1050;
+$z-index-popover: 1060;
+$z-index-tooltip: 1070;
+
+// ============================================
+// COMPONENT-SPECIFIC VARIABLES
+// ============================================
+
+// Card Sizes
+$card-aspect-ratio: calc(4 / 5);
+$card-width-small: 80px;
+$card-width-medium: 200px;
+$card-width-large: 200px;
+
+// Card Container Widths
+$card-container-mobile: 38vw;
+$card-container-tablet: 20vw;
+$card-container-desktop: 15vw;
+
+// Marker
+$marker-size-mobile: 4rem;
+$marker-size-desktop: 3rem;
+$marker-border-width: $border-width-thick;
+
+// Drop Shadow
+$drop-shadow-base: drop-shadow(0 0 10px rgba(0, 0, 0, 0.5));
