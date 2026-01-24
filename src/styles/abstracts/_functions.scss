@@ -40,12 +40,12 @@
 
 // Convert px to rem
 @function px-to-rem($px, $base: 16px) {
-  @return calc($px / $base) * 1rem;
+  @return ($px / $base) * 1rem;
 }
 
 // Convert rem to px
 @function rem-to-px($rem, $base: 16px) {
-  @return calc($rem * $base);
+  @return $rem * $base;
 }
 
 // ============================================
@@ -63,5 +63,5 @@
 
 // Calculate aspect ratio
 @function aspect-ratio($width, $height) {
-  @return calc($width / $height);
+  @return ($width / $height);
 }

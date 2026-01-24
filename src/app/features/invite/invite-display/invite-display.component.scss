@@ -4,10 +4,6 @@
 // QR Code styles
 ::ng-deep .qr-code {
   border-radius: $border-radius-base;
-
-  canvas {
-    border-radius: $border-radius-base;
-  }
 }
 
 
