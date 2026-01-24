@@ -1,0 +1,93 @@
+// ================================
+// MAIN STYLES - LOTERÍA MEXICANA
+// ================================
+// This file orchestrates all SCSS modules following Atomic Design principles
+// Architecture: Atoms > Molecules > Organisms > Utilities
+
+// 1. ATOMS - Design Tokens (Variables & Base Styles)
+@use 'styles/atoms/variables' as *;
+@use 'styles/atoms/animations';
+
+// 2. UTILITIES - Mixins & Functions
+@use 'styles/utilities/mixins' as *;
+@use 'styles/utilities/functions' as *;
+
+// 3. MOLECULES - Component Patterns
+@use 'styles/molecules/card';
+@use 'styles/molecules/button';
+
+// 4. ORGANISMS - Complex Components
+@use 'styles/organisms/tabla';
+@use 'styles/organisms/role-card';
+
+// 5. TAILWIND - Must come after @use statements
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+// ================================
+// GLOBAL BASE STYLES
+// ================================
+
+body {
+  font-family: $font-family-base;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+// Host display normalization for Angular components
+:host {
+  display: block;
+}
+
+// ================================
+// UTILITY CLASSES
+// ================================
+
+// Display utilities
+.flex-center {
+  @include flex-center;
+}
+
+.flex-column {
+  @include flex-column;
+}
+
+.flex-between {
+  @include flex-between;
+}
+
+// Glass effect
+.glass {
+  @include glass;
+}
+
+// Text utilities
+.text-truncate {
+  @include truncate;
+}
+
+.text-gradient-primary {
+  @include gradient-text($gradient-primary);
+}
+
+.text-gradient-secondary {
+  @include gradient-text($gradient-secondary);
+}
+
+// Shadow utilities
+.shadow-sm { @include shadow('sm'); }
+.shadow-base { @include shadow('base'); }
+.shadow-md { @include shadow('md'); }
+.shadow-lg { @include shadow('lg'); }
+.shadow-xl { @include shadow('xl'); }
+.shadow-2xl { @include shadow('2xl'); }
+
+// Background utilities
+.bg-gradient-primary {
+  @include gradient-primary;
+}
+
+.bg-gradient-secondary {
+  @include gradient-secondary;
+}

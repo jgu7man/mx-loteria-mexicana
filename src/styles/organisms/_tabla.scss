@@ -1,0 +1,26 @@
+// ================================
+// TABLA ORGANISM - LOTERÍA GAME BOARD
+// ================================
+
+@use '../atoms/variables' as *;
+@use '../utilities/mixins' as *;
+
+.tabla-container {
+  display: block;
+  width: 100%;
+}
+
+.tabla-grid {
+  @include gradient-primary;
+  @include container-inline;
+  width: 100%;
+  aspect-ratio: $card-aspect-ratio;
+  padding: clamp(6px, 1.2cqw, 12px);
+  border-radius: clamp(10px, 2cqw, 16px);
+  gap: clamp(6px, 1.2cqw, 12px);
+  align-items: stretch;
+}
+
+.tabla-cell {
+  @include flex-center;
+}

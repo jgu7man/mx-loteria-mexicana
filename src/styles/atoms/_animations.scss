@@ -1,0 +1,153 @@
+// ================================
+// ANIMATIONS - LOTERÍA MEXICANA
+// ================================
+
+@use '../atoms/variables' as *;
+
+// Float animation for icons and cards
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+// Background float for decorative elements
+@keyframes floatBackground {
+  0%, 100% {
+    transform: translateY(0) rotate(var(--rotation, 0deg)) scale(var(--scale, 1));
+  }
+  50% {
+    transform: translateY(-20px) rotate(var(--rotation, 0deg)) scale(var(--scale, 1));
+  }
+}
+
+// Bounce animation (brief)
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(-25%);
+    animation-timing-function: cubic-bezier(0.8, 0, 1, 1);
+  }
+  50% {
+    transform: translateY(0);
+    animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
+  }
+}
+
+// Confetti animation
+@keyframes confetti-fall {
+  0% {
+    transform: translateY(-100vh) rotate(0deg);
+  }
+  100% {
+    transform: translateY(100vh) rotate(360deg);
+  }
+}
+
+// Fade in
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+// Slide up
+@keyframes slideUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+// Shimmer loading
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+// Pulse
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+// Spin
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+// Scale in
+@keyframes scaleIn {
+  from {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+// Animation utility classes
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+.animate-float-bg {
+  animation: floatBackground 20s ease-in-out infinite;
+  
+  &:nth-child(odd) {
+    animation-delay: -5s;
+  }
+  
+  &:nth-child(even) {
+    animation-delay: -10s;
+  }
+}
+
+.animate-bounce-brief {
+  animation: bounce 1s;
+  animation-iteration-count: 3;
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-in;
+}
+
+.animate-slide-up {
+  animation: slideUp 0.3s ease-out;
+}
+
+.animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+.animate-scale-in {
+  animation: scaleIn 0.2s ease-out;
+}
