@@ -8,7 +8,6 @@ import { ManagerGameStateService } from '../../../../services/manager-game-state
   standalone: true,
   imports: [CommonModule],
   templateUrl: './verification-list.component.html',
-  styleUrl: './verification-list.component.scss',
 })
 export class VerificationListComponent {
   private gameState = inject(ManagerGameStateService);

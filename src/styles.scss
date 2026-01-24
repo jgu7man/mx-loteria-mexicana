@@ -91,3 +91,37 @@ body {
 .bg-gradient-secondary {
   @include gradient-secondary;
 }
+
+// Custom modular utilities for repeated patterns
+.mobile-nav-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  align-items: center;
+  
+  @media (min-width: $breakpoint-xl) {
+    display: none;
+  }
+}
+
+.form-label {
+  display: block;
+  font-weight: $font-weight-semibold;
+  margin-bottom: 0.5rem;
+  color: $color-gray-700;
+  text-align: left;
+}
+
+.form-input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 2px solid $color-gray-200;
+  border-radius: $radius-xl;
+  
+  &:focus {
+    outline: none;
+    border-color: #6366f1;
+    ring: 2px;
+    ring-color: #6366f1;
+  }
+}

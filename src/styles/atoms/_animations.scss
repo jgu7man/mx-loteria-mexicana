@@ -111,37 +111,9 @@
 }
 
 // Animation utility classes
-.animate-float {
-  animation: float 3s ease-in-out infinite;
-}
-
-.animate-float-bg {
-  animation: floatBackground 20s ease-in-out infinite;
-  
-  &:nth-child(odd) {
-    animation-delay: -5s;
-  }
-  
-  &:nth-child(even) {
-    animation-delay: -10s;
-  }
-}
-
 .animate-bounce-brief {
   animation: bounce 1s;
   animation-iteration-count: 3;
-}
-
-.animate-fade-in {
-  animation: fadeIn 0.3s ease-in;
-}
-
-.animate-slide-up {
-  animation: slideUp 0.3s ease-out;
-}
-
-.animate-pulse {
-  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
 .animate-spin {

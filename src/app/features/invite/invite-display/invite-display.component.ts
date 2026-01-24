@@ -15,7 +15,15 @@ import { RoomService } from '../../../core/services/room.service';
   standalone: true,
   imports: [CommonModule, QRCodeModule],
   templateUrl: './invite-display.component.html',
-  styleUrl: './invite-display.component.scss',
+  styles: [`
+    ::ng-deep .qr-code {
+      border-radius: 0.5rem;
+    }
+    
+    ::ng-deep .qr-code canvas {
+      border-radius: 0.5rem;
+    }
+  `],
 })
 export class InviteDisplayComponent implements OnInit {
   private router = inject(Router);

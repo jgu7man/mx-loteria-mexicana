@@ -7,7 +7,16 @@ import { Card } from '../../../core/models/game.model';
   standalone: true,
   imports: [CommonModule],
   templateUrl: './next-card-preview.component.html',
-  styleUrl: './next-card-preview.component.scss',
+  styles: [`
+    .next-card-container {
+      transition: all 0.3s ease;
+    }
+    
+    .next-card-container:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+    }
+  `],
 })
 export class NextCardPreviewComponent {
   @Input() card: Card | null = null;

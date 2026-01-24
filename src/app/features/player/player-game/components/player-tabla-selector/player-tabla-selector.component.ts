@@ -8,7 +8,6 @@ import { CardComponent } from '../../../../../shared/components/card/card.compon
   standalone: true,
   imports: [CommonModule, CardComponent],
   templateUrl: './player-tabla-selector.component.html',
-  styleUrl: './player-tabla-selector.component.scss',
 })
 export class PlayerTablaSelectorComponent {
   @Input() availableTablas: number[][] = [];

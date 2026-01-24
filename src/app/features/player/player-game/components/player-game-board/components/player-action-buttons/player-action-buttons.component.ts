@@ -6,7 +6,6 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
   standalone: true,
   imports: [CommonModule],
   templateUrl: './player-action-buttons.component.html',
-  styleUrl: './player-action-buttons.component.scss',
 })
 export class PlayerActionButtonsComponent {
   @Input() layout: 'vertical' | 'horizontal' = 'vertical';

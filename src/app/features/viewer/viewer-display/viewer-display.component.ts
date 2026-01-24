@@ -12,7 +12,33 @@ import { ViewerJoinFormComponent } from '../viewer-join-form/viewer-join-form.co
   standalone: true,
   imports: [CommonModule, ViewerJoinFormComponent, ViewerGameDisplayComponent],
   templateUrl: './viewer-display.component.html',
-  styleUrl: './viewer-display.component.scss',
+  styles: [`
+    #current-card ::ng-deep .card-container {
+      width: clamp(150px, 40vw, 300px);
+      font-size: clamp(0.8rem, 5cqw, 1.2rem);
+    }
+    
+    #current-card ::ng-deep .card-large .card-emoji {
+      font-size: clamp(3rem, 14cqw, 5rem);
+    }
+    
+    #current-card ::ng-deep .card-large .card-name {
+      font-size: clamp(1rem, 14cqw, 1.2rem);
+    }
+    
+    @media screen and (min-width: 1200px) {
+      #current-card ::ng-deep .card-container {
+        width: clamp(200px, 25vw, 300px);
+      }
+      
+      #current-card ::ng-deep .card-large .card-emoji {
+        font-size: clamp(4rem, 10cqw, 5rem);
+      }
+      #current-card ::ng-deep .card-large .card-name {
+        font-size: clamp(1.2rem, 10cqw, 1.2rem);
+      }
+    }
+  `],
 })
 export class ViewerDisplayComponent implements OnInit {
   private router = inject(Router);

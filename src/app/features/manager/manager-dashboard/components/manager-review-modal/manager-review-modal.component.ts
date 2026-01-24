@@ -9,7 +9,6 @@ import { TablaComponent } from '../../../../../shared/components/tabla/tabla.com
   standalone: true,
   imports: [CommonModule, TablaComponent],
   templateUrl: './manager-review-modal.component.html',
-  styleUrl: './manager-review-modal.component.scss',
 })
 export class ManagerReviewModalComponent {
   @Input() reviewingParticipant: Participant | null = null;
