@@ -12,7 +12,7 @@ import { ManagerGameStateService } from '../../../../services/manager-game-state
 export class ActiveCardDisplayComponent {
   private gameState = inject(ManagerGameStateService);
 
-  displayCard = this.gameState.displayCard;
+  currentCard = this.gameState.currentCard;
   room = this.gameState.room;
   nextVersoSuggestion = this.gameState.nextVersoSuggestion;
 

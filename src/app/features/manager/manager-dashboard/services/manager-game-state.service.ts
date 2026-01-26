@@ -34,23 +34,6 @@ export class ManagerGameStateService {
     return CARDS.find((c) => c.id === nextId) ?? null;
   });
 
-  // Carta a mostrar: si currentIndex es -1 y hay deck, mostrar la primera
-  displayCard = computed(() => {
-    const r = this.room();
-    const current = this.currentCard();
-    
-    // Si ya hay carta actual, mostrarla
-    if (current) return current;
-    
-    // Si currentIndex es -1 pero hay deck (ronda iniciada), mostrar la primera carta como preview
-    if (r && r.currentIndex === -1 && Array.isArray(r.deck) && r.deck.length > 0 && r.state === 'playing') {
-      const firstCardId = r.deck[0];
-      return CARDS.find((c) => c.id === firstCardId) ?? null;
-    }
-    
-    return null;
-  });
-
   nextVersoSuggestion = computed(() => {
     const r = this.room();
     if (!r || isRoomWaiting(r.state)) return '"Presiona Iniciar para barajar"';
