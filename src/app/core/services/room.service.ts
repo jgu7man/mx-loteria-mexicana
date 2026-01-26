@@ -172,7 +172,7 @@ export class RoomService {
 
       const updateData: any = {
         deck: newDeck,
-        currentIndex: -1,
+        currentIndex: 0, // Mostrar la primera carta automáticamente
         currentRound: newRound,
         state: ROOM_STATES.PLAYING,
         currentRoundWinners: [],
