@@ -3,9 +3,10 @@ import {
   Component,
   EventEmitter,
   Input,
+  OnChanges,
   OnInit,
   Output,
-  effect,
+  SimpleChanges,
   inject,
 } from '@angular/core';
 import { MARKERS } from '../../../../../core/constants/game-data';
@@ -45,7 +46,7 @@ import { VerificationListComponent } from './components/verification-list/verifi
   templateUrl: './manager-game-panel.component.html',
   styles: [':host ::ng-deep .card-container { width: 50vw !important; }'],
 })
-export class ManagerGamePanelComponent implements OnInit {
+export class ManagerGamePanelComponent implements OnInit, OnChanges {
   private gameState = inject(ManagerGameStateService);
 
   @Input() room!: Room;
@@ -67,19 +68,23 @@ export class ManagerGamePanelComponent implements OnInit {
   players = this.gameState.players;
 
   ngOnInit() {
-    // Sync inputs to service
+    // Sync initial inputs to service
     this.gameState.setRoom(this.room);
     this.gameState.setParticipants(this.participants);
     this.gameState.setCurrentRoundWinners(this.currentRoundWinners);
   }
 
-  constructor() {
-    // Keep service in sync with inputs
-    effect(() => {
-      if (this.room) {
-        this.gameState.setRoom(this.room);
-      }
-    });
+  ngOnChanges(changes: SimpleChanges) {
+    // Sync input changes to service
+    if (changes['room']) {
+      this.gameState.setRoom(this.room);
+    }
+    if (changes['participants']) {
+      this.gameState.setParticipants(this.participants);
+    }
+    if (changes['currentRoundWinners']) {
+      this.gameState.setCurrentRoundWinners(this.currentRoundWinners);
+    }
   }
 
   readonly getRoomStateLabel = getRoomStateLabel;
