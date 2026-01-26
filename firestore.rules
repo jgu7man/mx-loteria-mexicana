@@ -12,8 +12,8 @@ service cloud.firestore {
       return isAuthenticated() && request.auth.uid == roomData.managerId;
     }
     
-    // Rooms collection
-    match /rooms/{roomId} {
+    // Rooms collection (salas)
+    match /salas/{roomId} {
       // Anyone authenticated can read rooms
       allow read: if isAuthenticated();
       
@@ -29,7 +29,7 @@ service cloud.firestore {
     }
     
     // Participants subcollection
-    match /participants/{roomId}/list/{participantId} {
+    match /salas/{roomId}/participantes/{participantId} {
       // Anyone authenticated can read participants
       allow read: if isAuthenticated();
       
@@ -41,13 +41,13 @@ service cloud.firestore {
       // OR the room manager can update any participant
       allow update: if isAuthenticated() 
                     && (request.resource.data.uid == request.auth.uid
-                        || exists(/databases/$(database)/documents/rooms/$(roomId))
-                        && get(/databases/$(database)/documents/rooms/$(roomId)).data.managerId == request.auth.uid);
+                        || exists(/databases/$(database)/documents/salas/$(roomId))
+                        && get(/databases/$(database)/documents/salas/$(roomId)).data.managerId == request.auth.uid);
       
       // Only the room manager can delete participants
       allow delete: if isAuthenticated()
-                    && exists(/databases/$(database)/documents/rooms/$(roomId))
-                    && get(/databases/$(database)/documents/rooms/$(roomId)).data.managerId == request.auth.uid;
+                    && exists(/databases/$(database)/documents/salas/$(roomId))
+                    && get(/databases/$(database)/documents/salas/$(roomId)).data.managerId == request.auth.uid;
     }
     
     // Deny all other reads/writes
