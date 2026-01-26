@@ -41,7 +41,7 @@ export class RoomService {
     managerId: string,
     managerName: string,
     roomName: string,
-    config: RoomConfig
+    config: RoomConfig,
   ): Promise<string> {
     try {
       const roomId = this.gameUtils.generateInviteCode(8);
@@ -125,7 +125,7 @@ export class RoomService {
         (error) => {
           console.error('Error observing room:', error);
           observer.error(error);
-        }
+        },
       );
 
       return () => unsubscribe();
@@ -163,7 +163,7 @@ export class RoomService {
           currentRoundVerifiedWinners: [],
         });
         throw new Error(
-          'La sala estaba en un estado inválido y fue reseteada. Intenta nuevamente.'
+          'La sala estaba en un estado inválido y fue reseteada. Intenta nuevamente.',
         );
       }
 
@@ -172,7 +172,7 @@ export class RoomService {
 
       const updateData: any = {
         deck: newDeck,
-        currentIndex: 0, // Mostrar la primera carta automáticamente
+        currentIndex: -1,
         currentRound: newRound,
         state: ROOM_STATES.PLAYING,
         currentRoundWinners: [],
@@ -227,7 +227,7 @@ export class RoomService {
       if (!room) throw new Error('Room not found');
 
       const updatedWinners = Array.from(
-        new Set([...(room.currentRoundWinners || []), winnerId])
+        new Set([...(room.currentRoundWinners || []), winnerId]),
       );
 
       await updateDoc(roomRef, {
@@ -297,14 +297,14 @@ export class RoomService {
       }
 
       const pending = (room.currentRoundWinners || []).filter(
-        (uid) => uid !== winner.uid
+        (uid) => uid !== winner.uid,
       );
 
       // Incrementar victorias del participante
       const participantRef = doc(
         this.firestore,
         `salas/${roomId}/participantes`,
-        winner.uid
+        winner.uid,
       );
       const participantSnap = await getDoc(participantRef);
 
@@ -338,7 +338,7 @@ export class RoomService {
 
       // Quitar de la lista de pendientes
       const pending = (room.currentRoundWinners || []).filter(
-        (uid) => uid !== winnerId
+        (uid) => uid !== winnerId,
       );
 
       await updateDoc(roomRef, {
@@ -356,13 +356,13 @@ export class RoomService {
    */
   async joinRoom(
     roomId: string,
-    participant: Omit<Participant, 'joinedAt'>
+    participant: Omit<Participant, 'joinedAt'>,
   ): Promise<void> {
     try {
       const participantRef = doc(
         this.firestore,
         `salas/${roomId}/participantes`,
-        participant.uid
+        participant.uid,
       );
 
       await setDoc(participantRef, {
@@ -381,13 +381,13 @@ export class RoomService {
   async updateParticipant(
     roomId: string,
     uid: string,
-    updates: Partial<Participant>
+    updates: Partial<Participant>,
   ): Promise<void> {
     try {
       const participantRef = doc(
         this.firestore,
         `salas/${roomId}/participantes`,
-        uid
+        uid,
       );
 
       // Verificar que el participante existe antes de actualizar
@@ -410,7 +410,7 @@ export class RoomService {
   async changeTabla(
     roomId: string,
     uid: string,
-    newTablaId: number
+    newTablaId: number,
   ): Promise<void> {
     try {
       await this.updateParticipant(roomId, uid, {
@@ -431,7 +431,7 @@ export class RoomService {
       const participantRef = doc(
         this.firestore,
         `salas/${roomId}/participantes`,
-        uid
+        uid,
       );
       const participantSnap = await getDoc(participantRef);
 
@@ -460,7 +460,7 @@ export class RoomService {
       const participantRef = doc(
         this.firestore,
         `salas/${roomId}/participantes`,
-        uid
+        uid,
       );
       const participantSnap = await getDoc(participantRef);
 
@@ -486,7 +486,7 @@ export class RoomService {
     return new Observable((observer) => {
       const participantsRef = collection(
         this.firestore,
-        `salas/${roomId}/participantes`
+        `salas/${roomId}/participantes`,
       );
 
       const unsubscribe = onSnapshot(
@@ -501,7 +501,7 @@ export class RoomService {
         (error) => {
           console.error('Error observing participants:', error);
           observer.error(error);
-        }
+        },
       );
 
       return () => unsubscribe();
@@ -513,13 +513,13 @@ export class RoomService {
    */
   observeParticipant(
     roomId: string,
-    uid: string
+    uid: string,
   ): Observable<Participant | null> {
     return new Observable((observer) => {
       const participantRef = doc(
         this.firestore,
         `salas/${roomId}/participantes`,
-        uid
+        uid,
       );
 
       const unsubscribe = onSnapshot(
@@ -534,7 +534,7 @@ export class RoomService {
         (error) => {
           console.error('Error observing participant:', error);
           observer.error(error);
-        }
+        },
       );
 
       return () => unsubscribe();
@@ -549,7 +549,7 @@ export class RoomService {
       const participantRef = doc(
         this.firestore,
         `salas/${roomId}/participantes`,
-        uid
+        uid,
       );
       await deleteDoc(participantRef);
     } catch (error) {
@@ -566,12 +566,12 @@ export class RoomService {
       // Primero eliminar todos los participantes
       const participantsRef = collection(
         this.firestore,
-        `salas/${roomId}/participantes`
+        `salas/${roomId}/participantes`,
       );
       const participantsSnap = await getDocs(participantsRef);
 
       const deletePromises = participantsSnap.docs.map((doc) =>
-        deleteDoc(doc.ref)
+        deleteDoc(doc.ref),
       );
       await Promise.all(deletePromises);
 
@@ -591,7 +591,7 @@ export class RoomService {
       ...room,
       createdAt: room.createdAt,
       currentRoundVerifiedWinners: this.serializeRoundWinners(
-        room.currentRoundVerifiedWinners || []
+        room.currentRoundVerifiedWinners || [],
       ),
       roundHistory: this.serializeRoundHistory(room.roundHistory),
     };
@@ -616,15 +616,15 @@ export class RoomService {
       startedAt: data.startedAt?.toDate
         ? data.startedAt.toDate()
         : data.startedAt
-        ? new Date(data.startedAt)
-        : undefined,
+          ? new Date(data.startedAt)
+          : undefined,
       finishedAt: data.finishedAt?.toDate
         ? data.finishedAt.toDate()
         : data.finishedAt
-        ? new Date(data.finishedAt)
-        : undefined,
+          ? new Date(data.finishedAt)
+          : undefined,
       currentRoundVerifiedWinners: this.deserializeRoundWinners(
-        data.currentRoundVerifiedWinners || []
+        data.currentRoundVerifiedWinners || [],
       ),
       roundHistory: this.deserializeRoundHistory(data.roundHistory || []),
     } as Room;
