@@ -4,20 +4,20 @@
     <!-- Left column: Header + Carta Actual + historial -->
     <div class="xl:col-span-3 space-y-4">
       <app-player-room-header
-        [room]="room"
-        [roomId]="roomId"
+        [room]="room()"
+        [roomId]="roomId()"
         (goHome)="goHome.emit()"
       ></app-player-room-header>
 
       <app-player-current-card
-        [currentCard]="currentCard"
+        [currentCard]="currentCard()"
         [size]="'large'"
       ></app-player-current-card>
 
       <!-- Historial de cartas -->
       <div class="flex gap-3">
         <app-player-card-history
-          [historyCards]="historyCards"
+          [historyCards]="historyCards()"
           [maxCards]="2"
         ></app-player-card-history>
       </div>
@@ -27,12 +27,12 @@
     <div class="xl:col-span-6">
       <div id="tabla-desktop" class="rounded-2xl py-0 px-[3.5rem]">
         <app-tabla
-          [tablaCards]="myTabla"
-          [marks]="myMarks"
-          [markerEmoji]="selectedMarker"
-          [isInteractive]="true"
+          [tablaCards]="myTabla()"
+          [marks]="myMarks()"
+          [markerEmoji]="selectedMarkerEmoji()"
+          [isInteractive]="!isWaitingForVerification()"
           [size]="'large'"
-          (cardClicked)="cardClicked.emit($event)"
+          (cardClicked)="onCardClicked($event)"
         >
         </app-tabla>
       </div>
@@ -43,7 +43,6 @@
       <app-player-action-buttons
         [layout]="'vertical'"
         [size]="'large'"
-        (shoutLoteria)="shoutLoteria.emit()"
         (changeMarker)="changeMarker.emit()"
         (changeTabla)="changeTabla.emit()"
       >
@@ -55,8 +54,8 @@
   <div class="hidden md:block xl:hidden">
     <app-player-room-header
       class="mb-3"
-      [room]="room"
-      [roomId]="roomId"
+      [room]="room()"
+      [roomId]="roomId()"
       (goHome)="goHome.emit()"
     ></app-player-room-header>
 
@@ -65,12 +64,12 @@
         <!-- Tabla (izquierda, 3 columnas) -->
         <div class="col-span-3 bg rounded-2xl">
           <app-tabla
-            [tablaCards]="myTabla"
-            [marks]="myMarks"
-            [markerEmoji]="selectedMarker"
-            [isInteractive]="true"
+            [tablaCards]="myTabla()"
+            [marks]="myMarks()"
+            [markerEmoji]="selectedMarkerEmoji()"
+            [isInteractive]="!isWaitingForVerification()"
             [size]="'large'"
-            (cardClicked)="cardClicked.emit($event)"
+            (cardClicked)="onCardClicked($event)"
           >
           </app-tabla>
         </div>
@@ -79,7 +78,7 @@
         <div class="col-span-1 space-y-3 overflow-y-hidden h-[84vw]">
           <div class="bg-blue-100 rounded-2xl p-3 border-4 border-blue-300">
             <app-player-current-card
-              [currentCard]="currentCard"
+              [currentCard]="currentCard()"
               [size]="'medium'"
             ></app-player-current-card>
           </div>
@@ -87,7 +86,7 @@
           <!-- Historial de cartas -->
           <div class="space-y-2">
             <app-player-card-history
-              [historyCards]="historyCards"
+              [historyCards]="historyCards()"
               [maxCards]="3"
             ></app-player-card-history>
           </div>
@@ -98,7 +97,6 @@
       <app-player-action-buttons
         [layout]="'horizontal'"
         [compact]="true"
-        (shoutLoteria)="shoutLoteria.emit()"
         (changeMarker)="changeMarker.emit()"
         (changeTabla)="changeTabla.emit()"
       >
@@ -109,8 +107,8 @@
   <!-- MOBILE LAYOUT (< md) -->
   <div class="md:hidden space-y-4">
     <app-player-room-header
-      [room]="room"
-      [roomId]="roomId"
+      [room]="room()"
+      [roomId]="roomId()"
       (goHome)="goHome.emit()"
     ></app-player-room-header>
 
@@ -118,7 +116,7 @@
     <div class="grid grid-cols-4 gap-2">
       <div class="col-span-1">
         <app-player-current-card
-          [currentCard]="currentCard"
+          [currentCard]="currentCard()"
           [size]="'small'"
         ></app-player-current-card>
       </div>
@@ -126,7 +124,7 @@
       <!-- Historial de cartas -->
       <div class="col-span-3 flex gap-3 overflow-x-auto pb-2">
         <app-player-card-history
-          [historyCards]="historyCards"
+          [historyCards]="historyCards()"
           [maxCards]="3"
         ></app-player-card-history>
       </div>
@@ -135,12 +133,12 @@
     <!-- Tabla -->
     <div class="rounded-2xl">
       <app-tabla
-        [tablaCards]="myTabla"
-        [marks]="myMarks"
-        [markerEmoji]="selectedMarker"
-        [isInteractive]="true"
+        [tablaCards]="myTabla()"
+        [marks]="myMarks()"
+        [markerEmoji]="selectedMarkerEmoji()"
+        [isInteractive]="!isWaitingForVerification()"
         [size]="'large'"
-        (cardClicked)="cardClicked.emit($event)"
+        (cardClicked)="onCardClicked($event)"
       >
       </app-tabla>
     </div>
@@ -149,7 +147,6 @@
     <app-player-action-buttons
       [layout]="'horizontal'"
       [compact]="true"
-      (shoutLoteria)="shoutLoteria.emit()"
       (changeMarker)="changeMarker.emit()"
       (changeTabla)="changeTabla.emit()"
     >

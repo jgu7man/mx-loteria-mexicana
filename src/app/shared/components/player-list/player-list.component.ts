@@ -14,4 +14,18 @@ export class PlayerListComponent {
   @Input() variant: 'compact' | 'detailed' | 'grid' = 'detailed';
   @Input() maxHeight: string = 'max-h-[300px]';
   @Input() showPhotos: boolean = true;
+
+  getPlayerStatus(player: Participant): string {
+    if (!player.marker) return '⚙️ Eligiendo marcador';
+    if (!player.tablaCards || player.tablaCards.length === 0)
+      return '📋 Eligiendo tabla';
+    return '✅ Listo';
+  }
+
+  getPlayerStatusColor(player: Participant): string {
+    if (!player.marker) return 'text-orange-500';
+    if (!player.tablaCards || player.tablaCards.length === 0)
+      return 'text-blue-500';
+    return 'text-green-500';
+  }
 }

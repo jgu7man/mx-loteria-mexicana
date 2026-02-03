@@ -47,48 +47,50 @@ import { ManagerGameStateService } from './services/manager-game-state.service';
     ManagerReviewModalComponent,
   ],
   templateUrl: './manager-dashboard.component.html',
-  styles: [`
-    #current-card ::ng-deep .card-container {
-      width: clamp(150px, 40vw, 300px);
-      font-size: clamp(0.8rem, 5cqw, 1.2rem);
-    }
-    
-    #current-card ::ng-deep .card-large .card-emoji {
-      font-size: clamp(3rem, 14cqw, 5rem);
-    }
-    
-    #current-card ::ng-deep .card-large .card-name {
-      font-size: clamp(1rem, 14cqw, 1.2rem);
-    }
-    
-    @media screen and (min-width: 1200px) {
+  styles: [
+    `
       #current-card ::ng-deep .card-container {
-        width: clamp(200px, 25vw, 300px);
+        width: clamp(150px, 40vw, 300px);
+        font-size: clamp(0.8rem, 5cqw, 1.2rem);
       }
-      
+
       #current-card ::ng-deep .card-large .card-emoji {
-        font-size: clamp(4rem, 10cqw, 5rem);
+        font-size: clamp(3rem, 14cqw, 5rem);
       }
+
       #current-card ::ng-deep .card-large .card-name {
-        font-size: clamp(1.2rem, 10cqw, 1.2rem);
+        font-size: clamp(1rem, 14cqw, 1.2rem);
       }
-    }
-    
-    @keyframes scale-in {
-      from {
-        transform: scale(0.9);
-        opacity: 0;
+
+      @media screen and (min-width: 1200px) {
+        #current-card ::ng-deep .card-container {
+          width: clamp(200px, 25vw, 300px);
+        }
+
+        #current-card ::ng-deep .card-large .card-emoji {
+          font-size: clamp(4rem, 10cqw, 5rem);
+        }
+        #current-card ::ng-deep .card-large .card-name {
+          font-size: clamp(1.2rem, 10cqw, 1.2rem);
+        }
       }
-      to {
-        transform: scale(1);
-        opacity: 1;
+
+      @keyframes scale-in {
+        from {
+          transform: scale(0.9);
+          opacity: 0;
+        }
+        to {
+          transform: scale(1);
+          opacity: 1;
+        }
       }
-    }
-    
-    .animate-scale-in {
-      animation: scale-in 0.2s ease-out;
-    }
-  `],
+
+      .animate-scale-in {
+        animation: scale-in 0.2s ease-out;
+      }
+    `,
+  ],
 })
 export class ManagerDashboardComponent implements OnDestroy {
   private router = inject(Router);
@@ -109,6 +111,7 @@ export class ManagerDashboardComponent implements OnDestroy {
   roomLoading = signal<boolean>(false);
   isLoading = computed(() => this.authLoading() || this.roomLoading());
   isAuthenticated = computed(() => this.currentUser() !== null);
+  isGoogleAuthenticated = computed(() => this.authService.isGoogleUser());
   room = signal<Room | null>(null);
   currentCard = signal<any>(null);
   nextCardPreview = computed(() => {
@@ -215,9 +218,17 @@ export class ManagerDashboardComponent implements OnDestroy {
     effect(
       () => {
         const user = this.currentUser();
+        const isGoogle = this.isGoogleAuthenticated();
 
-        // Cargar lista de salas del manager cuando se autentica
-        if (user) {
+        // Si el usuario es anónimo, cerrar sesión automáticamente
+        if (user && !isGoogle && user.isAnonymous) {
+          console.log('Usuario anónimo detectado en manager, cerrando sesión...');
+          this.authService.signOut();
+          return;
+        }
+
+        // Cargar lista de salas del manager cuando se autentica con Google
+        if (isGoogle) {
           this.loadManagerRooms();
         } else {
           this.managerRooms.set([]);
@@ -384,6 +395,62 @@ export class ManagerDashboardComponent implements OnDestroy {
     }
   }
 
+  async changeDifficulty() {
+    const currentRoom = this.room();
+    if (!currentRoom) return;
+
+    const result = await this.alertService.fire({
+      title: 'Dificultad de Sala',
+      text: 'Configura qué cartas podrán ver los espectadores en el historial:',
+      icon: 'question',
+      input: 'radio',
+      inputValue: currentRoom.config.viewerDifficulty,
+      inputOptions: {
+        easy: '🟢 Fácil (historial de 3 cartas)',
+        medium: '🟡 Medio (historial de 1 carta)',
+        hard: '🔴 Difícil (sin historial)',
+      },
+      customClass: {
+        input: '!flex !flex-col !items-start !gap-3 !px-8 !py-4',
+      },
+      inputValidator: (value) => {
+        if (!value) {
+          return 'Debes elegir una opción';
+        }
+        return null;
+      },
+      showCancelButton: true,
+      confirmButtonText: 'Actualizar',
+      cancelButtonText: 'Cancelar',
+      confirmButtonColor: '#6366f1',
+    });
+
+    if (result.isConfirmed) {
+      try {
+        const newDifficulty = result.value as 'easy' | 'medium' | 'hard';
+        await this.roomService.updateRoomConfig(currentRoom.id, {
+          ...currentRoom.config,
+          viewerDifficulty: newDifficulty,
+        });
+
+        this.alertService.fire({
+          icon: 'success',
+          title: 'Configuración actualizada',
+          text: `Dificultad cambiada a: ${newDifficulty}`,
+          timer: 2000,
+          showConfirmButton: false,
+        });
+      } catch (error) {
+        console.error('Error updating difficulty:', error);
+        this.alertService.fire({
+          icon: 'error',
+          title: 'Error al actualizar',
+          confirmButtonColor: '#6366f1',
+        });
+      }
+    }
+  }
+
   async startRound() {
     const currentRoom = this.room();
     if (!currentRoom) return;
@@ -393,8 +460,8 @@ export class ManagerDashboardComponent implements OnDestroy {
       this.alertService.fire({
         icon: 'success',
         title: '¡Ronda iniciada!',
-        text: 'Las cartas han sido barajadas',
-        timer: 2000,
+        text: 'Las cartas han sido barajadas. Presiona "Siguiente Carta" para comenzar.',
+        timer: 3000,
         showConfirmButton: false,
       });
     } catch (error) {
@@ -764,6 +831,10 @@ export class ManagerDashboardComponent implements OnDestroy {
       .subscribe((r) => {
         this.room.set(r);
         this.roomLoading.set(false);
+
+        // Sync to game state service
+        this.gameState.setRoom(r);
+
         if (r && r.currentIndex >= 0) {
           const cardId = r.deck[r.currentIndex];
           this.currentCard.set(CARDS.find((c) => c.id === cardId));

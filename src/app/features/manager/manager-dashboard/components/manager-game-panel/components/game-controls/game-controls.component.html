@@ -44,9 +44,9 @@
   </button>
 
   <button
-    *ngIf="isRoomWaiting(room()?.state || 'waiting')"
     (click)="changeDifficulty.emit()"
-    class="btn-control bg-orange-600 hover:bg-orange-700"
+    [disabled]="room()?.state === 'playing'"
+    class="btn-control bg-orange-600 hover:bg-orange-700 disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-gray-400"
   >
     <span class="xl:inline hidden">⚙️ Cambiar Dificultad</span>
     <span class="xl:hidden flex flex-col items-center gap-1">

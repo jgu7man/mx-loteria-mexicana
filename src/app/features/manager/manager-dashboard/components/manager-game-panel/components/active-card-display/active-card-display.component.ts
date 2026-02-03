@@ -26,4 +26,11 @@ export class ActiveCardDisplayComponent {
   isRoomActive(state: string): boolean {
     return state === 'playing' || state === 'verifying';
   }
+
+  getButtonText(): string {
+    const r = this.room();
+    if (!r) return '...';
+    if (this.isRoomWaiting(r.state)) return '▶️ Iniciar Ronda';
+    return '➡️ Siguiente Carta';
+  }
 }

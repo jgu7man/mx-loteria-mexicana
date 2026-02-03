@@ -1,6 +1,6 @@
 <div class="space-y-3">
   <button
-    (click)="shoutLoteria.emit()"
+    (click)="shoutLoteria()"
     class="w-full bg-green-500 text-white px-6 rounded-lg font-bold hover:bg-green-600 transition"
     [ngClass]="{
       'py-4 text-xl': size === 'large',
@@ -31,6 +31,12 @@
         CAMBIAR TABLA
       }
     </button>
+    <button
+      (click)="clearTable()"
+      class="w-full bg-red-400/90 text-white px-6 py-4 rounded-lg font-semibold hover:bg-red-500 transition border-2 border-red-500/20"
+    >
+      LIMPIAR TABLA
+    </button>
   </div>
 
   <div *ngIf="layout === 'horizontal'" class="flex gap-3">
@@ -52,6 +58,16 @@
         TABLAS
       } @else {
         CAMBIAR TABLA
+      }
+    </button>
+    <button
+      (click)="clearTable()"
+      class="flex-1 bg-red-400/90 text-white px-4 py-3 rounded-lg font-semibold hover:bg-red-500 transition border-2 border-red-500/20"
+    >
+      @if (compact) {
+        LIMPIAR
+      } @else {
+        LIMPIAR TABLA
       }
     </button>
   </div>

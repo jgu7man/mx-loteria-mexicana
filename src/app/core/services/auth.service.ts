@@ -95,6 +95,14 @@ export class AuthService {
   }
 
   /**
+   * Verificar si el usuario está autenticado con Google (no anónimo)
+   */
+  isGoogleUser(): boolean {
+    const user = this.currentUser();
+    return user !== null && !user.isAnonymous && user.provider === 'google';
+  }
+
+  /**
    * Verificar si el usuario actual es el manager de una sala
    */
   isManager(managerId: string): boolean {

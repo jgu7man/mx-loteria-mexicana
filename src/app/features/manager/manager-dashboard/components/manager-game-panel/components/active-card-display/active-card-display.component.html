@@ -45,14 +45,14 @@
       (click)="startRound.emit()"
       class="bg-indigo-600 text-white px-8 py-4 rounded-xl font-bold hover:bg-indigo-700 transition text-lg shadow-lg w-full max-w-sm"
     >
-      ▶️ Iniciar Ronda
+      {{ getButtonText() }}
     </button>
     <button
       *ngIf="isRoomActive(room()?.state || 'waiting')"
       (click)="nextCard.emit()"
       class="bg-indigo-600 text-white px-8 py-4 rounded-xl font-bold hover:bg-indigo-700 transition text-lg shadow-lg w-full max-w-sm"
     >
-      ➡️ Siguiente Carta
+      {{ getButtonText() }}
     </button>
   </div>
 </div>

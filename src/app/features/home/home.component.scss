@@ -1,6 +1,8 @@
 /* Background Cards Animation */
 .background-cards-layer {
   z-index: 0;
+  position: absolute;
+  inset: 0;
 }
 
 .background-card {

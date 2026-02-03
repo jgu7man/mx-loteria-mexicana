@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import {
   Firestore,
+  arrayUnion,
   collection,
   deleteDoc,
   doc,
@@ -133,6 +134,22 @@ export class RoomService {
   }
 
   /**
+   * Actualizar la configuración de una sala
+   */
+  async updateRoomConfig(
+    roomId: string,
+    config: Partial<RoomConfig>,
+  ): Promise<void> {
+    try {
+      const roomRef = doc(this.firestore, 'salas', roomId);
+      await updateDoc(roomRef, { config });
+    } catch (error) {
+      console.error('Error updating room config:', error);
+      throw error;
+    }
+  }
+
+  /**
    * Actualizar el estado de una sala
    */
   async updateRoomState(roomId: string, state: RoomState): Promise<void> {
@@ -222,16 +239,9 @@ export class RoomService {
   async addWinner(roomId: string, winnerId: string): Promise<void> {
     try {
       const roomRef = doc(this.firestore, 'salas', roomId);
-      const room = await this.getRoom(roomId);
-
-      if (!room) throw new Error('Room not found');
-
-      const updatedWinners = Array.from(
-        new Set([...(room.currentRoundWinners || []), winnerId]),
-      );
 
       await updateDoc(roomRef, {
-        currentRoundWinners: updatedWinners,
+        currentRoundWinners: arrayUnion(winnerId),
         state: ROOM_STATES.VERIFYING,
       });
     } catch (error) {
@@ -563,19 +573,9 @@ export class RoomService {
    */
   async deleteRoom(roomId: string): Promise<void> {
     try {
-      // Primero eliminar todos los participantes
-      const participantsRef = collection(
-        this.firestore,
-        `salas/${roomId}/participantes`,
-      );
-      const participantsSnap = await getDocs(participantsRef);
-
-      const deletePromises = participantsSnap.docs.map((doc) =>
-        deleteDoc(doc.ref),
-      );
-      await Promise.all(deletePromises);
-
-      // Luego eliminar la sala
+      // Solo eliminar la sala
+      // Los participantes quedan como documentos huérfanos pero inaccesibles
+      // (Se pueden limpiar posteriormente con una Cloud Function si es necesario)
       const roomRef = doc(this.firestore, 'salas', roomId);
       await deleteDoc(roomRef);
     } catch (error) {
@@ -608,8 +608,14 @@ export class RoomService {
   }
 
   private deserializeRoom(data: any): Room {
+    const room: any = { ...data };
+
     return {
-      ...data,
+      ...room,
+      deck: Array.isArray(data.deck) ? data.deck : [],
+      currentRoundWinners: Array.isArray(data.currentRoundWinners)
+        ? data.currentRoundWinners
+        : [],
       createdAt: data.createdAt?.toDate
         ? data.createdAt.toDate()
         : new Date(data.createdAt),

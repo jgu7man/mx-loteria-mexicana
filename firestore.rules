@@ -21,8 +21,11 @@ service cloud.firestore {
       allow create: if isAuthenticated() 
                     && request.resource.data.managerId == request.auth.uid;
       
-      // Only the room manager can update their room
-      allow update: if isRoomManager(resource.data);
+      // Only the room manager can update their room (full access)
+      // OR authenticated users can update currentRoundWinners and state (to shout Loteria)
+      allow update: if isRoomManager(resource.data)
+                    || (isAuthenticated() 
+                        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['currentRoundWinners', 'state']));
       
       // Only the room manager can delete their room
       allow delete: if isRoomManager(resource.data);
@@ -45,9 +48,12 @@ service cloud.firestore {
                         && get(/databases/$(database)/documents/salas/$(roomId)).data.managerId == request.auth.uid);
       
       // Only the room manager can delete participants
+      // Check if room exists first, if not allow delete (for cleanup during room deletion)
       allow delete: if isAuthenticated()
-                    && exists(/databases/$(database)/documents/salas/$(roomId))
-                    && get(/databases/$(database)/documents/salas/$(roomId)).data.managerId == request.auth.uid;
+                    && (
+                      !exists(/databases/$(database)/documents/salas/$(roomId))
+                      || get(/databases/$(database)/documents/salas/$(roomId)).data.managerId == request.auth.uid
+                    );
     }
     
     // Deny all other reads/writes
