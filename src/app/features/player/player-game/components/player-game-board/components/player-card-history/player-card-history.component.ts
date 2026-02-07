@@ -11,6 +11,8 @@ import { CardComponent } from '../../../../../../../shared/components/card/card.
 export class PlayerCardHistoryComponent {
   @Input() historyCards: any[] = [];
   @Input() maxCards = 3;
+  @Input() roomState: string = 'waiting';
+  @Input() showWaitingMessage: boolean = false;
 
   Math = Math;
 }

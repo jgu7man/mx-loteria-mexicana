@@ -7,6 +7,7 @@ import {
   inject,
 } from '@angular/core';
 import { AuthService } from '../../../../../core/services/auth.service';
+import { PlayerListComponent } from '../../../../../shared/components/player-list/player-list.component';
 import { TablaComponent } from '../../../../../shared/components/tabla/tabla.component';
 import { PlayerGameStateService } from '../../services/player-game-state.service';
 import { PlayerActionButtonsComponent } from './components/player-action-buttons/player-action-buttons.component';
@@ -20,6 +21,7 @@ import { PlayerRoomHeaderComponent } from './components/player-room-header/playe
   imports: [
     CommonModule,
     TablaComponent,
+    PlayerListComponent,
     PlayerRoomHeaderComponent,
     PlayerCurrentCardComponent,
     PlayerCardHistoryComponent,
@@ -59,6 +61,21 @@ export class PlayerGameBoardComponent {
   );
   roomId = this.playerState.roomId;
   isWaitingForVerification = this.playerState.isWaitingForVerification;
+
+  // Lista de jugadores (filtrados por role 'player')
+  players = computed(() =>
+    this.playerState.participants().filter((p) => p.role === 'player'),
+  );
+
+  // True si la ronda está activa pero aún no se han cantado cartas
+  showWaitingMessage = computed(() => {
+    const r = this.room();
+    const history = this.historyCards();
+    return (
+      (r?.state === 'playing' || r?.state === 'verifying') &&
+      history.length === 0
+    );
+  });
 
   @Output() changeMarker = new EventEmitter<void>();
   @Output() changeTabla = new EventEmitter<void>();

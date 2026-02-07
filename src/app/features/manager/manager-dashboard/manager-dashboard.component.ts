@@ -260,6 +260,72 @@ export class ManagerDashboardComponent implements OnDestroy {
       },
       { allowSignalWrites: true },
     );
+
+    // Effect para detectar cuando alguien grita lotería
+    effect(
+      () => {
+        const r = this.room();
+        const participants = this.participants();
+
+        if (
+          !r ||
+          !r.currentRoundWinners ||
+          r.currentRoundWinners.length === 0
+        ) {
+          return;
+        }
+
+        // Obtener los nombres de los ganadores actuales
+        const winnerIds = r.currentRoundWinners;
+        const winners = participants.filter((p) => winnerIds.includes(p.uid));
+
+        // Mostrar toast para cada ganador nuevo
+        winners.forEach((winner) => {
+          this.alertService.fire({
+            toast: true,
+            position: 'top-end',
+            icon: 'info',
+            title: `${winner.displayName} gritó ¡Lotería!`,
+            showConfirmButton: false,
+            timer: 3000,
+            timerProgressBar: true,
+          });
+        });
+      },
+      { allowSignalWrites: false },
+    );
+
+    // Effect para detectar cuando se aprueba un ganador
+    effect(
+      () => {
+        const r = this.room();
+
+        if (
+          !r ||
+          !r.currentRoundVerifiedWinners ||
+          r.currentRoundVerifiedWinners.length === 0
+        ) {
+          return;
+        }
+
+        // Obtener el último ganador verificado
+        const verifiedWinners = r.currentRoundVerifiedWinners;
+        const lastWinner = verifiedWinners[verifiedWinners.length - 1];
+
+        if (lastWinner) {
+          this.alertService.fire({
+            toast: true,
+            position: 'top-end',
+            icon: 'success',
+            title: `${lastWinner.displayName} ha ganado esta ronda 🏆`,
+            showConfirmButton: false,
+            timer: 4000,
+            timerProgressBar: true,
+          });
+        }
+      },
+      { allowSignalWrites: false },
+    );
   }
 
   private async loadManagerRooms() {

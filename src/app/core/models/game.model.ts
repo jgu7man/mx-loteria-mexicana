@@ -51,6 +51,17 @@ export interface VictoryPattern {
 }
 
 /**
+ * Estado del participante
+ */
+export type ParticipantStatus =
+  | 'choosing-marker'
+  | 'choosing-tabla'
+  | 'changing-marker'
+  | 'changing-tabla'
+  | 'ready'
+  | 'waiting-verification';
+
+/**
  * Participante (Jugador o Espectador)
  */
 export interface Participant {
@@ -58,6 +69,7 @@ export interface Participant {
   displayName: string;
   photoURL?: string;
   role: 'player' | 'viewer';
+  status?: ParticipantStatus; // Estado actual del participante
   marker?: string; // ID del marcador seleccionado
   tablaId?: number; // ID de la tabla actual
   tablaCards?: number[]; // Cartas de la tabla (para verificación/visualización)

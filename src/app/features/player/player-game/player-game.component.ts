@@ -93,6 +93,89 @@ export class PlayerGameComponent implements OnInit {
       },
       { allowSignalWrites: true },
     );
+
+    // Effect para detectar cuando alguien grita lotería
+    effect(
+      () => {
+        const r = this.room();
+        const participant = this.participant();
+
+        if (
+          !r ||
+          !r.currentRoundWinners ||
+          r.currentRoundWinners.length === 0
+        ) {
+          return;
+        }
+
+        // Obtener el participante que gritó (debe estar en la lista de participantes observados)
+        const winnerId =
+          r.currentRoundWinners[r.currentRoundWinners.length - 1];
+
+        // Si soy yo quien gritó, no mostrar el toast (ya tengo mi propia alerta)
+        if (winnerId === participant?.uid) {
+          return;
+        }
+
+        // Obtener info del ganador desde Firestore
+        if (this.roomId) {
+          this.roomService
+            .getParticipant(this.roomId, winnerId)
+            .then((winner) => {
+              if (winner) {
+                this.alertService.fire({
+                  toast: true,
+                  position: 'top-end',
+                  icon: 'info',
+                  title: `${winner.displayName} gritó ¡Lotería!`,
+                  showConfirmButton: false,
+                  timer: 3000,
+                  timerProgressBar: true,
+                });
+              }
+            });
+        }
+      },
+      { allowSignalWrites: false },
+    );
+
+    // Effect para detectar cuando se aprueba un ganador
+    effect(
+      () => {
+        const r = this.room();
+        const participant = this.participant();
+
+        if (
+          !r ||
+          !r.currentRoundVerifiedWinners ||
+          r.currentRoundVerifiedWinners.length === 0
+        ) {
+          return;
+        }
+
+        // Obtener el último ganador verificado
+        const verifiedWinners = r.currentRoundVerifiedWinners;
+        const lastWinner = verifiedWinners[verifiedWinners.length - 1];
+
+        if (lastWinner) {
+          // Mostrar toast diferente si soy yo el ganador
+          const isMe = lastWinner.uid === participant?.uid;
+
+          this.alertService.fire({
+            toast: true,
+            position: 'top-end',
+            icon: 'success',
+            title: isMe
+              ? '¡Felicidades! Has ganado esta ronda 🏆'
+              : `${lastWinner.displayName} ha ganado esta ronda 🏆`,
+            showConfirmButton: false,
+            timer: 4000,
+            timerProgressBar: true,
+          });
+        }
+      },
+      { allowSignalWrites: false },
+    );
   }
 
   ngOnInit() {
@@ -410,6 +493,7 @@ export class PlayerGameComponent implements OnInit {
         marks: [],
         victories: 0,
         isActive: true,
+        status: 'choosing-marker',
       };
 
       await this.roomService.joinRoom(this.roomId, participant);
@@ -443,6 +527,7 @@ export class PlayerGameComponent implements OnInit {
       // Actualizar marcador en Firestore
       this.roomService.updateParticipant(this.roomId, user.uid, {
         marker: marker.id,
+        status: this.myTabla().length === 0 ? 'choosing-tabla' : 'ready',
       });
     }
     this.showMarkerSelector.set(false);
@@ -453,12 +538,65 @@ export class PlayerGameComponent implements OnInit {
     }
   }
 
+  async startChangingMarker() {
+    // Mostrar el selector de marcador
+    this.showMarkerSelector.set(true);
+
+    // Actualizar status a 'changing-marker' sin borrar datos
+    const user = this.currentUser();
+    if (user && this.roomId) {
+      try {
+        await this.roomService.updateParticipant(this.roomId, user.uid, {
+          status: 'changing-marker',
+        });
+      } catch (error) {
+        console.error('Error al actualizar status del jugador:', error);
+      }
+    }
+  }
+
   cancelMarkerSelection() {
     this.showMarkerSelector.set(false);
+    // Restaurar status a ready si tiene marcador y tabla
+    const user = this.currentUser();
+    if (
+      user &&
+      this.roomId &&
+      this.selectedMarker() &&
+      this.myTabla().length > 0
+    ) {
+      this.roomService.updateParticipant(this.roomId, user.uid, {
+        status: 'ready',
+      });
+    }
   }
 
   cancelTablaSelection() {
     this.showTablaSelector.set(false);
+    // Restaurar status a ready si tiene tabla
+    const user = this.currentUser();
+    if (user && this.roomId && this.myTabla().length > 0) {
+      this.roomService.updateParticipant(this.roomId, user.uid, {
+        status: 'ready',
+      });
+    }
+  }
+
+  async startChangingTabla() {
+    // Mostrar el selector de tabla
+    this.showTablaSelector.set(true);
+
+    // Actualizar status a 'changing-tabla' sin borrar datos
+    const user = this.currentUser();
+    if (user && this.roomId) {
+      try {
+        await this.roomService.updateParticipant(this.roomId, user.uid, {
+          status: 'changing-tabla',
+        });
+      } catch (error) {
+        console.error('Error al actualizar status del jugador:', error);
+      }
+    }
   }
 
   selectTabla(tabla: number[]) {
@@ -479,6 +617,7 @@ export class PlayerGameComponent implements OnInit {
         marker: this.selectedMarker()?.id,
         tablaCards: tabla,
         marks: [],
+        status: 'ready',
       });
     }
     this.showTablaSelector.set(false);

@@ -15,6 +15,7 @@ export class ActiveCardDisplayComponent {
   currentCard = this.gameState.currentCard;
   room = this.gameState.room;
   nextVersoSuggestion = this.gameState.nextVersoSuggestion;
+  nextCardPreview = this.gameState.nextCardPreview;
 
   @Output() startRound = new EventEmitter<void>();
   @Output() nextCard = new EventEmitter<void>();

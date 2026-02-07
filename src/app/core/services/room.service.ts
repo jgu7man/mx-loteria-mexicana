@@ -459,6 +459,32 @@ export class RoomService {
   }
 
   /**
+   * Obtener un participante por su UID
+   */
+  async getParticipant(
+    roomId: string,
+    uid: string,
+  ): Promise<Participant | null> {
+    try {
+      const participantRef = doc(
+        this.firestore,
+        `salas/${roomId}/participantes`,
+        uid,
+      );
+      const participantSnap = await getDoc(participantRef);
+
+      if (!participantSnap.exists()) {
+        return null;
+      }
+
+      return participantSnap.data() as Participant;
+    } catch (error) {
+      console.error('Error getting participant:', error);
+      return null;
+    }
+  }
+
+  /**
    * Cambiar la tabla de un participante (resetea las marcas)
    */
   async changeTabla(

@@ -1,5 +1,5 @@
 <div
-  class="player-container min-h-screen bg-gradient-to-br from-green-600 to-teal-700 p-4 md:p-6 xl:p-8"
+  class="player-container min-h-screen bg-gradient-to-br from-green-600 to-teal-700 p-4 md:p-6 xl:p-8 max-w-full overflow-x-hidden"
 >
   <!-- Loading -->
   <div *ngIf="isLoading() && !showJoinForm()" class="text-center py-20">
@@ -124,8 +124,8 @@
       !showMarkerSelector() &&
       !showTablaSelector()
     "
-    (changeMarker)="showMarkerSelector.set(true)"
-    (changeTabla)="showTablaSelector.set(true)"
+    (changeMarker)="startChangingMarker()"
+    (changeTabla)="startChangingTabla()"
     (goHome)="goHome()"
   >
   </app-player-game-board>

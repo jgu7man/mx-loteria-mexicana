@@ -1,3 +1,12 @@
+<!-- Mensaje de espera cuando la ronda está activa pero no hay cartas -->
+<div
+  *ngIf="showWaitingMessage"
+  class="col-span-full text-center text-gray-500 text-sm italic py-4"
+>
+  ⏳ Esperando a que el gritón dé la primera carta...
+</div>
+
+<!-- Cartas del historial -->
 <div
   *ngFor="let card of historyCards.slice(0, maxCards)"
   class="overflow-hidden"
@@ -6,7 +15,9 @@
 </div>
 
 <!-- Placeholders si hay menos cartas que el máximo -->
-<div
-  *ngFor="let _ of [].constructor(Math.max(0, maxCards - historyCards.length))"
-  class="rounded-xl aspect-[4/5] flex items-center justify-center text-gray-400 text-xs"
-></div>
+<ng-container *ngIf="!showWaitingMessage">
+  <div
+    *ngFor="let _ of [].constructor(Math.max(0, maxCards - historyCards.length))"
+    class="rounded-xl aspect-[4/5] flex items-center justify-center text-gray-400 text-xs"
+  ></div>
+</ng-container>

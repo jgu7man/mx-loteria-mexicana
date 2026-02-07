@@ -30,7 +30,7 @@ export class HomeComponent implements OnInit {
   roles = [
     {
       id: 'manager',
-      name: 'Manager / Gritón',
+      name: 'Administrador / Gritón',
       emoji: '🎙️',
       description:
         'Crea y controla salas, canta las cartas y verifica ganadores',

@@ -2,14 +2,14 @@
 // ROLE CARD ORGANISM - HOME ROLE SELECTION
 // ================================
 
-@use '../atoms/variables' as *;
-@use '../utilities/mixins' as *;
+@use "../atoms/variables" as *;
+@use "../utilities/mixins" as *;
 
 .role-card {
   position: relative;
   overflow: hidden;
   @include backdrop-blur;
-  
+
   &::before {
     content: "";
     @include absolute-cover;
@@ -17,7 +17,7 @@
     background: $gradient-card;
     transition: left $transition-slow;
   }
-  
+
   &:hover::before {
     left: 100%;
   }
@@ -36,11 +36,11 @@
   transition: all $transition-base;
   filter: blur(1px);
   animation: floatBackground 20s ease-in-out infinite;
-  
+
   &:nth-child(odd) {
     animation-delay: -5s;
   }
-  
+
   &:nth-child(even) {
     animation-delay: -10s;
   }
@@ -49,13 +49,6 @@
 // Content layer
 .content-layer {
   z-index: $z-dropdown;
-}
-
-// Responsive adjustments
-@media (max-width: ($breakpoint-md - 1)) {
-  .background-card {
-    display: none;
-  }
 }
 
 @media (min-width: $breakpoint-md) and (max-width: ($breakpoint-lg - 1)) {

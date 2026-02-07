@@ -18,6 +18,7 @@ export class PlayerGameStateService implements OnDestroy {
   // State signals
   room = signal<Room | null>(null);
   participant = signal<Participant | null>(null);
+  participants = signal<Participant[]>([]);
   myTabla = signal<number[]>([]);
   myMarks = signal<number[]>([]);
   selectedMarker = signal<Marker | null>(null);
@@ -68,6 +69,13 @@ export class PlayerGameStateService implements OnDestroy {
     this.subscriptions.add(
       this.roomService.observeParticipant(roomId, uid).subscribe((p) => {
         this.setParticipant(p);
+      }),
+    );
+
+    // Observar lista completa de participantes
+    this.subscriptions.add(
+      this.roomService.observeParticipants(roomId).subscribe((list) => {
+        this.participants.set(list);
       }),
     );
   }

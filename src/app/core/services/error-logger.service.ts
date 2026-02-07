@@ -1,11 +1,10 @@
-import { inject, Injectable } from '@angular/core';
+import { inject, Injectable, Injector } from '@angular/core';
 import {
   addDoc,
   collection,
   Firestore,
   serverTimestamp,
 } from '@angular/fire/firestore';
-import { AuthService } from './auth.service';
 
 export interface ErrorLog {
   timestamp: any;
@@ -25,7 +24,7 @@ export interface ErrorLog {
 })
 export class ErrorLoggerService {
   private firestore = inject(Firestore);
-  private authService = inject(AuthService);
+  private injector = inject(Injector);
 
   async logError(
     error: Error | string,
@@ -34,7 +33,11 @@ export class ErrorLoggerService {
     additionalData?: Record<string, any>,
   ): Promise<void> {
     try {
-      const currentUser = this.authService.currentUser();
+      // Lazy inject AuthService to avoid circular dependency
+      const authService = this.injector.get(
+        await import('./auth.service').then((m) => m.AuthService),
+      );
+      const currentUser = authService.currentUser();
 
       const errorLog: ErrorLog = {
         timestamp: serverTimestamp(),

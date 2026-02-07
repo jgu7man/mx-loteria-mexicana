@@ -19,12 +19,28 @@
         <app-player-card-history
           [historyCards]="historyCards()"
           [maxCards]="2"
+          [roomState]="room()?.state || 'waiting'"
+          [showWaitingMessage]="showWaitingMessage()"
         ></app-player-card-history>
       </div>
     </div>
 
     <!-- Center: Tabla -->
-    <div class="xl:col-span-6">
+    <div class="xl:col-span-6 relative">
+      <!-- Verification Overlay -->
+      <div
+        *ngIf="isWaitingForVerification()"
+        class="absolute inset-0 bg-black/60 backdrop-blur-sm z-50 rounded-2xl flex items-center justify-center"
+      >
+        <div class="bg-white rounded-2xl p-8 max-w-sm mx-4 text-center shadow-2xl">
+          <div class="text-6xl mb-4 animate-pulse">⏳</div>
+          <h3 class="text-2xl font-bold text-gray-800 mb-2">Verificando...</h3>
+          <p class="text-gray-600">
+            El administrador está revisando tu tabla. Por favor aguarda un momento.
+          </p>
+        </div>
+      </div>
+      
       <div id="tabla-desktop" class="rounded-2xl py-0 px-[3.5rem]">
         <app-tabla
           [tablaCards]="myTabla()"
@@ -47,6 +63,15 @@
         (changeTabla)="changeTabla.emit()"
       >
       </app-player-action-buttons>
+
+      <!-- Lista de Jugadores -->
+      <app-player-list
+        [players]="players()"
+        [variant]="'compact'"
+        [maxHeight]="'max-h-[300px]'"
+        [showPhotos]="false"
+      >
+      </app-player-list>
     </div>
   </div>
 
@@ -62,7 +87,21 @@
     <div class="space-y-4">
       <div class="grid grid-cols-4 gap-4">
         <!-- Tabla (izquierda, 3 columnas) -->
-        <div class="col-span-3 bg rounded-2xl">
+        <div class="col-span-3 bg rounded-2xl relative">
+          <!-- Verification Overlay -->
+          <div
+            *ngIf="isWaitingForVerification()"
+            class="absolute inset-0 bg-black/60 backdrop-blur-sm z-50 rounded-2xl flex items-center justify-center"
+          >
+            <div class="bg-white rounded-2xl p-6 max-w-xs mx-4 text-center shadow-2xl">
+              <div class="text-5xl mb-3 animate-pulse">⏳</div>
+              <h3 class="text-xl font-bold text-gray-800 mb-2">Verificando...</h3>
+              <p class="text-gray-600 text-sm">
+                El administrador está revisando tu tabla. Por favor aguarda un momento.
+              </p>
+            </div>
+          </div>
+          
           <app-tabla
             [tablaCards]="myTabla()"
             [marks]="myMarks()"
@@ -88,6 +127,8 @@
             <app-player-card-history
               [historyCards]="historyCards()"
               [maxCards]="3"
+              [roomState]="room()?.state || 'waiting'"
+              [showWaitingMessage]="showWaitingMessage()"
             ></app-player-card-history>
           </div>
         </div>
@@ -101,11 +142,20 @@
         (changeTabla)="changeTabla.emit()"
       >
       </app-player-action-buttons>
+
+      <!-- Lista de Jugadores -->
+      <app-player-list
+        [players]="players()"
+        [variant]="'compact'"
+        [maxHeight]="'max-h-[200px]'"
+        [showPhotos]="false"
+      >
+      </app-player-list>
     </div>
   </div>
 
   <!-- MOBILE LAYOUT (< md) -->
-  <div class="md:hidden space-y-4">
+  <div class="md:hidden space-y-4 max-w-full overflow-x-hidden">
     <app-player-room-header
       [room]="room()"
       [roomId]="roomId()"
@@ -113,8 +163,8 @@
     ></app-player-room-header>
 
     <!-- Top: Carta Actual + historial placeholders (horizontal) -->
-    <div class="grid grid-cols-4 gap-2">
-      <div class="col-span-1">
+    <div class="grid gap-2 w-full" [ngClass]="showWaitingMessage() ? 'grid-cols-1' : 'grid-cols-4'">
+      <div class="col-span-1" *ngIf="!showWaitingMessage()">
         <app-player-current-card
           [currentCard]="currentCard()"
           [size]="'small'"
@@ -122,16 +172,32 @@
       </div>
 
       <!-- Historial de cartas -->
-      <div class="col-span-3 flex gap-3 overflow-x-auto pb-2">
+      <div [ngClass]="showWaitingMessage() ? 'col-span-1' : 'col-span-3'" class="flex gap-3 overflow-x-auto pb-2">
         <app-player-card-history
           [historyCards]="historyCards()"
           [maxCards]="3"
+          [roomState]="room()?.state || 'waiting'"
+          [showWaitingMessage]="showWaitingMessage()"
         ></app-player-card-history>
       </div>
     </div>
 
     <!-- Tabla -->
-    <div class="rounded-2xl">
+    <div class="rounded-2xl relative w-full">
+      <!-- Verification Overlay -->
+      <div
+        *ngIf="isWaitingForVerification()"
+        class="absolute inset-0 bg-black/60 backdrop-blur-sm z-50 rounded-2xl flex items-center justify-center"
+      >
+        <div class="bg-white rounded-2xl p-6 max-w-xs mx-4 text-center shadow-2xl">
+          <div class="text-5xl mb-3 animate-pulse">⏳</div>
+          <h3 class="text-xl font-bold text-gray-800 mb-2">Verificando...</h3>
+          <p class="text-gray-600 text-sm">
+            El administrador está revisando tu tabla. Por favor aguarda un momento.
+          </p>
+        </div>
+      </div>
+      
       <app-tabla
         [tablaCards]="myTabla()"
         [marks]="myMarks()"
@@ -151,5 +217,14 @@
       (changeTabla)="changeTabla.emit()"
     >
     </app-player-action-buttons>
+
+    <!-- Lista de Jugadores -->
+    <app-player-list
+      [players]="players()"
+      [variant]="'compact'"
+      [maxHeight]="'max-h-[200px]'"
+      [showPhotos]="false"
+    >
+    </app-player-list>
   </div>
 </div>
