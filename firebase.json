@@ -1,8 +1,7 @@
 {
   "firestore": {
     "rules": "firestore.rules",
-    "indexes": "firestore.indexes.json",
-    "database": "mx-loteria-mexicana"
+    "indexes": "firestore.indexes.json"
   },
   "hosting": {
     "site": "mx-loteria-mexicana",
