@@ -10,6 +10,7 @@ import {
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
+import { firstValueFrom } from 'rxjs';
 
 import { MARKERS } from '../../../core/constants/game-data';
 import { Marker, Participant } from '../../../core/models/game.model';
@@ -140,13 +141,32 @@ export class PlayerGameComponent implements OnInit {
         // Verificar si la sala existe
         const room = await this.roomService.getRoom(roomIdCandidate);
         if (!room) {
-          // La sala no existe, limpiar
+          // La sala no existe, limpiar y mostrar modal
           this.clearPlayerSession(user.uid, roomIdCandidate);
+          this.gameState.isRoomDeleted.set(true);
           this.roomLoading.set(false);
           return;
         }
 
         this.roomId = roomIdCandidate;
+
+        // Verificar si el participante existe en Firestore
+        const existingParticipant = await firstValueFrom(
+          this.roomService.observeParticipant(roomIdCandidate, user.uid),
+        );
+
+        // Si el participante no existe, registrarlo automáticamente
+        if (!existingParticipant) {
+          const participant: Omit<Participant, 'joinedAt'> = {
+            uid: user.uid,
+            displayName: user.displayName,
+            role: 'player',
+            marks: [],
+            victories: 0,
+            isActive: true,
+          };
+          await this.roomService.joinRoom(roomIdCandidate, participant);
+        }
 
         // Iniciar observación centralizada en el servicio
         this.gameState.observeRoom(roomIdCandidate, user.uid);

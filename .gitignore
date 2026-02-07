@@ -46,3 +46,4 @@ Thumbs.db
 /src/environments/environment.prod.ts
 *.local.ts
 draft/
+.firebase/
