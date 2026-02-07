@@ -32,10 +32,6 @@ export class TablaComponent {
 
   // Manejar click en una carta
   onCardClick(cardId: number): void {
-    console.log(
-      `🤖 ~ tabla.component.ts:35 ~ this.isInteractive:`,
-      this.isInteractive
-    );
     if (this.isInteractive) {
       this.cardClicked.emit(cardId);
     }

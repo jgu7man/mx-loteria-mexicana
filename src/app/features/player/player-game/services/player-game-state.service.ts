@@ -4,6 +4,7 @@ import { CARDS } from '../../../../core/constants/game-data';
 import { ROOM_STATES } from '../../../../core/constants/room-states';
 import { Marker, Participant, Room } from '../../../../core/models/game.model';
 import { AlertService } from '../../../../core/services/alert.service';
+import { ErrorLoggerService } from '../../../../core/services/error-logger.service';
 import { RoomService } from '../../../../core/services/room.service';
 
 @Injectable({
@@ -12,6 +13,7 @@ import { RoomService } from '../../../../core/services/room.service';
 export class PlayerGameStateService implements OnDestroy {
   private roomService = inject(RoomService);
   private alertService = inject(AlertService);
+  private errorLogger = inject(ErrorLoggerService);
 
   // State signals
   room = signal<Room | null>(null);
@@ -160,7 +162,12 @@ export class PlayerGameStateService implements OnDestroy {
         });
         this.myMarks.set([]);
       } catch (error) {
-        console.error('Error clearing table:', error);
+        await this.errorLogger.logError(
+          error as Error,
+          'PlayerGameStateService.clearTable',
+          'medium',
+          { roomId: this.roomId(), uid },
+        );
       }
     }
   }
@@ -194,7 +201,12 @@ export class PlayerGameStateService implements OnDestroy {
         confirmButtonColor: '#10b981',
       });
     } catch (error: any) {
-      console.error('Error shouting lotería:', error);
+      await this.errorLogger.logError(
+        error as Error,
+        'PlayerGameStateService.shoutLoteria',
+        'critical',
+        { roomId: this.roomId(), uid, marksCount: this.myMarks().length },
+      );
       this.alertService.fire({
         icon: 'error',
         title: 'No se pudo enviar',
@@ -217,7 +229,12 @@ export class PlayerGameStateService implements OnDestroy {
         this.myMarks.update((marks) => [...marks, cardId]);
       }
     } catch (error) {
-      console.error('Error toggling mark:', error);
+      await this.errorLogger.logError(
+        error as Error,
+        'PlayerGameStateService.toggleMark',
+        'medium',
+        { roomId: this.roomId(), uid, cardId },
+      );
     }
   }
 

@@ -222,7 +222,6 @@ export class ManagerDashboardComponent implements OnDestroy {
 
         // Si el usuario es anónimo, cerrar sesión automáticamente
         if (user && !isGoogle && user.isAnonymous) {
-          console.log('Usuario anónimo detectado en manager, cerrando sesión...');
           this.authService.signOut();
           return;
         }

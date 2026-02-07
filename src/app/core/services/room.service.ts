@@ -24,6 +24,7 @@ import {
   RoundHistory,
   RoundWinner,
 } from '../models/game.model';
+import { ErrorLoggerService } from './error-logger.service';
 import { GameUtilsService } from './game-utils.service';
 
 @Injectable({
@@ -32,6 +33,7 @@ import { GameUtilsService } from './game-utils.service';
 export class RoomService {
   private firestore = inject(Firestore);
   private gameUtils = inject(GameUtilsService);
+  private errorLogger = inject(ErrorLoggerService);
 
   constructor() {}
 
@@ -68,7 +70,12 @@ export class RoomService {
       await setDoc(roomRef, this.serializeRoom(room));
       return roomId;
     } catch (error) {
-      console.error('Error creating room:', error);
+      await this.errorLogger.logError(
+        error as Error,
+        'RoomService.createRoom',
+        'critical',
+        { managerId, managerName, roomName, config },
+      );
       throw error;
     }
   }
@@ -86,7 +93,12 @@ export class RoomService {
       }
       return null;
     } catch (error) {
-      console.error('Error getting room:', error);
+      await this.errorLogger.logError(
+        error as Error,
+        'RoomService.getRoom',
+        'high',
+        { roomId },
+      );
       throw error;
     }
   }
@@ -203,7 +215,12 @@ export class RoomService {
 
       await updateDoc(roomRef, updateData);
     } catch (error) {
-      console.error('Error starting new round:', error);
+      await this.errorLogger.logError(
+        error as Error,
+        'RoomService.startNewRound',
+        'critical',
+        { roomId },
+      );
       throw error;
     }
   }
@@ -213,9 +230,9 @@ export class RoomService {
    * @returns true si avanzó exitosamente, false si ya no hay más cartas
    */
   async nextCard(roomId: string): Promise<boolean> {
+    const room = await this.getRoom(roomId);
     try {
       const roomRef = doc(this.firestore, 'salas', roomId);
-      const room = await this.getRoom(roomId);
 
       if (!room) throw new Error('Room not found');
       if (room.currentIndex >= room.deck.length - 1) {
@@ -228,7 +245,12 @@ export class RoomService {
 
       return true;
     } catch (error) {
-      console.error('Error advancing card:', error);
+      await this.errorLogger.logError(
+        error as Error,
+        'RoomService.nextCard',
+        'critical',
+        { roomId, currentIndex: room?.currentIndex },
+      );
       throw error;
     }
   }
@@ -245,7 +267,12 @@ export class RoomService {
         state: ROOM_STATES.VERIFYING,
       });
     } catch (error) {
-      console.error('Error adding winner:', error);
+      await this.errorLogger.logError(
+        error as Error,
+        'RoomService.addWinner',
+        'critical',
+        { roomId, winnerId },
+      );
       throw error;
     }
   }
@@ -284,7 +311,19 @@ export class RoomService {
 
       await updateDoc(roomRef, updateData);
     } catch (error) {
-      console.error('Error finishing round:', error);
+      const room = await this.getRoom(roomId);
+      await this.errorLogger.logError(
+        error as Error,
+        'RoomService.finishRound',
+        'high',
+        {
+          roomId,
+          winnersCount: winners.length,
+          isLastRound: room
+            ? room.currentRound >= room.config.maxRounds
+            : undefined,
+        },
+      );
       throw error;
     }
   }
@@ -332,7 +371,12 @@ export class RoomService {
         state: pending.length > 0 ? ROOM_STATES.VERIFYING : ROOM_STATES.PLAYING,
       });
     } catch (error) {
-      console.error('Error approving winner:', error);
+      await this.errorLogger.logError(
+        error as Error,
+        'RoomService.approveWinner',
+        'high',
+        { roomId, winnerUid: winner.uid },
+      );
       throw error;
     }
   }

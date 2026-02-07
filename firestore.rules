@@ -56,6 +56,14 @@ service cloud.firestore {
                     );
     }
     
+    // Error logs collection
+    match /error-logs/{logId} {
+      // Cualquier usuario puede crear logs (incluso anónimos o no autenticados)
+      allow create: if true;
+      // Solo usuarios autenticados pueden leer (para futuro dashboard de admin)
+      allow read: if request.auth != null;
+    }
+    
     // Deny all other reads/writes
     match /{document=**} {
       allow read, write: if false;

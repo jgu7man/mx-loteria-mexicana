@@ -10,12 +10,14 @@ import {
 } from '@angular/fire/auth';
 import { Observable } from 'rxjs';
 import { AppUser, AuthProvider } from '../models/game.model';
+import { ErrorLoggerService } from './error-logger.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class AuthService {
   private auth = inject(Auth);
+  private errorLogger = inject(ErrorLoggerService);
 
   // Signal para el usuario actual
   currentUser = signal<AppUser | null>(null);
@@ -54,7 +56,11 @@ export class AuthService {
       this.currentUser.set(appUser);
       return appUser;
     } catch (error) {
-      console.error('Error signing in with Google:', error);
+      await this.errorLogger.logError(
+        error as Error,
+        'AuthService.signInWithGoogle',
+        'critical',
+      );
       throw error;
     }
   }
@@ -69,7 +75,12 @@ export class AuthService {
       this.currentUser.set(appUser);
       return appUser;
     } catch (error) {
-      console.error('Error signing in anonymously:', error);
+      await this.errorLogger.logError(
+        error as Error,
+        'AuthService.signInAnonymously',
+        'high',
+        { displayName },
+      );
       throw error;
     }
   }
