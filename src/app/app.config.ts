@@ -14,6 +14,6 @@ export const appConfig: ApplicationConfig = {
 		provideRouter(routes),
 		provideFirebaseApp(() => initializeApp(environment.firebase)),
 		provideAuth(() => getAuth()),
-		provideFirestore(() => getFirestore(undefined as any, 'mx-loteria-mexicana')),
+		provideFirestore(() => getFirestore()),
 	],
 };
