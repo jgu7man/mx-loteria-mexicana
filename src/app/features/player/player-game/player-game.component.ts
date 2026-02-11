@@ -83,12 +83,10 @@ export class PlayerGameComponent implements OnInit {
   private readonly legacyTablaKey = 'playerTabla';
 
   constructor() {
-    console.log('[constructor] Iniciando componente');
     // Effect para detectar cambios en la autenticación
     effect(
       () => {
         const user = this.currentUser();
-        console.log('[effect auth] Usuario detectado:', user?.uid);
         if (user) {
           this.restorePlayerSession();
         }
@@ -181,15 +179,9 @@ export class PlayerGameComponent implements OnInit {
   }
 
   ngOnInit() {
-    console.log('[ngOnInit] Iniciando...');
-    console.log('[ngOnInit] roomLoading inicial:', this.roomLoading());
-    console.log('[ngOnInit] authLoading inicial:', this.authLoading());
-    console.log('[ngOnInit] showJoinForm inicial:', this.showJoinForm());
-    
     // Check route to determine behavior
     this.route.url.subscribe((segments) => {
       const path = segments[0]?.path || '';
-      console.log('[ngOnInit] Path actual:', path);
       
       // Si estamos en /player, ocultar formulario inmediatamente (evitar flash)
       if (path === 'player') {
@@ -198,7 +190,6 @@ export class PlayerGameComponent implements OnInit {
       
       // Si estamos en /join, mostrar formulario y limpiar sesión previa
       if (path === 'join') {
-        console.log('[ngOnInit] Ruta /join detectada - limpiando sesión previa');
         const user = this.currentUser();
         const legacyRoomId = localStorage.getItem(this.legacyRoomKey);
         if (user && legacyRoomId) {
@@ -208,27 +199,20 @@ export class PlayerGameComponent implements OnInit {
         
         // Check if roomId is in URL params
         this.route.params.subscribe((params) => {
-          console.log('[ngOnInit] Params de ruta:', params);
           if (params['roomId']) {
             this.roomId = params['roomId'];
-            console.log('[ngOnInit] roomId extraído de URL:', this.roomId);
-          } else {
-            console.log('[ngOnInit] No hay roomId en la URL');
           }
         });
       }
       
       // Si estamos en /player/:roomId, intentar restaurar sesión
       if (path === 'player') {
-        console.log('[ngOnInit] Ruta /player detectada - intentando restaurar sesión');
         this.route.params.subscribe((params) => {
           if (params['roomId']) {
             this.roomId = params['roomId'];
-            console.log('[ngOnInit] roomId de /player:', this.roomId);
             localStorage.setItem(this.legacyRoomKey, params['roomId']);
           } else {
             // Si llegamos a /player sin roomId, redirigir a /join
-            console.log('[ngOnInit] /player sin roomId, redirigiendo a /join');
             this.router.navigate(['/join']);
           }
         });
@@ -237,7 +221,6 @@ export class PlayerGameComponent implements OnInit {
 
     // Generate some tablas
     this.refreshAvailableTablas();
-    console.log('[ngOnInit] Completado');
   }
 
   refreshAvailableTablas() {
@@ -249,32 +232,18 @@ export class PlayerGameComponent implements OnInit {
   }
 
   private async restorePlayerSession() {
-    console.log('[restorePlayerSession] Iniciando...');
     const user = this.currentUser();
-    console.log('[restorePlayerSession] User:', user?.uid);
-    if (!user) {
-      console.log('[restorePlayerSession] No hay usuario, saliendo');
-      return;
-    }
+    if (!user) return;
 
     const roomIdCandidate =
       this.roomId || localStorage.getItem(this.legacyRoomKey) || '';
-    console.log('[restorePlayerSession] roomIdCandidate:', roomIdCandidate);
-    if (!roomIdCandidate) {
-      console.log('[restorePlayerSession] No hay roomId, saliendo');
-      return;
-    }
+    if (!roomIdCandidate) return;
 
     const session = this.loadPlayerSession(user.uid, roomIdCandidate);
-    console.log('[restorePlayerSession] Session encontrada:', session);
     
     // Solo continuar si hay datos que restaurar
-    if (!session) {
-      console.log('[restorePlayerSession] No hay session guardada, saliendo');
-      return;
-    }
+    if (!session) return;
     
-    console.log('[restorePlayerSession] Activando roomLoading...');
     this.roomLoading.set(true);
 
     // Solo usar legacy keys si el roomId guardado coincide con el actual
@@ -381,7 +350,6 @@ export class PlayerGameComponent implements OnInit {
         // Navegar a /player/:roomId si restauración exitosa
         const currentPath = window.location.pathname;
         if (currentPath.includes('/join/')) {
-          console.log('[restorePlayerSession] Navegando de /join a /player/', roomIdCandidate);
           await this.router.navigate(['/player', roomIdCandidate]);
         }
       } catch (error) {
@@ -495,9 +463,7 @@ export class PlayerGameComponent implements OnInit {
   }
 
   async signInAnonymously() {
-    console.log('[signInAnonymously] Iniciando con displayName:', this.displayName, 'roomId:', this.roomId);
     if (!this.displayName.trim() || !this.roomId.trim()) {
-      console.log('[signInAnonymously] Campos incompletos');
       this.alertService.fire({
         icon: 'warning',
         title: 'Campos incompletos',
@@ -510,7 +476,6 @@ export class PlayerGameComponent implements OnInit {
     // Limpiar localStorage si es una sala diferente
     const legacyRoomId = localStorage.getItem(this.legacyRoomKey);
     if (legacyRoomId && legacyRoomId !== this.roomId.trim()) {
-      console.log('[signInAnonymously] RoomId diferente detectado, limpiando legacy data');
       localStorage.removeItem(this.legacyRoomKey);
       localStorage.removeItem(this.legacyMarkerKey);
       localStorage.removeItem(this.legacyTablaKey);
@@ -518,11 +483,8 @@ export class PlayerGameComponent implements OnInit {
 
     try {
       if (!this.currentUser()) {
-        console.log('[signInAnonymously] Autenticando como anónimo...');
         await this.authService.signInAnonymously(this.displayName);
-        console.log('[signInAnonymously] Autenticación completada');
       }
-      console.log('[signInAnonymously] Llamando a joinRoom...');
       await this.joinRoom();
     } catch (error: any) {
       console.error('Error joining room:', error);
@@ -549,7 +511,6 @@ export class PlayerGameComponent implements OnInit {
     // Limpiar localStorage si es una sala diferente
     const legacyRoomId = localStorage.getItem(this.legacyRoomKey);
     if (legacyRoomId && legacyRoomId !== this.roomId.trim()) {
-      console.log('[signInWithGoogle] RoomId diferente detectado, limpiando legacy data');
       localStorage.removeItem(this.legacyRoomKey);
       localStorage.removeItem(this.legacyMarkerKey);
       localStorage.removeItem(this.legacyTablaKey);
@@ -571,16 +532,11 @@ export class PlayerGameComponent implements OnInit {
   }
 
   private async joinRoom() {
-    console.log('[joinRoom] Iniciando con roomId:', this.roomId);
     this.roomLoading.set(true);
-    console.log('[joinRoom] roomLoading activado');
 
     try {
-      console.log('[joinRoom] Obteniendo sala de Firestore...');
       const room = await this.roomService.getRoom(this.roomId);
-      console.log('[joinRoom] Room obtenida:', room);
       if (!room) {
-        console.log('[joinRoom] Sala no encontrada');
         this.roomLoading.set(false);
         this.alertService.fire({
           icon: 'error',
@@ -592,7 +548,6 @@ export class PlayerGameComponent implements OnInit {
       }
 
       const user = this.currentUser();
-      console.log('[joinRoom] Usuario actual:', user?.uid);
       if (!user) throw new Error('User not authenticated');
 
       // Iniciar observación centralizada
@@ -610,7 +565,6 @@ export class PlayerGameComponent implements OnInit {
       };
 
       await this.roomService.joinRoom(this.roomId, participant);
-      console.log('[joinRoom] Participante unido a la sala');
 
       // Guardar en localStorage
       this.savePlayerSession(user.uid, this.roomId, {
@@ -618,17 +572,13 @@ export class PlayerGameComponent implements OnInit {
         tabla: this.myTabla().length ? this.myTabla() : null,
         marks: this.myMarks(),
       });
-      console.log('[joinRoom] Sesión guardada en localStorage');
 
       // Navegar a /player/:roomId
-      console.log('[joinRoom] Navegando a /player/', this.roomId);
       await this.router.navigate(['/player', this.roomId]);
       
       this.showJoinForm.set(false);
       this.showTablaSelector.set(true); // Tabla primero
-      console.log('[joinRoom] Desactivando roomLoading...');
       this.roomLoading.set(false);
-      console.log('[joinRoom] Completado exitosamente');
     } catch (error) {
       console.error('Error joining room:', error);
       this.roomLoading.set(false);
