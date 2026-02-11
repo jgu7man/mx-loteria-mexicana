@@ -445,9 +445,9 @@ export const CARDS: Card[] = [
  * Marcadores disponibles para usar en el juego
  */
 export const MARKERS: Marker[] = [
-  { id: 'bean', name: 'Frijol', emoji: '🫘', color: '#6F4E37' },
-  { id: 'corn', name: 'Maíz', emoji: '🌽', color: '#F1C40F' },
-  { id: 'coin', name: 'Moneda', emoji: '🪙', color: '#FFD700' },
+  { id: 'bean', name: 'Frijol', emoji: '🫘', color: '#16a34a' },
+  { id: 'corn', name: 'Maíz', emoji: '🌽', color: '#10b981' },
+  { id: 'coin', name: 'Moneda', emoji: '🪙', color: '#0f766e' },
 ];
 
 /**

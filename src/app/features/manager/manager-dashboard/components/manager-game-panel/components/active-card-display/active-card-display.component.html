@@ -1,73 +1,73 @@
 <div
-  class="bg-white rounded-3xl shadow-md p-6 h-full flex flex-col justify-between"
+  class="flex flex-col h-full p-6 bg-white rounded-3xl shadow-md justify-between"
 >
   <!-- Próxima Carta (Grande, con verso) -->
   <div class="mb-6">
     <!-- Encabezado -->
-    <p class="text-gray-400 text-xs uppercase font-bold mb-3 tracking-wider text-center">
-      SIGUIENTE CARTA
-      <span class="text-red-400">(SÓLO TÚ LA VES)</span>
+    <p
+      class="mb-3 text-gray-400 text-xs font-bold tracking-wider text-center uppercase"
+    >
+      SIGUIENTE CARTA <span class="text-red-400">(SÓLO TÚ LA VES)</span>
     </p>
-    
     <!-- Carta Grande -->
     <div
       id="next-card"
-      class="flex flex-col justify-center flex-1 items-center min-h-[250px]"
+      class="flex flex-col flex-1 min-h-[250px] justify-center items-center"
     >
-    <app-card
-      [card]="nextCardPreview()!"
-      [size]="'large'"
-      [showVerso]="false"
-    ></app-card>
-      <div class="text-center" *ngIf="nextCardPreview()">
+      <div
+        class="text-center flex flex-col items-center"
+        *ngIf="nextCardPreview()"
+      >
+        <app-card
+          class="w-fit"
+          [card]="nextCardPreview()!"
+          [size]="'large'"
+          [showVerso]="false"
+        ></app-card>
         <!-- Verso debajo de la carta -->
-        <div class="mt-4 bg-indigo-50 rounded-2xl p-4 max-w-sm mx-auto">
-          <p class="text-[10px] uppercase font-bold text-indigo-400 mb-1 text-center tracking-widest">
+        <div class="max-w-sm mt-4 p-4 mx-auto bg-indigo-50 rounded-2xl">
+          <p
+            class="mb-1 text-[10px] font-bold text-indigo-400 text-center tracking-widest uppercase"
+          >
             Sugerencia de verso
           </p>
-          <p class="text-indigo-700 italic font-semibold text-center text-lg">
+          <p class="text-indigo-700 font-semibold text-center text-lg italic">
             {{ nextCardPreview()?.verso || "..." }}
           </p>
         </div>
       </div>
-
       <div
         *ngIf="!nextCardPreview()"
-        class="w-56 h-72 bg-gradient-to-br from-gray-50 to-gray-100 rounded-3xl border-4 border-gray-200 flex flex-col items-center justify-center shadow-inner"
+        class="flex flex-col w-56 h-72 bg-gradient-to-br from-gray-50 to-gray-100 rounded-3xl border-4 border-gray-200 shadow-inner items-center justify-center"
       >
-        <div class="text-6xl text-gray-800 font-bold mb-2">?</div>
+        <div class="mb-2 text-6xl text-gray-800 font-bold">?</div>
         <div class="text-gray-400 font-semibold tracking-widest text-sm">
           PRÓXIMA CARTA…
         </div>
       </div>
     </div>
   </div>
-
   <!-- Botones Principales -->
-  <div class="flex justify-center mb-6">
+  <div class="flex mb-6 justify-center">
     <button
       *ngIf="isRoomWaiting(room()?.state || 'waiting')"
       (click)="startRound.emit()"
-      class="bg-indigo-600 text-white px-8 py-4 rounded-xl font-bold hover:bg-indigo-700 transition text-lg shadow-lg w-full max-w-sm"
+      class="w-full max-w-sm px-8 py-4 text-white font-bold text-lg bg-indigo-600 rounded-xl shadow-lg hover:bg-indigo-700 transition"
     >
       {{ getButtonText() }}
     </button>
     <button
       *ngIf="isRoomActive(room()?.state || 'waiting')"
       (click)="nextCard.emit()"
-      class="bg-indigo-600 text-white px-8 py-4 rounded-xl font-bold hover:bg-indigo-700 transition text-lg shadow-lg w-full max-w-sm"
+      class="w-full max-w-sm px-8 py-4 text-white font-bold text-lg bg-indigo-600 rounded-xl shadow-lg hover:bg-indigo-700 transition"
     >
       {{ getButtonText() }}
     </button>
   </div>
-
   <!-- Carta Actual (Pequeña) -->
-  <div
-    id="current-card"
-    class="flex justify-center items-center pb-2"
-  >
+  <div id="current-card" class="flex pb-2 justify-center items-center">
     <div class="text-center">
-      <p class="text-xs uppercase font-bold text-gray-400 mb-2 tracking-widest">
+      <p class="mb-2 text-xs font-bold text-gray-400 tracking-widest uppercase">
         Carta Actual
       </p>
       <app-card
@@ -76,10 +76,9 @@
         [size]="'small'"
         [showVerso]="false"
       ></app-card>
-      
       <div
         *ngIf="!currentCard()"
-        class="w-32 h-40 bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl border-2 border-gray-200 flex flex-col items-center justify-center shadow-inner"
+        class="flex flex-col w-32 h-40 bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl border-2 border-gray-200 shadow-inner items-center justify-center"
       >
         <div class="text-3xl text-gray-400 font-bold">-</div>
       </div>

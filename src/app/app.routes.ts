@@ -9,10 +9,12 @@ export const routes: Routes = [
   { path: '', component: HomeComponent },
   { path: 'manager', component: ManagerDashboardComponent },
   { path: 'manager/:roomId', component: ManagerDashboardComponent },
-  { path: 'player', component: PlayerGameComponent },
+  { path: 'join', component: PlayerGameComponent }, // Formulario sin roomId
+  { path: 'join/:roomId', component: PlayerGameComponent }, // Formulario con roomId prellenado
+  { path: 'player/:roomId', component: PlayerGameComponent }, // Juego activo
+  { path: 'player', redirectTo: 'join', pathMatch: 'full' }, // Redirigir /player a /join
   { path: 'viewer/:roomId', component: ViewerDisplayComponent },
   { path: 'viewer', component: ViewerDisplayComponent },
   { path: 'invite/:roomId', component: InviteDisplayComponent },
-  { path: 'join/:roomId', component: PlayerGameComponent },
   { path: '**', redirectTo: '' },
 ];

@@ -43,7 +43,7 @@ export class HomeComponent implements OnInit {
       emoji: '🎮',
       description: 'Únete a una sala, elige tu tabla y juega a la lotería',
       color: '#10B981',
-      route: '/player',
+      route: '/join',
     },
     {
       id: 'viewer',
