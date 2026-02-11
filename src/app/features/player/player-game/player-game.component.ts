@@ -377,6 +377,13 @@ export class PlayerGameComponent implements OnInit {
           tabla: restoredTabla,
           marks: this.myMarks(),
         });
+        
+        // Navegar a /player/:roomId si restauración exitosa
+        const currentPath = window.location.pathname;
+        if (currentPath.includes('/join/')) {
+          console.log('[restorePlayerSession] Navegando de /join a /player/', roomIdCandidate);
+          await this.router.navigate(['/player', roomIdCandidate]);
+        }
       } catch (error) {
         console.error('Error auto-joining room:', error);
       }
