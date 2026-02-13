@@ -92,6 +92,31 @@ export class PlayerGameComponent implements OnInit {
   private readonly legacyTablaKey = 'playerTabla';
 
   constructor() {
+    // Effect para validar que el usuario tenga datos completos al estar en /player
+    effect(
+      () => {
+        const participant = this.participant();
+        const currentPath = window.location.pathname;
+        
+        // Solo validar si estamos en /player/:roomId
+        if (currentPath.startsWith('/player/') && this.roomId && !this.roomLoading()) {
+          // Si no hay participante o no tiene nombre
+          if (!participant || !participant.displayName || participant.displayName.trim() === '') {
+            this.router.navigate(['/join', this.roomId]);
+            return;
+          }
+          
+          // Si no tiene tabla ni marcador
+          if ((!participant.tablaCards || participant.tablaCards.length === 0) && 
+              !participant.marker) {
+            this.router.navigate(['/join', this.roomId]);
+            return;
+          }
+        }
+      },
+      { allowSignalWrites: false },
+    );
+
     // Effect para detectar cambios en la autenticación
     effect(
       () => {
