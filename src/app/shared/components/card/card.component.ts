@@ -15,6 +15,7 @@ export class CardComponent {
   @Input() showVerso: boolean = false;
   @Input() isMarked: boolean = false;
   @Input() markerEmoji?: string;
+  @Input() markerImage?: string; // Ruta de imagen SVG para marcador
 
   imageError = false;
 

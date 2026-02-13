@@ -27,6 +27,7 @@ export interface Marker {
   name: string;
   emoji: string;
   color: string;
+  image?: string; // Ruta opcional para imagen SVG/PNG
 }
 
 /**

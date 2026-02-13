@@ -448,6 +448,13 @@ export const MARKERS: Marker[] = [
   { id: 'bean', name: 'Frijol', emoji: '🫘', color: '#16a34a' },
   { id: 'corn', name: 'Maíz', emoji: '🌽', color: '#10b981' },
   { id: 'coin', name: 'Moneda', emoji: '🪙', color: '#0f766e' },
+  { 
+    id: 'falabella', 
+    name: 'Falabella', 
+    emoji: '🏦', 
+    color: '#00A859',
+    image: 'assets/images/icons/Logotipo_Banco_Falabella.svg'
+  },
 ];
 
 /**

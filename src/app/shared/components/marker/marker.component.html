@@ -7,7 +7,14 @@
       [class.selected]="isSelected(marker)"
       [style.background-color]="marker.color"
     >
-      <div class="marker-emoji text-6xl">{{ marker.emoji }}</div>
+      <!-- Imagen SVG si está disponible, sino emoji -->
+      <div class="marker-emoji text-6xl" *ngIf="!marker.image">{{ marker.emoji }}</div>
+      <img 
+        *ngIf="marker.image" 
+        [src]="marker.image" 
+        [alt]="marker.name"
+        class="h-16 w-auto mx-auto"
+      />
       <div
         class="marker-name text-white font-bold mt-2 text-center drop-shadow-lg"
       >

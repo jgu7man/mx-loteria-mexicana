@@ -59,6 +59,9 @@ export class PlayerGameBoardComponent {
   selectedMarkerEmoji = computed(
     () => this.playerState.selectedMarker()?.emoji || '🫘',
   );
+  selectedMarkerImage = computed(
+    () => this.playerState.selectedMarker()?.image,
+  );
   roomId = this.playerState.roomId;
   isWaitingForVerification = this.playerState.isWaitingForVerification;
 

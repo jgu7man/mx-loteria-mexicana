@@ -15,6 +15,7 @@ export class TablaComponent {
   @Input() tablaCards: number[] = []; // IDs de las 16 cartas
   @Input() marks: number[] = []; // IDs de las cartas marcadas
   @Input() markerEmoji: string = '🫘'; // Emoji del marcador
+  @Input() markerImage?: string; // Imagen SVG del marcador
   @Input() isInteractive: boolean = true; // Si se puede hacer click
   @Input() size: 'small' | 'medium' | 'large' = 'small';
 
