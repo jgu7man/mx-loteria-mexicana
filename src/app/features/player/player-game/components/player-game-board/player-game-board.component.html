@@ -173,9 +173,9 @@
     <!-- Top: Carta Actual + historial placeholders (horizontal) -->
     <div
       class="grid gap-2 w-full items-end"
-      [ngClass]="showWaitingMessage() ? 'grid-cols-1' : 'grid-cols-4'"
+      [ngClass]="currentCard() ? 'grid-cols-4' : 'grid-cols-1'"
     >
-      <div class="col-span-1" *ngIf="!showWaitingMessage()">
+      <div class="col-span-1" *ngIf="currentCard()">
         <app-player-current-card
           [currentCard]="currentCard()"
           [size]="'small'"
@@ -184,7 +184,7 @@
 
       <!-- Historial de cartas -->
       <div
-        [ngClass]="showWaitingMessage() ? 'col-span-1' : 'col-span-3'"
+        [ngClass]="currentCard() ? 'col-span-3' : 'col-span-1'"
         class="flex gap-3 overflow-x-auto pb-2"
       >
         <app-player-card-history
