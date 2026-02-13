@@ -172,9 +172,13 @@ export class PlayerGameComponent implements OnInit {
 
         const isCurrentlyInWinners =
           r.currentRoundWinners?.includes(participant.uid) || false;
+        
+        // Verificar si fue aprobado (está en verified winners)
+        const isInVerifiedWinners = 
+          r.currentRoundVerifiedWinners?.some(w => w.uid === participant.uid) || false;
 
-        // Si estaba en winners y ya no está, fue rechazado
-        if (wasInWinners && !isCurrentlyInWinners) {
+        // Si estaba en winners, ya no está, Y tampoco está en verified winners = fue rechazado
+        if (wasInWinners && !isCurrentlyInWinners && !isInVerifiedWinners) {
           this.alertService.fire({
             toast: true,
             position: 'top-end',

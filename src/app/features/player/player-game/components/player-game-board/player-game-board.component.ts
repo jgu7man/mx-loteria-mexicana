@@ -70,11 +70,8 @@ export class PlayerGameBoardComponent {
   // True si la ronda está activa pero aún no se han cantado cartas
   showWaitingMessage = computed(() => {
     const r = this.room();
-    const history = this.historyCards();
-    return (
-      (r?.state === 'playing' || r?.state === 'verifying') &&
-      history.length === 0
-    );
+    const current = this.currentCard();
+    return (r?.state === 'playing' || r?.state === 'verifying') && !current;
   });
 
   @Output() changeMarker = new EventEmitter<void>();
