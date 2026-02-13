@@ -18,6 +18,7 @@ import { AlertService } from '../../../core/services/alert.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { GameUtilsService } from '../../../core/services/game-utils.service';
 import { RoomService } from '../../../core/services/room.service';
+import { WinnerNotificationService } from '../../../core/services/winner-notification.service';
 import { MarkerComponent } from '../../../shared/components/marker/marker.component';
 import { PodiumComponent } from '../../../shared/components/podium/podium.component';
 import { PlayerGameBoardComponent } from './components/player-game-board/player-game-board.component';
@@ -49,6 +50,7 @@ export class PlayerGameComponent implements OnInit {
   private gameUtils = inject(GameUtilsService);
   private alertService = inject(AlertService);
   private destroyRef = inject(DestroyRef);
+  private winnerNotification = inject(WinnerNotificationService);
 
   // Re-export state from service
   currentUser = this.authService.currentUser;
@@ -58,6 +60,7 @@ export class PlayerGameComponent implements OnInit {
 
   room = this.gameState.room;
   participant = this.gameState.participant;
+  participants = this.gameState.participants;
   currentCard = this.gameState.currentCard;
   historyCards = this.gameState.historyCards;
   myTabla = this.gameState.myTabla;
@@ -66,6 +69,12 @@ export class PlayerGameComponent implements OnInit {
 
   showPodium = this.gameState.showPodium;
   currentRoundWinners = this.gameState.currentRoundWinnersList;
+
+  // Computed signal serializado para detectar cambios reales en currentRoundWinners
+  currentRoundWinnersJson = computed(() => {
+    const winners = this.room()?.currentRoundWinners || [];
+    return JSON.stringify(winners);
+  });
 
   // UI state
   roomId = '';
@@ -95,46 +104,21 @@ export class PlayerGameComponent implements OnInit {
     );
 
     // Effect para detectar cuando alguien grita lotería
+    // Usa computed signal serializado para evitar ejecuciones en cada cambio de room
     effect(
       () => {
-        const r = this.room();
+        // Leer el computed signal serializado - solo cambia si winners cambia
+        const winnersJson = this.currentRoundWinnersJson();
+        const winners = winnersJson ? JSON.parse(winnersJson) : [];
         const participant = this.participant();
 
-        if (
-          !r ||
-          !r.currentRoundWinners ||
-          r.currentRoundWinners.length === 0
-        ) {
-          return;
-        }
-
-        // Obtener el participante que gritó (debe estar en la lista de participantes observados)
-        const winnerId =
-          r.currentRoundWinners[r.currentRoundWinners.length - 1];
-
-        // Si soy yo quien gritó, no mostrar el toast (ya tengo mi propia alerta)
-        if (winnerId === participant?.uid) {
-          return;
-        }
-
-        // Obtener info del ganador desde Firestore
-        if (this.roomId) {
-          this.roomService
-            .getParticipant(this.roomId, winnerId)
-            .then((winner) => {
-              if (winner) {
-                this.alertService.fire({
-                  toast: true,
-                  position: 'top-end',
-                  icon: 'info',
-                  title: `${winner.displayName} gritó ¡Lotería!`,
-                  showConfirmButton: false,
-                  timer: 3000,
-                  timerProgressBar: true,
-                });
-              }
-            });
-        }
+        // Usar el servicio compartido para procesar ganadores
+        // Pasar el UID del jugador actual para no notificarse a sí mismo
+        this.winnerNotification.processWinners(
+          winners,
+          participant?.uid,
+          this.roomId,
+        );
       },
       { allowSignalWrites: false },
     );
@@ -176,18 +160,50 @@ export class PlayerGameComponent implements OnInit {
       },
       { allowSignalWrites: false },
     );
+
+    // Effect para detectar cuando el manager rechaza el gane
+    let wasInWinners = false;
+    effect(
+      () => {
+        const r = this.room();
+        const participant = this.participant();
+
+        if (!r || !participant) return;
+
+        const isCurrentlyInWinners =
+          r.currentRoundWinners?.includes(participant.uid) || false;
+
+        // Si estaba en winners y ya no está, fue rechazado
+        if (wasInWinners && !isCurrentlyInWinners) {
+          this.alertService.fire({
+            toast: true,
+            position: 'top-end',
+            icon: 'error',
+            title: 'Gane rechazado ❌',
+            text: 'El manager verificó tu tabla y no cumplía con los requisitos',
+            showConfirmButton: false,
+            timer: 5000,
+            timerProgressBar: true,
+          });
+        }
+
+        // Actualizar estado para la próxima ejecución
+        wasInWinners = isCurrentlyInWinners;
+      },
+      { allowSignalWrites: false },
+    );
   }
 
   ngOnInit() {
     // Check route to determine behavior
     this.route.url.subscribe((segments) => {
       const path = segments[0]?.path || '';
-      
+
       // Si estamos en /player, ocultar formulario inmediatamente (evitar flash)
       if (path === 'player') {
         this.showJoinForm.set(false);
       }
-      
+
       // Si estamos en /join, mostrar formulario y limpiar sesión previa
       if (path === 'join') {
         const user = this.currentUser();
@@ -196,7 +212,7 @@ export class PlayerGameComponent implements OnInit {
           this.clearPlayerSession(user.uid, legacyRoomId);
         }
         this.showJoinForm.set(true);
-        
+
         // Check if roomId is in URL params
         this.route.params.subscribe((params) => {
           if (params['roomId']) {
@@ -204,7 +220,7 @@ export class PlayerGameComponent implements OnInit {
           }
         });
       }
-      
+
       // Si estamos en /player/:roomId, intentar restaurar sesión
       if (path === 'player') {
         this.route.params.subscribe((params) => {
@@ -240,10 +256,10 @@ export class PlayerGameComponent implements OnInit {
     if (!roomIdCandidate) return;
 
     const session = this.loadPlayerSession(user.uid, roomIdCandidate);
-    
+
     // Solo continuar si hay datos que restaurar
     if (!session) return;
-    
+
     this.roomLoading.set(true);
 
     // Solo usar legacy keys si el roomId guardado coincide con el actual
@@ -346,7 +362,7 @@ export class PlayerGameComponent implements OnInit {
           tabla: restoredTabla,
           marks: this.myMarks(),
         });
-        
+
         // Navegar a /player/:roomId si restauración exitosa
         const currentPath = window.location.pathname;
         if (currentPath.includes('/join/')) {
@@ -575,7 +591,7 @@ export class PlayerGameComponent implements OnInit {
 
       // Navegar a /player/:roomId
       await this.router.navigate(['/player', this.roomId]);
-      
+
       this.showJoinForm.set(false);
       this.showTablaSelector.set(true); // Tabla primero
       this.roomLoading.set(false);
@@ -685,16 +701,16 @@ export class PlayerGameComponent implements OnInit {
         marks: [],
         status: this.selectedMarker() ? 'ready' : 'choosing-marker',
       };
-      
+
       // Solo agregar marker si existe
       if (this.selectedMarker()?.id) {
         updates.marker = this.selectedMarker()!.id;
       }
-      
+
       this.roomService.updateParticipant(this.roomId, user.uid, updates);
     }
     this.showTablaSelector.set(false);
-    
+
     // Mostrar selector de marcador si aún no tiene uno
     if (!this.selectedMarker()) {
       this.showMarkerSelector.set(true);

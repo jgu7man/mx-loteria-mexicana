@@ -1,13 +1,17 @@
-<div class="fixed inset-0 bg-gradient-to-br from-yellow-400 via-amber-500 to-orange-600 z-50 flex  justify-center p-4 overflow-y-auto">
+<div
+  class="fixed inset-0 bg-gradient-to-br from-yellow-400 via-amber-500 to-orange-600 z-50 flex justify-center p-4 overflow-y-auto"
+>
   <div class="max-w-4xl w-full">
     <!-- Projected Content (Buttons) - At the top -->
     <div class="flex justify-evenly mb-6">
       <ng-content></ng-content>
     </div>
 
-        <!-- Continue message -->
+    <!-- Continue message -->
     <div *ngIf="!isLastRound" class="text-center">
-      <div class="bg-white/90 backdrop-blur-sm rounded-2xl p-4 inline-block shadow-lg mb-4">
+      <div
+        class="bg-white/90 backdrop-blur-sm rounded-2xl p-4 inline-block shadow-lg mb-4"
+      >
         <p class="text-gray-700 font-semibold">
           ⏳ Esperando que el gritón inicie la siguiente ronda...
         </p>
@@ -21,77 +25,92 @@
         ¡LOTERÍA!
       </h1>
       <p class="text-xl md:text-2xl text-white/90 font-semibold">
-        Ronda {{ roundNumber }} {{ isLastRound ? '(Final)' : 'de ' + maxRounds }}
+        Ronda {{ roundNumber }}
+        {{ isLastRound ? "(Final)" : "de " + maxRounds }}
       </p>
     </div>
 
-    <!-- Winners podium -->
+    <!-- Players ranking -->
     <div class="bg-white rounded-3xl shadow-2xl p-6 md:p-8 mb-6">
       <h2 class="text-2xl md:text-3xl font-bold text-gray-800 mb-6 text-center">
-        🏆 {{ winners.length === 1 ? 'Ganador' : 'Ganadores' }}
+        🏆 Clasificación General
       </h2>
 
-      <div *ngIf="winners.length === 0" class="text-center text-gray-500 py-8">
-        No hay ganadores registrados
+      <div
+        *ngIf="playerRankings().length === 0"
+        class="text-center text-gray-500 py-8"
+      >
+        No hay jugadores registrados
       </div>
 
-      <div *ngIf="winners.length > 0" class="space-y-4">
+      <div *ngIf="playerRankings().length > 0" class="space-y-4">
         <div
-          *ngFor="let winner of winners; let i = index"
-          class="flex items-center gap-4 p-4 rounded-2xl transition-transform hover:scale-105"
+          *ngFor="let player of playerRankings(); let i = index"
+          class="flex items-center gap-4 p-4 rounded-2xl transition-transform"
           [ngClass]="{
-            'bg-gradient-to-r from-yellow-100 to-amber-100 border-2 border-yellow-400': i === 0,
-            'bg-gradient-to-r from-gray-100 to-slate-100 border-2 border-gray-300': i === 1,
-            'bg-gradient-to-r from-orange-100 to-amber-100 border-2 border-orange-300': i === 2,
-            'bg-gray-50 border-2 border-gray-200': i > 2
-          }">
+            'bg-gradient-to-r from-yellow-100 to-amber-100 border-2 border-yellow-400 hover:scale-105':
+              player.isWinner && i === 0,
+            'bg-gradient-to-r from-gray-100 to-slate-100 border-2 border-gray-300 hover:scale-105':
+              player.isWinner && i === 1,
+            'bg-gradient-to-r from-orange-100 to-amber-100 border-2 border-orange-300 hover:scale-105':
+              player.isWinner && i === 2,
+            'bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-400':
+              player.isWinner && i > 2,
+            'bg-gray-50 border border-gray-200': !player.isWinner,
+          }"
+        >
           <!-- Position medal -->
-          <div class="flex-shrink-0 w-16 h-16 rounded-full flex items-center justify-center text-3xl font-bold"
-               [ngClass]="{
-                 'bg-yellow-400 text-yellow-900': i === 0,
-                 'bg-gray-300 text-gray-700': i === 1,
-                 'bg-orange-400 text-orange-900': i === 2,
-                 'bg-gray-200 text-gray-600': i > 2
-               }">
-            {{ i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : (i + 1) }}
+          <div
+            class="flex-shrink-0 w-16 h-16 rounded-full flex items-center justify-center text-2xl font-bold"
+            [ngClass]="{
+              'bg-yellow-400 text-yellow-900': player.isWinner && i === 0,
+              'bg-gray-300 text-gray-700': player.isWinner && i === 1,
+              'bg-orange-400 text-orange-900': player.isWinner && i === 2,
+              'bg-green-400 text-green-900': player.isWinner && i > 2,
+              'bg-gray-200 text-gray-600': !player.isWinner,
+            }"
+          >
+            {{
+              player.isWinner && i === 0
+                ? "🥇"
+                : player.isWinner && i === 1
+                  ? "🥈"
+                  : player.isWinner && i === 2
+                    ? "🥉"
+                    : player.position
+            }}
           </div>
 
-          <!-- Winner info -->
+          <!-- Player info -->
           <div class="flex-1 min-w-0">
-            <div class="text-xl font-bold text-gray-800 truncate mb-3">
-              {{ winner.displayName }}
-            </div>
-            <!-- Winner tabla -->
-            <div class="w-full max-w-sm">
-              <app-tabla
-                *ngIf="winner.tablaCards && winner.tablaCards.length > 0"
-                [tablaCards]="winner.tablaCards"
-                [marks]="winner.marks"
-                [markerEmoji]="'🔥'"
-                [isInteractive]="false"
-                [size]="'small'">
-              </app-tabla>
-              <div *ngIf="!winner.tablaCards || winner.tablaCards.length === 0" 
-                   class="text-sm text-gray-500 italic">
-                Tabla no disponible
+            <div class="flex items-center gap-2 mb-1">
+              <div class="text-xl font-bold text-gray-800 truncate">
+                {{ player.displayName }}
               </div>
+              <span *ngIf="player.isWinner" class="text-lg">✨</span>
+            </div>
+            <div class="text-sm text-gray-600">
+              {{ player.totalWins }}
+              {{ player.totalWins === 1 ? "victoria" : "victorias" }}
             </div>
           </div>
 
-          <!-- Trophy icon for first place -->
-          <div *ngIf="i === 0" class="flex-shrink-0 text-4xl">
-            🏆
-          </div>
+          <!-- Trophy icon for current round winner -->
+          <div *ngIf="player.isWinner" class="flex-shrink-0 text-3xl">🏆</div>
         </div>
       </div>
 
       <!-- Game over message for last round -->
-      <div *ngIf="isLastRound" class="mt-8 p-6 bg-gradient-to-r from-purple-100 to-pink-100 rounded-2xl border-2 border-purple-300 text-center">
+      <div
+        *ngIf="isLastRound"
+        class="mt-8 p-6 bg-gradient-to-r from-purple-100 to-pink-100 rounded-2xl border-2 border-purple-300 text-center"
+      >
         <div class="text-3xl mb-2">🎊</div>
-        <h3 class="text-2xl font-bold text-purple-900 mb-2">¡Juego Terminado!</h3>
+        <h3 class="text-2xl font-bold text-purple-900 mb-2">
+          ¡Juego Terminado!
+        </h3>
         <p class="text-purple-700">Han completado todas las rondas</p>
       </div>
     </div>
-
   </div>
 </div>

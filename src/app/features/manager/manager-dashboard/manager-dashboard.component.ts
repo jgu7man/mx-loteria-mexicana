@@ -30,6 +30,7 @@ import { AlertService } from '../../../core/services/alert.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { GameUtilsService } from '../../../core/services/game-utils.service';
 import { RoomService } from '../../../core/services/room.service';
+import { WinnerNotificationService } from '../../../core/services/winner-notification.service';
 import { ManagerGamePanelComponent } from './components/manager-game-panel/manager-game-panel.component';
 import { ManagerReviewModalComponent } from './components/manager-review-modal/manager-review-modal.component';
 import { ManagerRoomListComponent } from './components/manager-room-list/manager-room-list.component';
@@ -100,6 +101,7 @@ export class ManagerDashboardComponent implements OnDestroy {
   private gameState = inject(ManagerGameStateService);
   private gameUtils = inject(GameUtilsService);
   private alertService = inject(AlertService);
+  private winnerNotification = inject(WinnerNotificationService);
 
   readonly origin = window.location.origin;
 
@@ -109,6 +111,7 @@ export class ManagerDashboardComponent implements OnDestroy {
   currentUser = this.authService.currentUser;
   authLoading = this.authService.authLoading;
   roomLoading = signal<boolean>(false);
+  loadingRooms = signal<boolean>(false);
   isLoading = computed(() => this.authLoading() || this.roomLoading());
   isAuthenticated = computed(() => this.currentUser() !== null);
   isGoogleAuthenticated = computed(() => this.authService.isGoogleUser());
@@ -187,7 +190,12 @@ export class ManagerDashboardComponent implements OnDestroy {
 
   activeRoomId = computed(() => this.room()?.id ?? null);
   managerRooms = signal<Room[]>([]);
-  loadingRooms = signal(false);
+
+  // Computed signal serializado para detectar cambios reales en currentRoundWinners
+  currentRoundWinnersJson = computed(() => {
+    const winners = this.room()?.currentRoundWinners || [];
+    return JSON.stringify(winners);
+  });
 
   // Helpers para el template
   readonly ROOM_STATES = ROOM_STATES;
@@ -262,35 +270,21 @@ export class ManagerDashboardComponent implements OnDestroy {
     );
 
     // Effect para detectar cuando alguien grita lotería
+    // Usa computed signal serializado para evitar ejecuciones en cada cambio de room
     effect(
       () => {
-        const r = this.room();
-        const participants = this.participants();
+        // Leer el computed signal serializado - solo cambia si winners cambia
+        const winnersJson = this.currentRoundWinnersJson();
+        const winners = winnersJson ? JSON.parse(winnersJson) : [];
+        const roomId = this.room()?.id;
 
-        if (
-          !r ||
-          !r.currentRoundWinners ||
-          r.currentRoundWinners.length === 0
-        ) {
-          return;
-        }
-
-        // Obtener los nombres de los ganadores actuales
-        const winnerIds = r.currentRoundWinners;
-        const winners = participants.filter((p) => winnerIds.includes(p.uid));
-
-        // Mostrar toast para cada ganador nuevo
-        winners.forEach((winner) => {
-          this.alertService.fire({
-            toast: true,
-            position: 'top-end',
-            icon: 'info',
-            title: `${winner.displayName} gritó ¡Lotería!`,
-            showConfirmButton: false,
-            timer: 3000,
-            timerProgressBar: true,
-          });
-        });
+        // Usar el servicio compartido para procesar ganadores
+        // Manager no pasa userId, así que ve todas las notificaciones
+        this.winnerNotification.processWinners(
+          winners,
+          undefined, // No filtrar por usuario actual (el manager ve todos)
+          roomId,
+        );
       },
       { allowSignalWrites: false },
     );
@@ -522,6 +516,8 @@ export class ManagerDashboardComponent implements OnDestroy {
 
     try {
       await this.roomService.startNewRound(currentRoom.id);
+      // Limpiar ganadores notificados al iniciar nueva ronda
+      this.winnerNotification.clearNotifications(currentRoom.id);
       this.alertService.fire({
         icon: 'success',
         title: '¡Ronda iniciada!',
@@ -689,6 +685,9 @@ export class ManagerDashboardComponent implements OnDestroy {
         currentRoom.currentRoundVerifiedWinners || [],
       );
       this.clearReview();
+      // Limpiar ganadores notificados al finalizar ronda
+      this.winnerNotification.clearNotifications(currentRoom.id);
+
       this.alertService.fire({
         icon: 'success',
         title: '¡Ronda finalizada!',

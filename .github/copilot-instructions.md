@@ -9,6 +9,15 @@
 - ❌ NO asumas que debes hacer commit porque "es el siguiente paso lógico"
 - ✅ Después de hacer cambios, pregunta: "¿Quieres que haga commit de estos cambios?"
 
+## ✅ REGLA CRÍTICA: Verificación de Compilación
+
+**SIEMPRE ejecuta `npm run build` antes de confirmar que los cambios están completos.**
+
+- ✅ Después de hacer cambios en código TypeScript, ejecuta `npm run build`
+- ❌ NO digas que algo está corregido sin verificar que compile
+- ✅ Si el build falla, corrige los errores y vuelve a verificar
+- ✅ Solo confirma que los cambios están listos después de un build exitoso
+
 ## Arquitectura del Proyecto
 
 Este es un juego de **Lotería Mexicana** en tiempo real construido con Angular 18+ y Firebase.

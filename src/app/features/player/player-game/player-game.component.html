@@ -27,6 +27,7 @@
       !showTablaSelector()
     "
     [winners]="currentRoundWinners()"
+    [allParticipants]="participants()"
     [roundNumber]="room()?.currentRound || 0"
     [maxRounds]="room()?.config?.maxRounds || 0"
     [isLastRound]="room()?.state === 'finished'"
@@ -100,9 +101,12 @@
           ← Cancelar
         </button>
       </div>
-      <h2 class="text-2xl font-bold text-gray-800 mb-2">Selecciona tu Marcador</h2>
+      <h2 class="text-2xl font-bold text-gray-800 mb-2">
+        Selecciona tu Marcador
+      </h2>
       <p class="text-gray-600 mb-6">
-        ✨ Elige el marcador que usarás para marcar las cartas en tu tabla durante el juego.
+        ✨ Elige el marcador que usarás para marcar las cartas en tu tabla
+        durante el juego.
       </p>
       <app-marker (markerSelected)="onMarkerSelected($event)"></app-marker>
     </div>
