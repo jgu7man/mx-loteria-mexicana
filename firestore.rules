@@ -47,11 +47,13 @@ service cloud.firestore {
                         || exists(/databases/$(database)/documents/salas/$(roomId))
                         && get(/databases/$(database)/documents/salas/$(roomId)).data.managerId == request.auth.uid);
       
-      // Only the room manager can delete participants
-      // Check if room exists first, if not allow delete (for cleanup during room deletion)
+      // Users can delete their own participant entry (to leave the room)
+      // OR the room manager can delete any participant
+      // OR allow delete if room doesn't exist (for cleanup during room deletion)
       allow delete: if isAuthenticated()
                     && (
-                      !exists(/databases/$(database)/documents/salas/$(roomId))
+                      participantId == request.auth.uid
+                      || !exists(/databases/$(database)/documents/salas/$(roomId))
                       || get(/databases/$(database)/documents/salas/$(roomId)).data.managerId == request.auth.uid
                     );
     }

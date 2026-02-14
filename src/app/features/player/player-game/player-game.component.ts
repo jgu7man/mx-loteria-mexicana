@@ -9,7 +9,7 @@ import {
   signal,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 
 import { MARKERS } from '../../../core/constants/game-data';
@@ -90,39 +90,35 @@ export class PlayerGameComponent implements OnInit {
   private readonly legacyRoomKey = 'playerRoomId';
   private readonly legacyMarkerKey = 'playerMarker';
   private readonly legacyTablaKey = 'playerTabla';
+  private isInSelectionProcess = false; // Flag para desactivar validación durante selección
 
   constructor() {
-    // Effect para validar que el usuario tenga datos completos al estar en /player
-    effect(
-      () => {
-        const participant = this.participant();
-        const currentPath = window.location.pathname;
-        
-        // Solo validar si estamos en /player/:roomId
-        if (currentPath.startsWith('/player/') && this.roomId && !this.roomLoading()) {
-          // Si no hay participante o no tiene nombre
-          if (!participant || !participant.displayName || participant.displayName.trim() === '') {
-            this.router.navigate(['/join', this.roomId]);
-            return;
-          }
-          
-          // Si no tiene tabla ni marcador
-          if ((!participant.tablaCards || participant.tablaCards.length === 0) && 
-              !participant.marker) {
-            this.router.navigate(['/join', this.roomId]);
-            return;
-          }
-        }
-      },
-      { allowSignalWrites: false },
-    );
-
     // Effect para detectar cambios en la autenticación
     effect(
       () => {
         const user = this.currentUser();
-        if (user) {
-          this.restorePlayerSession();
+        const authLoading = this.authLoading();
+        console.log('🔐 [AUTH EFFECT]', { user: user?.uid, authLoading, path: window.location.pathname });
+        
+        // Solo proceder si hay usuario autenticado y NO está cargando
+        if (user && !authLoading) {
+          const currentPath = window.location.pathname;
+          
+          // Si estamos en /player, restaurar sesión
+          if (currentPath.startsWith('/player/')) {
+            console.log('🔄 [AUTH EFFECT] Llamando restorePlayerSession');
+            this.restorePlayerSession();
+          }
+          
+          // Si estamos en /join, verificar si debe redirigir automáticamente
+          if (currentPath.startsWith('/join/')) {
+            const roomIdMatch = currentPath.match(/\/join\/([^/]+)/);
+            if (roomIdMatch && roomIdMatch[1]) {
+              const roomId = roomIdMatch[1];
+              console.log('🔍 [AUTH EFFECT] Verificando redirección automática para roomId:', roomId);
+              this.checkAutoRedirect(user.uid, roomId);
+            }
+          }
         }
       },
       { allowSignalWrites: true },
@@ -197,10 +193,12 @@ export class PlayerGameComponent implements OnInit {
 
         const isCurrentlyInWinners =
           r.currentRoundWinners?.includes(participant.uid) || false;
-        
+
         // Verificar si fue aprobado (está en verified winners)
-        const isInVerifiedWinners = 
-          r.currentRoundVerifiedWinners?.some(w => w.uid === participant.uid) || false;
+        const isInVerifiedWinners =
+          r.currentRoundVerifiedWinners?.some(
+            (w) => w.uid === participant.uid,
+          ) || false;
 
         // Si estaba en winners, ya no está, Y tampoco está en verified winners = fue rechazado
         if (wasInWinners && !isCurrentlyInWinners && !isInVerifiedWinners) {
@@ -224,28 +222,95 @@ export class PlayerGameComponent implements OnInit {
   }
 
   ngOnInit() {
+    console.log('🎬 [INIT] ngOnInit ejecutándose');
+    // Usar NavigationEnd para reaccionar a cambios de ruta
+    this.router.events.subscribe((event) => {
+      if (event instanceof NavigationEnd) {
+        const currentPath = event.urlAfterRedirects || event.url;
+        console.log('🚀 [NAVIGATION END]', currentPath);
+        
+        // Si estamos en /player, ocultar formulario
+        if (currentPath.startsWith('/player')) {
+          console.log('📋 [NAVIGATION] Ocultando formulario - /player');
+          this.showJoinForm.set(false);
+        }
+        
+        // Si estamos en /join, mostrar formulario
+        if (currentPath.startsWith('/join')) {
+          console.log('📝 [NAVIGATION] Mostrando formulario - /join');
+        }
+      }
+    });
+
     // Check route to determine behavior
     this.route.url.subscribe((segments) => {
       const path = segments[0]?.path || '';
+      console.log('🛤️ [ROUTE URL]', path);
 
       // Si estamos en /player, ocultar formulario inmediatamente (evitar flash)
       if (path === 'player') {
+        console.log('👤 [ROUTE] path=player, ocultando formulario');
         this.showJoinForm.set(false);
       }
 
-      // Si estamos en /join, mostrar formulario y limpiar sesión previa
+      // Si estamos en /join, verificar si ya tiene sesión activa
       if (path === 'join') {
-        const user = this.currentUser();
-        const legacyRoomId = localStorage.getItem(this.legacyRoomKey);
-        if (user && legacyRoomId) {
-          this.clearPlayerSession(user.uid, legacyRoomId);
-        }
-        this.showJoinForm.set(true);
+        console.log('📝 [ROUTE] path=join');
 
         // Check if roomId is in URL params
-        this.route.params.subscribe((params) => {
+        this.route.params.subscribe(async (params) => {
           if (params['roomId']) {
             this.roomId = params['roomId'];
+            console.log('🆔 [ROUTE] roomId en URL:', params['roomId']);
+            
+            const user = this.currentUser();
+            console.log('👤 [ROUTE] Usuario actual:', user?.uid);
+            
+            if (user) {
+              // Verificar si ya tiene sesión guardada para este roomId
+              const sessionKey = this.getPlayerSessionKey(user.uid, params['roomId']);
+              console.log('🔑 [ROUTE] Buscando sesión con key:', sessionKey);
+              const session = this.loadPlayerSession(user.uid, params['roomId']);
+              console.log('🔍 [ROUTE] Sesión encontrada:', session);
+              console.log('📦 [ROUTE] localStorage keys:', Object.keys(localStorage));
+              
+              if (session) {
+                // Verificar si el participante existe en Firestore
+                try {
+                  console.log('🔥 [ROUTE] Verificando participante en Firestore...');
+                  const participant = await firstValueFrom(
+                    this.roomService.observeParticipant(params['roomId'], user.uid)
+                  );
+                  
+                  console.log('👤 [ROUTE] Participante en Firestore:', participant);
+                  
+                  // Si existe en Firestore, redirigir automáticamente a /player
+                  if (participant) {
+                    console.log('🚀 [ROUTE] ✅ Redirigiendo automáticamente a /player');
+                    await this.router.navigate(['/player', params['roomId']]);
+                    return;
+                  } else {
+                    console.log('❌ [ROUTE] Participante NO existe en Firestore, mostrando formulario');
+                  }
+                } catch (error) {
+                  console.log('⚠️ [ROUTE] Error verificando participante:', error);
+                }
+              } else {
+                console.log('❌ [ROUTE] No hay sesión en localStorage');
+              }
+            } else {
+              console.log('❌ [ROUTE] No hay usuario autenticado');
+            }
+            
+            // Si no hay sesión o no existe en Firestore, mostrar formulario
+            this.showJoinForm.set(true);
+            
+            // Solo limpiar sesión si es una sala DIFERENTE a la guardada
+            const legacyRoomId = localStorage.getItem(this.legacyRoomKey);
+            if (user && legacyRoomId && legacyRoomId !== params['roomId']) {
+              console.log('🧹 [ROUTE] Limpiando sesión anterior:', legacyRoomId);
+              this.clearPlayerSession(user.uid, legacyRoomId);
+            }
           }
         });
       }
@@ -254,9 +319,11 @@ export class PlayerGameComponent implements OnInit {
       if (path === 'player') {
         this.route.params.subscribe((params) => {
           if (params['roomId']) {
+            console.log('🎮 [ROUTE] player con roomId:', params['roomId']);
             this.roomId = params['roomId'];
             localStorage.setItem(this.legacyRoomKey, params['roomId']);
           } else {
+            console.log('⚠️ [ROUTE] player SIN roomId, redirigiendo a /join');
             // Si llegamos a /player sin roomId, redirigir a /join
             this.router.navigate(['/join']);
           }
@@ -266,6 +333,42 @@ export class PlayerGameComponent implements OnInit {
 
     // Generate some tablas
     this.refreshAvailableTablas();
+  }
+
+  private async checkAutoRedirect(uid: string, roomId: string) {
+    console.log('🔍 [AUTO REDIRECT] Iniciando verificación', { uid, roomId });
+    
+    // Verificar si ya tiene sesión guardada para este roomId
+    const sessionKey = this.getPlayerSessionKey(uid, roomId);
+    console.log('🔑 [AUTO REDIRECT] Buscando sesión con key:', sessionKey);
+    const session = this.loadPlayerSession(uid, roomId);
+    console.log('🔍 [AUTO REDIRECT] Sesión encontrada:', session);
+    console.log('📦 [AUTO REDIRECT] localStorage keys:', Object.keys(localStorage));
+    
+    if (session) {
+      // Verificar si el participante existe en Firestore
+      try {
+        console.log('🔥 [AUTO REDIRECT] Verificando participante en Firestore...');
+        const participant = await firstValueFrom(
+          this.roomService.observeParticipant(roomId, uid)
+        );
+        
+        console.log('👤 [AUTO REDIRECT] Participante en Firestore:', participant);
+        
+        // Si existe en Firestore, redirigir automáticamente a /player
+        if (participant) {
+          console.log('🚀 [AUTO REDIRECT] ✅ Redirigiendo automáticamente a /player');
+          await this.router.navigate(['/player', roomId]);
+          return;
+        } else {
+          console.log('❌ [AUTO REDIRECT] Participante NO existe en Firestore');
+        }
+      } catch (error) {
+        console.log('⚠️ [AUTO REDIRECT] Error verificando participante:', error);
+      }
+    } else {
+      console.log('❌ [AUTO REDIRECT] No hay sesión en localStorage');
+    }
   }
 
   refreshAvailableTablas() {
@@ -278,34 +381,34 @@ export class PlayerGameComponent implements OnInit {
 
   private async restorePlayerSession() {
     const user = this.currentUser();
-    if (!user) return;
+    console.log('🔄 [RESTORE] Iniciando restorePlayerSession', { user: user?.uid });
+    if (!user) {
+      console.log('❌ [RESTORE] No hay usuario, saliendo');
+      return;
+    }
 
     const roomIdCandidate =
       this.roomId || localStorage.getItem(this.legacyRoomKey) || '';
-    if (!roomIdCandidate) return;
+    console.log('🆔 [RESTORE] roomIdCandidate:', roomIdCandidate);
+    if (!roomIdCandidate) {
+      console.log('❌ [RESTORE] No hay roomId, saliendo');
+      return;
+    }
 
     const session = this.loadPlayerSession(user.uid, roomIdCandidate);
+    console.log('💾 [RESTORE] Sesión cargada:', session);
 
-    // Solo continuar si hay datos que restaurar
-    if (!session) return;
+    // Si estamos en proceso de selección, no restaurar (es un join nuevo)
+    if (this.isInSelectionProcess) {
+      console.log('❌ [RESTORE] isInSelectionProcess=true, saliendo');
+      return;
+    }
 
     this.roomLoading.set(true);
 
-    // Solo usar legacy keys si el roomId guardado coincide con el actual
-    const legacyRoomId = localStorage.getItem(this.legacyRoomKey);
-    const useLegacy = legacyRoomId === roomIdCandidate;
-
-    const legacyMarker = useLegacy
-      ? localStorage.getItem(this.legacyMarkerKey)
-      : null;
-    const legacyTabla = useLegacy
-      ? localStorage.getItem(this.legacyTablaKey)
-      : null;
-
-    const markerId =
-      session?.markerId ?? this.parseLegacyMarkerId(legacyMarker);
-    const tabla = session?.tabla ?? this.parseLegacyTabla(legacyTabla);
+    // Cargar marcas de localStorage si existen
     const marks = session?.marks ?? [];
+    console.log('📍 [RESTORE] Marcas de localStorage:', marks);
 
     if (roomIdCandidate && user) {
       try {
@@ -328,9 +431,10 @@ export class PlayerGameComponent implements OnInit {
 
         // Si el participante no existe, registrarlo automáticamente
         if (!existingParticipant) {
+          const displayNameToUse = session?.displayName || user.displayName;
           const participant: Omit<Participant, 'joinedAt'> = {
             uid: user.uid,
-            displayName: user.displayName,
+            displayName: displayNameToUse,
             role: 'player',
             marks: [],
             victories: 0,
@@ -342,63 +446,81 @@ export class PlayerGameComponent implements OnInit {
         // Iniciar observación centralizada en el servicio
         this.gameState.observeRoom(roomIdCandidate, user.uid);
 
-        // Restaurar marcador por id
-        const restoredMarker = markerId
-          ? (MARKERS.find((m) => m.id === markerId) ?? null)
-          : null;
-        if (restoredMarker) {
-          this.selectedMarker.set(restoredMarker);
+        // Restaurar desde Firestore (marker y tabla vienen de la DB)
+        let restoredMarker = null;
+        let restoredTabla = null;
+
+        if (existingParticipant) {
+          // Restaurar displayName
+          if (existingParticipant.displayName) {
+            this.displayName = existingParticipant.displayName;
+          }
+
+          // Restaurar marcador desde Firestore
+          if (existingParticipant.marker) {
+            restoredMarker = MARKERS.find((m) => m.id === existingParticipant.marker) ?? null;
+            if (restoredMarker) {
+              this.selectedMarker.set(restoredMarker);
+            }
+          }
+
+          // Restaurar tabla desde Firestore
+          if (existingParticipant.tablaCards && existingParticipant.tablaCards.length === 16) {
+            restoredTabla = existingParticipant.tablaCards;
+            this.myTabla.set(restoredTabla);
+          }
         }
 
-        // Restaurar tabla (si existe y es válida)
-        const restoredTabla =
-          Array.isArray(tabla) && tabla.length > 0 ? tabla : null;
-        if (restoredTabla) {
-          this.myTabla.set(restoredTabla);
-        }
-
-        // Best-effort: sincronizar marker/tabla a Firestore (útil tras recargas)
-        const restoreUpdates: Partial<Participant> = {};
-        if (restoredMarker?.id) restoreUpdates.marker = restoredMarker.id;
-        if (restoredTabla) restoreUpdates.tablaCards = restoredTabla;
-        if (Object.keys(restoreUpdates).length > 0) {
-          this.roomService
-            .updateParticipant(roomIdCandidate, user.uid, restoreUpdates)
-            .catch(() => {
-              // Puede fallar si el participante aún no existe; es best-effort.
-            });
+        // Restaurar marcas desde localStorage (tienen prioridad sobre Firestore)
+        if (marks.length > 0) {
+          this.myMarks.set(marks);
+          console.log('✅ [RESTORE] Marcas restauradas desde localStorage:', marks.length);
+          
+          // Sincronizar marcas a Firestore para que observeParticipant no las sobrescriba
+          await this.roomService.updateParticipant(roomIdCandidate, user.uid, {
+            marks: marks,
+          });
+          console.log('🔄 [RESTORE] Marcas sincronizadas a Firestore');
+        } else if (existingParticipant?.marks && existingParticipant.marks.length > 0) {
+          this.myMarks.set(existingParticipant.marks);
+          console.log('✅ [RESTORE] Marcas restauradas desde Firestore:', existingParticipant.marks.length);
         }
 
         // Elegir correctamente el paso de UI.
         this.showJoinForm.set(false);
         if (!restoredTabla) {
           // Sin tabla: mostrar selector de tabla primero
+          this.isInSelectionProcess = true;
           this.showTablaSelector.set(true);
           this.showMarkerSelector.set(false);
         } else if (!restoredMarker) {
           // Tiene tabla pero no marcador: mostrar selector de marcador
+          this.isInSelectionProcess = true;
           this.showMarkerSelector.set(true);
           this.showTablaSelector.set(false);
         } else {
           // Tiene ambos: listo para jugar
+          this.isInSelectionProcess = false;
           this.showMarkerSelector.set(false);
           this.showTablaSelector.set(false);
         }
 
         // Guardar/migrar al formato nuevo para futuras recargas
         this.savePlayerSession(user.uid, roomIdCandidate, {
-          markerId: restoredMarker?.id ?? null,
-          tabla: restoredTabla,
+          displayName: this.displayName,
           marks: this.myMarks(),
         });
 
         // Navegar a /player/:roomId si restauración exitosa
         const currentPath = window.location.pathname;
+        console.log('🎯 [RESTORE] Navegación?', { currentPath, shouldNavigate: currentPath.includes('/join/') });
         if (currentPath.includes('/join/')) {
+          console.log('🚀 [RESTORE] Navegando a /player/', roomIdCandidate);
           await this.router.navigate(['/player', roomIdCandidate]);
         }
+        console.log('✅ [RESTORE] Restauración completada');
       } catch (error) {
-        console.error('Error auto-joining room:', error);
+        console.error('❌ [RESTORE] Error auto-joining room:', error);
       }
     }
     this.roomLoading.set(false);
@@ -412,27 +534,21 @@ export class PlayerGameComponent implements OnInit {
     uid: string,
     roomId: string,
   ): {
-    markerId: string | null;
-    tabla: number[] | null;
+    displayName?: string;
     marks: number[];
   } | null {
     const raw = localStorage.getItem(this.getPlayerSessionKey(uid, roomId));
     if (!raw) return null;
     try {
       const parsed = JSON.parse(raw) as {
-        markerId?: string | null;
-        tabla?: unknown;
+        displayName?: string;
         marks?: unknown;
       };
-      const tabla = Array.isArray(parsed.tabla)
-        ? (parsed.tabla as number[])
-        : null;
       const marks = Array.isArray(parsed.marks)
         ? (parsed.marks as unknown[]).filter((n) => typeof n === 'number')
         : [];
       return {
-        markerId: parsed.markerId ?? null,
-        tabla,
+        displayName: parsed.displayName,
         marks: marks as number[],
       };
     } catch {
@@ -443,20 +559,17 @@ export class PlayerGameComponent implements OnInit {
   private savePlayerSession(
     uid: string,
     roomId: string,
-    data: { markerId: string | null; tabla: number[] | null; marks?: number[] },
+    data: { displayName?: string; marks?: number[] },
   ) {
-    localStorage.setItem(
-      this.getPlayerSessionKey(uid, roomId),
-      JSON.stringify(data),
-    );
-    // Keep legacy keys in sync (best effort)
-    if (data.markerId) {
-      localStorage.setItem(this.legacyMarkerKey, data.markerId);
-    }
-    if (data.tabla) {
-      localStorage.setItem(this.legacyTablaKey, JSON.stringify(data.tabla));
-    }
+    const key = this.getPlayerSessionKey(uid, roomId);
+    const value = JSON.stringify(data);
+    console.log('💾 [SAVE SESSION] key:', key);
+    console.log('💾 [SAVE SESSION] value:', value);
+    localStorage.setItem(key, value);
+    // Guardar roomId para referencia
     localStorage.setItem(this.legacyRoomKey, roomId);
+    console.log('✅ [SAVE SESSION] Guardado en localStorage');
+    console.log('📦 [SAVE SESSION] Verificación - valor guardado:', localStorage.getItem(key));
   }
 
   private clearPlayerSession(uid: string, roomId: string) {
@@ -518,6 +631,9 @@ export class PlayerGameComponent implements OnInit {
       return;
     }
 
+    // Mostrar loading inmediatamente
+    this.roomLoading.set(true);
+
     // Limpiar localStorage si es una sala diferente
     const legacyRoomId = localStorage.getItem(this.legacyRoomKey);
     if (legacyRoomId && legacyRoomId !== this.roomId.trim()) {
@@ -577,6 +693,7 @@ export class PlayerGameComponent implements OnInit {
   }
 
   private async joinRoom() {
+    console.log('🚪 [JOIN] Iniciando joinRoom', { roomId: this.roomId, displayName: this.displayName });
     this.roomLoading.set(true);
 
     try {
@@ -611,18 +728,39 @@ export class PlayerGameComponent implements OnInit {
 
       await this.roomService.joinRoom(this.roomId, participant);
 
-      // Guardar en localStorage
+      // Guardar displayName y marcas en localStorage
+      const sessionKey = this.getPlayerSessionKey(user.uid, this.roomId);
+      console.log('💾 [JOIN] Guardando sesión con key:', sessionKey);
+      console.log('💾 [JOIN] Datos a guardar:', { displayName: this.displayName, marks: [] });
       this.savePlayerSession(user.uid, this.roomId, {
-        markerId: this.selectedMarker()?.id ?? null,
-        tabla: this.myTabla().length ? this.myTabla() : null,
-        marks: this.myMarks(),
+        displayName: this.displayName,
+        marks: [],
       });
+      console.log('✅ [JOIN] Sesión guardada en localStorage');
 
-      // Navegar a /player/:roomId
-      await this.router.navigate(['/player', this.roomId]);
+      // Activar flag para desactivar validación durante selección
+      console.log('🏁 [JOIN] isInSelectionProcess = true');
+      this.isInSelectionProcess = true;
 
+      // Ocultar formulario ANTES de navegar para evitar flash
+      console.log('📋 [JOIN] Ocultando formulario y mostrando selector de tabla');
       this.showJoinForm.set(false);
       this.showTablaSelector.set(true); // Tabla primero
+
+      // Esperar a que authLoading termine antes de navegar
+      // Esto evita que el componente se renderice con estado de "no autenticado"
+      let attempts = 0;
+      while (this.authLoading() && attempts < 50) {
+        await new Promise(resolve => setTimeout(resolve, 100));
+        attempts++;
+      }
+      console.log('⏳ [JOIN] Esperó authLoading:', attempts, 'intentos');
+
+      // Navegar a /player/:roomId
+      console.log('🚀 [JOIN] Navegando a /player/', this.roomId);
+      await this.router.navigate(['/player', this.roomId]);
+
+      console.log('✅ [JOIN] joinRoom completado');
       this.roomLoading.set(false);
     } catch (error) {
       console.error('Error joining room:', error);
@@ -635,9 +773,9 @@ export class PlayerGameComponent implements OnInit {
     this.selectedMarker.set(marker);
     const user = this.currentUser();
     if (user && this.roomId) {
+      // Solo guardar displayName y marcas en localStorage
       this.savePlayerSession(user.uid, this.roomId, {
-        markerId: marker.id,
-        tabla: this.myTabla().length ? this.myTabla() : null,
+        displayName: this.displayName,
         marks: this.myMarks(),
       });
 
@@ -648,6 +786,8 @@ export class PlayerGameComponent implements OnInit {
       });
     }
     this.showMarkerSelector.set(false);
+    // Desactivar flag cuando se completa la selección
+    this.isInSelectionProcess = false;
   }
 
   async startChangingMarker() {
@@ -716,13 +856,13 @@ export class PlayerGameComponent implements OnInit {
     this.myMarks.set([]);
     const user = this.currentUser();
     if (user && this.roomId) {
+      // Solo guardar displayName y marcas en localStorage
       this.savePlayerSession(user.uid, this.roomId, {
-        markerId: this.selectedMarker()?.id ?? null,
-        tabla,
+        displayName: this.displayName,
         marks: [],
       });
 
-      // Update participant in Firestore
+      // Update participant in Firestore (marker y tabla)
       const tablaId = this.availableTablas().indexOf(tabla);
       const updates: Partial<Participant> = {
         tablaId,
@@ -743,13 +883,23 @@ export class PlayerGameComponent implements OnInit {
     // Mostrar selector de marcador si aún no tiene uno
     if (!this.selectedMarker()) {
       this.showMarkerSelector.set(true);
+      // Mantener flag activo hasta que seleccione marcador
+    } else {
+      // Si ya tiene marcador, completar selección
+      this.isInSelectionProcess = false;
     }
   }
 
-  goHome() {
+  async goHome() {
     // Limpiar la sesión del jugador al salir
     const user = this.currentUser();
     if (user && this.roomId) {
+      try {
+        // Remover participante de Firestore
+        await this.roomService.leaveRoom(this.roomId, user.uid);
+      } catch (error) {
+        console.error('Error al remover participante:', error);
+      }
       this.clearPlayerSession(user.uid, this.roomId);
     } else {
       // Best effort legacy cleanup

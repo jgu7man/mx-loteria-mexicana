@@ -12,33 +12,35 @@ import { ViewerJoinFormComponent } from '../viewer-join-form/viewer-join-form.co
   standalone: true,
   imports: [CommonModule, ViewerJoinFormComponent, ViewerGameDisplayComponent],
   templateUrl: './viewer-display.component.html',
-  styles: [`
-    #current-card ::ng-deep .card-container {
-      width: clamp(150px, 40vw, 300px);
-      font-size: clamp(0.8rem, 5cqw, 1.2rem);
-    }
-    
-    #current-card ::ng-deep .card-large .card-emoji {
-      font-size: clamp(3rem, 14cqw, 5rem);
-    }
-    
-    #current-card ::ng-deep .card-large .card-name {
-      font-size: clamp(1rem, 14cqw, 1.2rem);
-    }
-    
-    @media screen and (min-width: 1200px) {
+  styles: [
+    `
       #current-card ::ng-deep .card-container {
-        width: clamp(200px, 25vw, 300px);
+        width: clamp(150px, 40vw, 300px);
+        font-size: clamp(0.8rem, 5cqw, 1.2rem);
       }
-      
+
       #current-card ::ng-deep .card-large .card-emoji {
-        font-size: clamp(4rem, 10cqw, 5rem);
+        font-size: clamp(3rem, 14cqw, 5rem);
       }
+
       #current-card ::ng-deep .card-large .card-name {
-        font-size: clamp(1.2rem, 10cqw, 1.2rem);
+        font-size: clamp(1rem, 14cqw, 1.2rem);
       }
-    }
-  `],
+
+      @media screen and (min-width: 1200px) {
+        #current-card ::ng-deep .card-container {
+          width: clamp(200px, 25vw, 300px);
+        }
+
+        #current-card ::ng-deep .card-large .card-emoji {
+          font-size: clamp(4rem, 10cqw, 5rem);
+        }
+        #current-card ::ng-deep .card-large .card-name {
+          font-size: clamp(1.2rem, 10cqw, 1.2rem);
+        }
+      }
+    `,
+  ],
 })
 export class ViewerDisplayComponent implements OnInit {
   private router = inject(Router);
@@ -109,13 +111,14 @@ export class ViewerDisplayComponent implements OnInit {
           if (r.config.viewerDifficulty === 'hard') limit = 1;
 
           const recentCardIds = r.deck.slice(
-            Math.max(0, r.currentIndex - limit + 1),
-            r.currentIndex + 1,
+            Math.max(0, r.currentIndex - limit),
+            r.currentIndex,
           );
           this.recentCards.set(
             recentCardIds
               .map((id) => CARDS.find((c) => c.id === id))
-              .filter((c) => c),
+              .filter((c) => c)
+              .reverse(),
           );
         }
       });

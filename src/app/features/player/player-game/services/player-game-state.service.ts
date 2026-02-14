@@ -165,10 +165,16 @@ export class PlayerGameStateService implements OnDestroy {
 
     if (result.isConfirmed) {
       try {
-        await this.roomService.updateParticipant(this.roomId(), uid, {
-          marks: [],
-        });
+        // Limpiar marcas localmente
         this.myMarks.set([]);
+        
+        // Guardar en localStorage
+        this.saveMarksToLocalStorage(uid, this.roomId(), []);
+        
+        // NO actualizar Firestore aquí, solo cuando cante lotería
+        // await this.roomService.updateParticipant(this.roomId(), uid, {
+        //   marks: [],
+        // });
       } catch (error) {
         await this.errorLogger.logError(
           error as Error,
@@ -184,8 +190,11 @@ export class PlayerGameStateService implements OnDestroy {
     if (this.isWaitingForVerification()) return;
 
     try {
-      // Sync tabla and marker first
-      const syncUpdates: Partial<Participant> = {};
+      // Sincronizar marcas a Firestore antes de cantar lotería
+      const syncUpdates: Partial<Participant> = {
+        marks: this.myMarks(), // Subir las marcas de localStorage a Firestore
+      };
+      
       const markerId = this.selectedMarker()?.id;
       const tablaCards = this.myTabla();
       if (markerId) syncUpdates.marker = markerId;
@@ -193,13 +202,12 @@ export class PlayerGameStateService implements OnDestroy {
         syncUpdates.tablaCards = tablaCards;
       }
 
-      if (Object.keys(syncUpdates).length > 0) {
-        await this.roomService.updateParticipant(
-          this.roomId(),
-          uid,
-          syncUpdates,
-        );
-      }
+      // Actualizar participante con todas las marcas
+      await this.roomService.updateParticipant(
+        this.roomId(),
+        uid,
+        syncUpdates,
+      );
 
       await this.roomService.addWinner(this.roomId(), uid);
       this.alertService.fire({
@@ -230,11 +238,25 @@ export class PlayerGameStateService implements OnDestroy {
     const currentMarks = this.myMarks();
     try {
       if (currentMarks.includes(cardId)) {
-        await this.roomService.unmarkCard(this.roomId(), uid, cardId);
+        // Remover marca localmente de inmediato (optimistic update)
         this.myMarks.update((marks) => marks.filter((id) => id !== cardId));
+        
+        // Guardar en localStorage
+        this.saveMarksToLocalStorage(uid, this.roomId(), this.myMarks());
+        
+        // Actualizar Firestore (solo cuando cante "¡Lotería!")
+        // Por ahora solo mantenemos sincronizado el estado local
+        // await this.roomService.unmarkCard(this.roomId(), uid, cardId);
       } else {
-        await this.roomService.markCard(this.roomId(), uid, cardId);
+        // Agregar marca localmente de inmediato (optimistic update)
         this.myMarks.update((marks) => [...marks, cardId]);
+        
+        // Guardar en localStorage
+        this.saveMarksToLocalStorage(uid, this.roomId(), this.myMarks());
+        
+        // Actualizar Firestore (solo cuando cante "¡Lotería!")
+        // Por ahora solo mantenemos sincronizado el estado local
+        // await this.roomService.markCard(this.roomId(), uid, cardId);
       }
     } catch (error) {
       await this.errorLogger.logError(
@@ -244,6 +266,23 @@ export class PlayerGameStateService implements OnDestroy {
         { roomId: this.roomId(), uid, cardId },
       );
     }
+  }
+
+  private saveMarksToLocalStorage(uid: string, roomId: string, marks: number[]) {
+    const key = `player-session:${uid}:${roomId}`;
+    const existing = localStorage.getItem(key);
+    let data: any = {};
+    
+    if (existing) {
+      try {
+        data = JSON.parse(existing);
+      } catch (e) {
+        data = {};
+      }
+    }
+    
+    data.marks = marks;
+    localStorage.setItem(key, JSON.stringify(data));
   }
 
   // State management helpers
